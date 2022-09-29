@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Materias</title>
+</head>
+<body>
+{% block content %}
+         <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+     {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                     {% if category == 'nom' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'error',
+  								title: 'En esta materia aun no tienes proceso!',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+
+<div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> <i class="bi bi-book"></i> Mis materias </h1>
+      <p class="lead my-3"> Aqui puedes encontrar tus materias</p>
+    </div>
+  </div>
+
+<div class="container">
+<div class="row align-items-md-stretch">
+    {% for materia in materias %}
+      <div class="col-md-3">
+        <div class="h-100 p-5 text-bg-dark rounded-3">
+          <h2>{{materia.1}}</h2>
+          <p>Curso: {{materia.2}}</p>
+           <p> Seccion: {{materia.3}}</p>
+          <p>Enfasis: {{materia.5}}</p>
+          <p>Año: {{materia.4}}</p>
+         <a href="/vermateria/{{materia.0}}{{materia.6}}" class="btn btn-outline-light" role="button">Ver Materia</a>
+        </div>
+      </div>
+    {% endfor %}
+</div>
+</div>
+{% endblock %}
+</body>
+</html>

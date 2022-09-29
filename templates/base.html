@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>Bienvenido alumno</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+ <!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+<body>
+          <!--Nav bar -->
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#"><img src="/static/logo.png" width="100" height="100"></a>
+           <div class="container-inline">
+      <div class="dropdown">
+        <a class="nav-link dropdown-toggle text-white" class="" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+             <i class="bi bi-person-fill"></i> {{datos.1}}, {{datos.2}}
+            </a>
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">Mis Datos</a></li>
+          <li><a class="dropdown-item" href="#">Configuracion de Cuenta</a></li>
+          <li><a class="dropdown-item" href="#">Cerrar Sesion</a></li>
+        </ul>
+      </div>
+    </div>
+      </div>
+    </nav>
+     <br>
+     <div class="">
+    <div class="row flex-nowrap">
+        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                <a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                    <span class="fs-5 d-none d-sm-inline">Actividades</span>
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+                    <li class="nav-item">
+                        <a href="/materias" class="nav-link align-middle px-0">
+                            <i class="fs-4 bi bi-book text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Materias</span></a></li>
+                        <a href="#" class="nav-link px-0 align-middle">
+                            <i class="fs-4 bi bi-pencil text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Cursos</span></a>
+                    </li>
+                    <li><a href="#" class="nav-link px-0 align-middle">
+                        <i class="fs-4 bi-credit-card text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Pagos</span> </a> </li>
+                     <li>
+                        <a href="#" class="nav-link px-0 align-middle text-white"><i class="fs-4 bi-person-check-fill"></i> <span class="ms-1 d-none d-sm-inline text-white">Inscripciones</span> </a>
+                     </li>
+                </ul>
+                <hr>
+            </div>
+        </div>
+        <div class="">
+           {%block content%}
+            {%endblock%}
+
+     <!--Nav bar -->
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

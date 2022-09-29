@@ -1,0 +1,196 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+</head>
+
+
+<body>
+     <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                     {% if category == 'mat' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Seleccione la materia!',
+  								text: 'No selecciono la materia, sino vuelva a hacerlo',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                    {% if category == 'cur' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Seleccione un curso!',
+  								text: 'Por favor seleccione un curso, sino vuelva a hacerlo',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                    {% if category == 'car' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Cargado con exito!',
+  								showConfirmButton: false,
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                    {% if category == 'pun_m' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Revise los puntajes!',
+  								text: 'Usted esta asignando mas del puntaje total a un alumno o mas..',
+  								showConfirmButton: false,
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                    {% if category == 'pun_e' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Revise los puntajes!',
+  								text: 'Usted no esta asignando un puntaje a un alumno o mas..',
+  								showConfirmButton: false,
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                       {% if category == 'no_p' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Revise los puntajes!',
+  								text: 'Usted no esta asignando algun puntaje..',
+  								showConfirmButton: false,
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                 {% endfor %}
+            {% endif %}
+        {% endwith  %}
+  {% block content %}
+ <center><h2>Carga de trabajo sumativo para alumnos</h2></center>
+<p></p>
+    {% from "macro.html" import show_form %}
+    <div class="">
+         <div class="row">
+          <div class="col-sm-3">
+            <div class="form-group">
+             <form method="POST" action="/procesoss">
+                <label>Seleccione la disciplina:</label>
+                <select class="form-control" name="idmat">
+                     {% for materia in materias %}
+                         <option value="{{materia.0}}">{{materia.1}}</option>
+                     {% endfor %}
+                <script>
+                    var select = document.getElementById('materia').value;
+                    console.log(document.getElementById('materia').value);
+                    selectElement.addEventListener('change',varselect)
+                    function varSelect(){
+                        console.log(select.value)
+                    }
+                </script>
+
+            </select>
+             <br>
+                <input type="submit" name="submit" value="Selecionar Disciplina" class="btn btn-secondary">
+             </form>
+            </div>
+
+        </div>
+             {% if bcurso == 1 %}
+            <div class="col-sm-5">
+            <div class="form-group">
+              <form method="POST" action="/alumnos">
+                <label>Seleccione el curso:</label>
+                <select class="form-control" name="idcurso">
+              {% for curso in cursos %}
+                    <option value="{{curso.0}}">Aula: {{curso.1}}. Seccion: {{curso.2}}. Enfasis: {{curso.3}}</option>
+              {% endfor %}
+                </select>
+                  <br>
+                  <input type="submit" name="submit" value="Seleccionar Curso" class="btn btn-secondary">
+              </form>
+            </div>
+        </div>
+             {% endif %}
+    </div>
+    </div>
+{% if balumno == 1%}
+<form method="POST" action="/proceso">
+<div class="">
+        <br>
+        <div class="row">
+        <div class="col-sm-3">
+         <div class="form-group">
+           <label>Nombre del Trabajo:</label>
+            {{show_form(task.nombre, class="form-control", placeholder="Ej: Exposicion Oral")}}
+         </div>
+        </div>
+    <br>
+        <div class="col-sm-3">
+            <div class="form-group">
+            <label>Tipo de Trabajo:</label>
+            <select class="form-control" name="tipo_t">
+              <option value="tra_pro">Trabajos de Proceso</option>
+              <option value="tra_pru">Prueba</option>
+              <option value="tra_exa">Examen</option>
+            </select>
+               <br>
+            </div>
+        </div>
+    <br>
+        <div class="col-sm-3">
+        <div class="form-group">
+             <label>Puntaje (1-100):</label>
+             {{show_form(task.puntaje, class="form-control",placeholder="5")}}
+        </div>
+         </div>
+<br>
+<div>
+		<center><h1>Lista de Alumnos Matriculados:</h1></center>
+</div>
+        <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Apellido</th>
+			<th>Nombre</th>
+			<th>Puntaje Logrado</th>
+		</thead>
+		<tbody>
+     {% for alumno in alumnos %}
+     <tr>
+     <td><input type="checkbox" value="{{alumno.0}}" name="idalum" class="invisible" checked>
+         {{ alumno.2 }}</td>
+     <td>{{ alumno.1 }}</td>
+     <td>
+     <span style="font-size: 24px; color: green;">
+         <input type="text" name="punt_a" class="form-control" placeholder="Puntaje">
+     </span>
+     </td>
+     </tr>
+
+    {% endfor %}
+    </tbody>
+	</table>
+    </div>
+ </div>
+    <center><input type="submit" name="submit" value="Cargar Proceso" class="btn btn-success"></center>
+</div>
+    </div>
+  </div>
+</div>
+</form>
+{% endif %}
+{% endblock %}
+</body>
+</html>

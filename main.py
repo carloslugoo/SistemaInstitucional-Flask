@@ -1,0 +1,598 @@
+from flask import Flask, url_for, redirect, render_template, request, session, flash, g, make_response, current_app, send_file
+import mysql.connector
+from flask import flash
+from config import DevConfig
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
+import userform
+from datetime import datetime
+import time
+import string
+import random
+from werkzeug.utils import secure_filename
+import os
+import config
+from io import BytesIO
+app = Flask(__name__)
+
+app.config.from_object(DevConfig)
+
+
+folder = os.path.abspath("./media/")
+ext_p = set(["doc", "docx", "pdf"])
+app.config['folder'] = folder
+
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="",
+  database="proyecto"
+)
+global bcurso
+bcurso =0
+global cursos
+cursos=[]
+global idmaterias
+idmaterias = 0
+global alumnos
+alumnos = []
+global balumno
+balumno = 0
+global idcurso
+idcurso = 0
+
+
+#@app.before_request
+def antes():
+  # Verificar si existe una sesion o no, en algun punto de acceso
+  datos = session['username']
+  print(datos)
+
+  if 'datos' not in session and request.endpoint in ['bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe', 'proceso']:
+    print("sin")
+    return redirect(url_for('login'))
+  if 'datos' in session and request.endpoint in ['login', 'registro']:
+    print("con")
+    return redirect(url_for('bienvenidoalumno'))
+
+
+@app.route('/bienvenidoprofe')
+def bienvenidoprofe():
+  datos = session['username']
+  print(datos)
+  return render_template('profesorview.html', datos = datos)
+
+@app.route('/bienvenidoalumno')
+def bienvenidoalumno():
+  datos = session['username']
+  print("estoy en def")
+  print(datos)
+  return render_template('materias.html', datos = datos)
+
+@app.route('/bienvenidoadmin')
+def bienvenidoadmin():
+  datos = session['username']
+  print(datos)
+  return render_template('directorview.html', datos = datos)
+
+
+@app.route('/', methods = ['GET', 'POST']) #Login, funciona pero falta ver el bug de la alerta de inicio de sesion
+def login():
+  user = userform.User(request.form)
+  username = user.username.data
+  password = user.password.data
+  t_u = 0
+  #print(username)
+  if request.method == 'POST':
+    mycursor = mydb.cursor()
+    mycursor.execute('SELECT * FROM user WHERE username = %(username)s', {'username': username})
+    data = mycursor.fetchall()
+    if data:
+      userdata = data[0]
+      #print(userdata)
+      if userdata:
+        passcheck = userdata[3]
+        #print(passcheck)
+      if userdata and check_password_hash(passcheck, password):
+        global tipo
+        tipo = userdata[4]
+        if userdata[4] == 1:
+          sql = "SELECT * FROM alumnos WHERE id_user = %s"
+          val = [userdata[0]]
+          mycursor.execute(sql, val)
+          data = mycursor.fetchall()
+          datos = data[0]
+          session['tipo_u'] = userdata[4]
+          session['username'] = datos
+          #flash("Correcto", "success")
+          time.sleep(1)
+          return redirect(url_for('vermaterias'))
+        if userdata[4] == 2:
+          sql = "SELECT * FROM profesores WHERE id_user = %s"
+          val = [userdata[0]]
+          mycursor.execute(sql, val)
+          data = mycursor.fetchall()
+          datos = data[0]
+          session['username'] = datos
+          #flash("Correcto", "success")
+          return redirect(url_for('bienvenidoprofe'))
+        if userdata[4] == 3:
+          sql = "SELECT * FROM admin WHERE id_user = %s"
+          val = [userdata[0]]
+          mycursor.execute(sql, val)
+          data = mycursor.fetchall()
+          datos = data[0]
+          session['username'] = datos
+          #flash("Correcto", "success")
+          return redirect(url_for('bienvenidoadmin'))
+      else:
+        flash("Contra", "error_p")
+    else:
+      flash("Not found", "error_n")
+
+  return render_template('login.html', user = user)
+
+@app.route('/registro', methods = ['GET', 'POST']) #Registro, falta ver username cambiar por cedula ❌
+def registro():
+  user = userform.User(request.form)
+  #pasw = user.password.data
+  if request.method == 'POST' and user.validate():
+    password = createpassword(user.password.data)
+    mycursor = mydb.cursor()
+    create = False
+    ci = int(user.ci.data)
+    print(ci)
+    mycursor = mydb.cursor()
+    sql = "SELECT * FROM alumnos WHERE ci_a = %s"
+    val = [ci]
+    mycursor.execute(sql, val)
+    data = mycursor.fetchall()
+    t_u = 0
+    if data:
+      t_u = 1 #Alumnos
+      print("alumno encontrado")
+    else:
+      sql = "SELECT * FROM profesores WHERE ci_p = %s"
+      val = [ci]
+      mycursor.execute(sql, val)
+      data = mycursor.fetchall()
+      if data:
+        t_u = 2  #Profesores
+        print("profesor encontrado")
+        create = True
+      else:
+        sql = "SELECT * FROM admin WHERE ci_ad = %s"
+        val = [ci]
+        mycursor.execute(sql, val)
+        data = mycursor.fetchall()
+        if data:
+          t_u = 3  # Admin
+          print("admin encontrado")
+          create = True
+
+    if data:
+      print("a")
+      data = data[0]
+      if data[6]:
+        create = False
+        flash("Ya tiene cuenta", "existe_ci")
+        print("test")
+    else:
+        create = False
+        flash("Error", "ci_e")
+    if t_u > 0:
+      sql = "SELECT * FROM user WHERE username = %s"
+      val = [user.username.data]
+      mycursor.execute(sql, val)
+      coc = mycursor.fetchall()
+      if coc:
+        flash("User existente", "existe_us")
+        print("a")
+        create = False
+      else:
+        sql = "SELECT * FROM user WHERE email = %s"
+        val = [user.email.data]
+        mycursor.execute(sql, val)
+        coe = mycursor.fetchall()
+        if coe:
+          flash("Correo existente", "existe_co")
+          create = False
+    if create == True:
+      if user.password.data == user.confirmpassword.data:
+        mycursor.execute('INSERT INTO user (username, email, password, tipo_u) VALUES (%s, %s, %s, %s)', (user.username.data,
+                                                                                         user.email.data, password, t_u))
+        mydb.commit()
+        sql = "SELECT * FROM user WHERE username = %s"
+        val = [user.username.data]
+        mycursor.execute(sql, val)
+        aux = mycursor.fetchall()
+        aux = aux[0]
+        print(aux)
+        if t_u == 1:
+          id = aux[0]
+          sql = "UPDATE alumnos SET id_user= %s WHERE ci_a = %s"
+          val = (id,ci)
+          mycursor.execute(sql, val)
+          mydb.commit()
+        if t_u == 2:
+          id = aux[0]
+          sql = "UPDATE profesores SET id_user= %s WHERE ci_p = %s"
+          val = (id, ci)
+          mycursor.execute(sql, val)
+          mydb.commit()
+        else:
+          id = aux[0]
+          sql = "UPDATE admin SET id_user= %s WHERE ci_ad = %s"
+          val = (id, ci)
+          mycursor.execute(sql, val)
+          mydb.commit()
+        flash("Correcto", "success")
+        # return redirect(url_for('login'))
+      else:
+        print("e")
+        flash("Error", "psw")
+  return render_template('register.html', user = user)
+
+@app.route('/recuperar', methods = ['GET', 'POST']) #Recuperar cuenta ❌
+def recuperar():
+  user = userform.User(request.form)
+  return render_template('recuperar.html', user=user)
+
+#Parte de Proceso de Alumnos, Carga de trabajos
+@app.route('/proceso', methods = ['GET', 'POST']) #Procesos ✔
+def proceso():
+  global bcurso
+  global balumno
+  datos = session['username']
+  #print(datos)
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM matxpro WHERE id_profesor = %s"
+  val = [datos[0]]
+  mycursor.execute(sql, val)
+  profe = mycursor.fetchall()
+  #print(profe) #ID, Id Materia, Id profe, Carga horaria, Id curso
+  profemat = []
+  profemati = []
+  cantm = 0
+  global cursos
+  global alumnos
+  for x in range(0, len(profe)):
+    #print(x)
+    aux = profe[x]
+    sql = "SELECT * FROM materias WHERE id_materia = %s"
+    val = [aux[1]]
+    mycursor.execute(sql, val)
+    aux = mycursor.fetchall()
+    aux = aux[0]
+    #print(aux)
+    #print(x)
+    if x == 0:
+      profemat.append(aux)
+      #print(profemat)
+      cantm += 1
+      #print(x)
+      #print(cantm)
+    elif profemat[x-cantm-1] != aux:
+      #print(cantm)
+      cantm += 1
+      profemat.append(aux)
+      #print(profemat)
+  #print(profemat)
+  task = userform.Task(request.form)
+  if request.method == 'POST' and task.validate(): #ID prof = datos[0],
+    tipo_t = request.form.get(('tipo_t'))
+    idalumnos = request.form.getlist(('idalum'))
+    puntalum = request.form.getlist(('punt_a'))
+    global idmaterias
+    global idcurso
+    #print(idalumnos)
+    #print(puntalum)
+    #print(tipo_t)
+    #print(task.nombre.data)
+    #print(task.puntaje.data)
+    fecha = datetime.now()
+    fecha = datetime.strftime(fecha, '%Y/%m/%d')
+    cargar = True
+    #print(fecha)
+    if idmaterias != 0:
+      if idcurso !=0:
+        #Comprobar si se cargo bien el form
+        for x in range(0, len(idalumnos)):
+          aux = idalumnos[x]
+          aux2 = 0
+          if puntalum[x]:
+            aux2 = int(puntalum[x])
+          else:
+            cargar = False
+            print("sin punt")
+            flash("puntaje", "pun_e")
+          puntajeform = int(task.puntaje.data)
+          print("Puntaje")
+          #print(aux2)
+          #print(aux)
+          print("Puntaje form")
+          print(task.puntaje.data)
+          if aux2 != 0:
+            if aux2 > puntajeform:
+              cargar = False
+              print("si es ma")
+            if aux2 > puntajeform:
+              flash("puntajem", "pun_m")
+          else:
+            flash("puntajem", "no_p")
+        if cargar == True:
+          for x in range(0, len(idalumnos)):
+            aux = idalumnos[x]
+            aux2 = int(puntalum[x])
+            if x ==0:
+              clavet = crearclavet()
+              print(clavet)
+              #Ingresa el trabajo
+              mycursor.execute(
+                'INSERT INTO trabajos (fec_t, des_t, pun_t, id_profesor, id_materia, tipo_t, clave_t) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                (fecha, task.nombre.data, task.puntaje.data, datos[0], idmaterias, tipo_t, clavet))
+              mydb.commit()
+              #Saca el id del trabajo
+              sql = "SELECT id_trabajo FROM trabajos WHERE id_materia = %s and id_profesor = %s and fec_t = %s and des_t= %s and pun_t = %s and tipo_t = %s and clave_t = %s"
+              val = [idmaterias, datos[0], fecha, task.nombre.data, task.puntaje.data, tipo_t, clavet]
+              mycursor.execute(sql, val)
+              idtra = mycursor.fetchall()
+              idtra = idtra[0]
+              mydb.commit()
+            #Updatea el puntaje acumulado
+            sql = "UPDATE matxalum SET pun_ac = (pun_ac + %s) WHERE id_alumno = %s and id_materia = %s and id_curso = %s"
+            val = (aux2, aux, idmaterias, idcurso)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            # Inserta el trabajo al alumno
+            mycursor.execute('INSERT INTO traxalum (id_alumno, pun_l, fec_t, id_trabajo) VALUES (%s, %s, %s, %s)',
+                             (aux, aux2, fecha, idtra[0]))
+            mydb.commit()
+            flash("Bien", "car")
+            bcurso = 1
+      else:
+        cargar = False
+        flash("Error", "cur")
+    else:
+      cargar = False
+      flash("Error", "mat")
+
+
+  return render_template('procesotest.html', task = task, datos = datos, materias = profemat,bcurso = bcurso, cursos = cursos,
+                         alumnos = alumnos, balumno = balumno )
+
+@app.route('/procesoss', methods = ['POST']) #Parte de procesos, aca quitamos la materia ✔
+def procesoss():
+  if request.method == 'POST':
+    id_mat = request.form.get(('idmat'))
+    if id_mat:
+      global bcurso
+      bcurso = 1
+    print(id_mat)
+    datos = session['username']
+    mycursor = mydb.cursor()
+    sql = "SELECT * FROM matxpro WHERE id_profesor = %s and id_materia =%s"
+    val = [datos[0], id_mat]
+    global idmaterias
+    idmaterias = id_mat
+    mycursor.execute(sql, val)
+    data = mycursor.fetchall()
+    print("Cursos con esa materia:")
+    print(data)
+    #print(cursos[0])
+    #print(len(cursos))
+    global balumno
+    global cursos
+    cursos = []
+    if cursos:
+      balumno = 1
+    for x in range(0, len(data)):
+      print(x)
+      aux = data[x]
+      mycursor = mydb.cursor()
+      sql = "SELECT id_curso, des_c, sec_c,des_e FROM cursos,enfasis WHERE id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+      val = [aux[4]]
+      mycursor.execute(sql, val)
+      aux = mycursor.fetchall()
+      aux = aux[0]
+      cursos.append(aux)
+    print("Cursos procesados:")
+    print(cursos)
+  return redirect(url_for('proceso'))
+
+@app.route('/alumnos', methods = ['POST']) #Parte de procesos, quitamos los cursos y los alumnos relacionados con la materia ✔
+def alumnosproceso():
+  if request.method == 'POST':
+    id_curso = request.form.get(('idcurso'))
+    datos = session['username']
+    global balumno
+    balumno = 1
+    global cursos
+    global idmaterias
+    mycursor = mydb.cursor()
+    sql = "SELECT alumnos.id_alumno,nmb_a, ape_a FROM alumnos, " \
+          "matxalum WHERE matxalum.id_curso =%s and alumnos.id_alumno = matxalum.id_alumno " \
+          "and matxalum.id_materia = %s"
+
+    val = [id_curso, idmaterias]
+    mycursor.execute(sql, val)
+    global idcurso
+    idcurso = id_curso
+    data = mycursor.fetchall()
+    print(id_curso)
+    print(idmaterias)
+    print("Alumnos con esta materia:")
+    print(data)
+    global alumnos
+    alumnos = data
+  return redirect(url_for('proceso'))
+
+#Parte de vista de alumnos materias
+@app.route('/materias')
+def vermaterias():
+  datos = session['username']
+
+  print(datos)
+  mycursor = mydb.cursor()
+  sql = "SELECT matxalum.id_materia,des_m, des_c, sec_c, ano_m, des_e, id_profesor FROM matxalum, materias, cursos, enfasis" \
+        " WHERE id_alumno = %s and cursos.id_curso =%s and matxalum.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [datos[0], datos[4]]
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  print(data)
+
+  return render_template('materias.html', datos=datos, materias=data)
+
+@app.route('/vermateria/<string:id>') #Ver proceso de la materia seleccionada.
+def verproceso(id):
+  datos = session['username']
+  #print(id) #Pimer digito materia, segundo id del profe
+  x = [int(a) for a in str(id)]
+  #print(x)
+  mycursor = mydb.cursor()
+  sql = "SELECT trabajos.id_trabajo,des_t, trabajos.fec_t, pun_t, pun_l FROM trabajos, traxalum WHERE trabajos.id_trabajo = traxalum.id_trabajo and id_materia = %s and id_alumno = %s"
+  val = [x[0], datos[0]]
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  if data:
+    print(data)
+    suml = 0
+    sumt = 0
+    for x in range(0, len(data)):
+      aux = data[x]
+      pl=aux[4]
+      pt=aux[3]
+      suml+= pl
+      print(suml)
+      sumt+= pt
+      porcl = int((suml * 100) / sumt)
+      print(porcl)
+  else:
+    flash("no", "nom")
+    return redirect(url_for('vermaterias'))
+
+  return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, porcl = porcl)
+
+@app.route('/inscribiral', methods = ['GET', 'POST'])
+def inscribirdir():
+  alumno = userform.Alumno(request.form)
+  datos = session['username']
+  if request.method == "POST":
+    cedu = request.files["cedu"]
+    ante = request.files["ante"]
+    auto = request.files["auto"]
+    # Parte Cedula.. Preguntar si conviene hacer funcion o q
+    if "cedu" not in request.files:
+      #print("No envio nada")
+      pass
+    elif cedu.filename == "":
+      #print("No mando nada")
+      pass
+    elif cedu and archpermi(cedu.filename):
+      filename = secure_filename(cedu.filename)
+      extc = filename.split('.')
+      #print(extc)
+      #print(filename)
+      #print(alumno.num_c.data)
+      filename = "cedula_" + alumno.num_c.data + "." + extc[1]
+      print(filename)
+      cedu.save(os.path.join(app.config["folder"], filename))
+      flash("", "") #Ya guarda el archivo
+    else:
+      print("archivo no permitido")
+    #Parte Antecedentes
+    if "ante" not in request.files:
+      #print("No envio nada")
+      pass
+    elif ante.filename == "":
+      #print("No mando nada")
+      pass
+    elif ante and archpermi(ante.filename):
+      filename = secure_filename(ante.filename)
+      extc = filename.split('.')
+      print(extc)
+      print(filename)
+      print(alumno.num_c.data)
+      filename = "antecedente_" + alumno.num_c.data + "." + extc[1]
+      print(filename)
+      ante.save(os.path.join(app.config["folder"], filename))
+      flash("", "")  # Ya guarda el archivo
+    else:
+      print("archivo no permitido")
+    #Parte Autorizacion de Padres
+    if "auto" not in request.files:
+      print("No envio nada")
+      pass
+    elif auto.filename == "":
+      print("No mando nada")
+      pass
+    elif auto and archpermi(auto.filename):
+      filename = secure_filename(auto.filename)
+      extc = filename.split('.')
+      print(extc)
+      print(filename)
+      print(alumno.num_c.data)
+      filename = "autorizacion_" + alumno.num_c.data + "." + extc[1]
+      print(filename)
+      auto.save(os.path.join(app.config["folder"], filename))
+      flash("", "")  # Ya guarda el archivo
+    else:
+      print("archivo no permitido")
+    print(cursos)
+  return render_template('inscribiral.html', datos = datos, alumno = alumno)
+
+@app.route('/inscribiral/<filename>')
+def getfile(filename):
+  return send_file(os.path.join(app.config["folder"], filename))
+
+@app.route('/inscribiralum', methods = ['GET', 'POST'])
+def inscurmat():
+  datos = session['username']
+  cur = request.form.get(('curso'))
+  enf = request.form.get(('enfasis'))
+  sec = request.form.get(('seccion'))
+  print(cur)
+  print(enf)
+  print(sec)
+  if request.method == 'POST':
+    pass
+  return render_template('inscribiral2.html', datos = datos, cursos = cursos)
+
+
+@app.route('/cargar', methods = ['GET', 'POST'])
+def cargar():
+  alumno = userform.Alumno(request.form)
+  if request.method == 'POST':
+      mycursor = mydb.cursor()
+      mycursor.execute(
+        'INSERT INTO materias (des_m) VALUES (%s)',
+        (alumno.nombre.data))
+      mydb.commit()
+      
+  return render_template('cargarm.html', alumno = alumno)
+def createpassword(password):
+  return generate_password_hash(password)
+def crearclavet(): #Una clave random para el trabajo.
+  length = 5
+  letters = string.ascii_letters + string.digits
+  clave = ''.join(random.choice(letters) for i in range(length))
+  return clave
+def conv_b(foto):
+  with open(foto, 'rb') as f:
+    blob= f.read()
+  return blob
+def guar_f(id_u,foto):
+  with open('media/foto_{}.png'.format(id_u), 'wb') as f:
+    f.write(foto)
+def archpermi(filename):
+  filename = filename.split('.')
+  #print(filename)
+  if filename[1] in ext_p:
+    return True
+  return False
+
+def guardararchivo():
+
+  return
+if __name__=='__main__':
+    app.run(debug = True, port= 8000)

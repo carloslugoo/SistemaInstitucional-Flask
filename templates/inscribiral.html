@@ -1,0 +1,150 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+     <title>{% block title %}Inscribir alumnos{% endblock %}</title>
+</head>
+<body>
+    {% block content %}
+     {% from "macro.html" import show_form %}
+    <div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> <i class="bi bi-person-plus-fill"></i> Nuevo Alumno </h1>
+      <p class="lead my-3"> Completa los campos para matricularlo</p>
+    </div>
+     </div>
+       <div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic">Ficha personal</h1>
+    </div>
+  </div>
+    <form method="POST" action="/inscribiral"  enctype="multipart/form-data">
+    <div class="">
+        <br>
+        <div class="row">
+        <div class="col-sm-3">
+         <div class="form-group">
+           <label>Nombre Completo:</label>
+            {{show_form(alumno.nombre, class="form-control")}}
+         </div>
+        </div>
+    <br>
+        <div class="col-sm-3">
+        <div class="form-group">
+             <label>Apellido Completo:</label>
+             {{show_form(alumno.apellido, class="form-control")}}
+        </div>
+         </div>
+<br>
+        <div class="col-sm-3">
+        <div class="form-group">
+             <label>Edad:</label>
+             {{show_form(alumno.edad, class="form-control")}}
+        </div>
+        </div>
+      <div class="row">
+        <div class="col-sm-3">
+        <div class="form-group">
+            <br>
+             <label>Fecha de Nacimiento:</label>
+            <div class="md-form md-outline input-with-post-icon datepicker">
+                <input placeholder="Select date" type="date" name="fec_n" class="form-control">
+            </div>
+        </div>
+        </div>
+
+        <div class="col-sm-3">
+        <div class="form-group">
+              <br>
+             <label>Número de Cedula:</label>
+             {{show_form(alumno.num_c, class="form-control")}}
+        </div>
+        </div>
+
+       <div class="col-sm-3">
+       <div class="form-group">
+           <br>
+           <label>Número de Telefono:</label>
+             {{show_form(alumno.num_t, class="form-control")}}
+        </div>
+        </div>
+        </div>
+      <div class="row">
+        <div class="col-sm-3">
+        <div class="form-group">
+            <br>
+             <label>Correo Electronico:</label>
+             {{show_form(alumno.email, class="form-control")}}
+        </div>
+        </div>
+          <div class="col-sm-3">
+          <div class="form-group">
+            <br>
+             <label>Localidad:</label>
+             {{show_form(alumno.localidad, class="form-control")}}
+        </div>
+        </div>
+          <div class="col-sm-3">
+          <div class="form-group">
+            <br>
+              <label>Nombre del Tutor:</label>
+             {{show_form(alumno.nmb_pa, class="form-control")}}
+        </div>
+        </div>
+        </div>
+        </div>
+      </div>
+        <div class="row">
+        <div class="col-sm-3">
+        <div class="form-group">
+            <br>
+             <label>Telefono del Tutor:</label>
+             {{show_form(alumno.num_pa, class="form-control")}}
+        </div>
+        </div>
+            <div class="col-sm-3">
+            <br>
+        </div>
+        </div>
+
+ <br>
+       <div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic">Documentos</h1>
+    </div>
+  </div>
+         <div class="row">
+        <div class="col-sm-4">
+        <div class="form-group">
+             <br>
+              <label>Antecedentes Academicos:</label>
+            <input type="file" name="ante" class="btn btn-secondary">
+            <br>
+        </div>
+        </div>
+             <div class="col-sm-4">
+       <div class="form-group">
+           <br>
+        <label>Adjuntar .PDF con fotos de la cedula (Atras y Delante):</label>
+            <input type="file" name="cedu" class="btn btn-secondary">
+
+        </div>
+        </div>
+         </div>
+         <div class="row">
+           <div class="col-sm-4">
+          <div class="form-group">
+            <br>
+              <label>Autorizacion de Padres:</label>
+            <input type="file" name="auto" class="btn btn-secondary">
+        </div>
+        </div>
+         </div>
+        <br>
+         <center><input type="submit" name="submit" value="Guardar" class="btn btn-secondary"></center>
+    </form>
+
+
+     </div>
+    {% endblock %}
+</body>
+</html>
