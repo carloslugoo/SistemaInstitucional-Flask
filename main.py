@@ -41,7 +41,6 @@ balumno = 0
 global idcurso
 idcurso = 0
 
-
 #@app.before_request
 def antes():
   # Verificar si existe una sesion o no, en algun punto de acceso
@@ -481,64 +480,86 @@ def inscribirdir():
     cedu = request.files["cedu"]
     ante = request.files["ante"]
     auto = request.files["auto"]
-    # Parte Cedula.. Preguntar si conviene hacer funcion o q
-    if "cedu" not in request.files:
-      #print("No envio nada")
-      pass
-    elif cedu.filename == "":
-      #print("No mando nada")
-      pass
-    elif cedu and archpermi(cedu.filename):
-      filename = secure_filename(cedu.filename)
-      extc = filename.split('.')
-      #print(extc)
-      #print(filename)
-      #print(alumno.num_c.data)
-      filename = "cedula_" + alumno.num_c.data + "." + extc[1]
-      print(filename)
-      cedu.save(os.path.join(app.config["folder"], filename))
-      flash("", "") #Ya guarda el archivo
+    fecha = (request.form['fec_n'])
+    print(fecha)
+    if fecha:
+      # Parte Cedula.. Preguntar si conviene hacer funcion o q
+      if "cedu" not in request.files:
+        #print("No envio nada")
+        pass
+      elif cedu.filename == "":
+        #print("No mando nada")
+        pass
+      elif cedu and archpermi(cedu.filename):
+        filename = secure_filename(cedu.filename)
+        extc = filename.split('.')
+        #print(extc)
+        #print(filename)
+        #print(alumno.num_c.data)
+        filename = "cedula_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        cedu.save(os.path.join(app.config["folder"], filename))
+        flash("", "") #Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      #Parte Antecedentes
+      if "ante" not in request.files:
+        #print("No envio nada")
+        pass
+      elif ante.filename == "":
+        #print("No mando nada")
+        pass
+      elif ante and archpermi(ante.filename):
+        filename = secure_filename(ante.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "antecedente_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        ante.save(os.path.join(app.config["folder"], filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      #Parte Autorizacion de Padres
+      if "auto" not in request.files:
+        #print("No envio nada")
+        pass
+      elif auto.filename == "":
+        #print("No mando nada")
+        pass
+      elif auto and archpermi(auto.filename):
+        filename = secure_filename(auto.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "autorizacion_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        auto.save(os.path.join(app.config["folder"], filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      mycursor = mydb.cursor()
+      print(cursos)
+      global cur
+      global enf
+      global sec
+      global ci
+      global tel
+      cur = request.form.get(('curso'))
+      enf = request.form.get(('enfasis'))
+      sec = request.form.get(('seccion'))
+      ci = alumno.num_c.data
+      tel = alumno.num_t.data
+      mycursor.execute(
+        'INSERT INTO alumnos (nmb_a, ape_a, tel_a, ci_a, edad, email, loc_a, nmb_tu, tel_tu, fec_a) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+        (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
+         alumno.email.data, alumno.localidad.data, alumno.nmb_pa.data, alumno.num_pa.data, fecha, alumno.barrio.data))
+      mydb.commit()
+      return redirect(url_for('sacarmat'))
     else:
-      print("archivo no permitido")
-    #Parte Antecedentes
-    if "ante" not in request.files:
-      #print("No envio nada")
-      pass
-    elif ante.filename == "":
-      #print("No mando nada")
-      pass
-    elif ante and archpermi(ante.filename):
-      filename = secure_filename(ante.filename)
-      extc = filename.split('.')
-      print(extc)
-      print(filename)
-      print(alumno.num_c.data)
-      filename = "antecedente_" + alumno.num_c.data + "." + extc[1]
-      print(filename)
-      ante.save(os.path.join(app.config["folder"], filename))
-      flash("", "")  # Ya guarda el archivo
-    else:
-      print("archivo no permitido")
-    #Parte Autorizacion de Padres
-    if "auto" not in request.files:
-      print("No envio nada")
-      pass
-    elif auto.filename == "":
-      print("No mando nada")
-      pass
-    elif auto and archpermi(auto.filename):
-      filename = secure_filename(auto.filename)
-      extc = filename.split('.')
-      print(extc)
-      print(filename)
-      print(alumno.num_c.data)
-      filename = "autorizacion_" + alumno.num_c.data + "." + extc[1]
-      print(filename)
-      auto.save(os.path.join(app.config["folder"], filename))
-      flash("", "")  # Ya guarda el archivo
-    else:
-      print("archivo no permitido")
-    print(cursos)
+      flash("", "")
   return render_template('inscribiral.html', datos = datos, alumno = alumno)
 
 @app.route('/inscribiral/<filename>')
@@ -547,29 +568,124 @@ def getfile(filename):
 
 @app.route('/inscribiralum', methods = ['GET', 'POST'])
 def inscurmat():
+  bver = 0
   datos = session['username']
-  cur = request.form.get(('curso'))
-  enf = request.form.get(('enfasis'))
-  sec = request.form.get(('seccion'))
+  global idmaterias
+  if request.method == 'POST':
+    idmat = request.form.getlist(('idmat'))
+    print(idmat)
+    bver = 1
+  return render_template('inscribiral2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver)
+
+@app.route('/sacarmat', methods = ['GET', 'POST'])
+def sacarmat():
+  global cur
+  global enf
+  global sec
+  global ci
+  global tel
+  if enf == "Sociales":  # Dependiendo del enfasis para no consultar la bd
+    enf = 2
+  else:
+    enf = 1
   print(cur)
   print(enf)
-  print(sec)
-  if request.method == 'POST':
-    pass
-  return render_template('inscribiral2.html', datos = datos, cursos = cursos)
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso FROM cursos WHERE des_c = %s and sec_c = %s and id_enfasis = %s"
+  val = [cur, sec, enf]
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  print(data[0])
+  data = data[0]
+  # Updatea con el curso asignado
+  sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
+  val = (data[0],ci, tel)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  #Sacar los nombres de materia y sus id
+  sql = "SELECT matxcur.id_materia, des_m FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_enfasis = %s " \
+        "and matxcur.id_materia = materias.id_materia "
+  val = [data[0], enf]
+  mycursor.execute(sql, val)
+  mat = mycursor.fetchall()
+  print(mat)
+  bver = 1
+  global idmaterias
+  idmaterias = mat
+  return redirect(url_for('inscurmat'))
 
 
-@app.route('/cargar', methods = ['GET', 'POST'])
+#@app.route('/cargar', methods = ['GET', 'POST']) #ABM Cargar Materias
 def cargar():
   alumno = userform.Alumno(request.form)
   if request.method == 'POST':
+    cur = request.form.getlist(('idalum'))
+    enf = request.form.get(('enfasis'))
+    sec = request.form.get(('seccion'))
+    ch1 = request.form.get(('car_1'))
+    ch2 = request.form.get(('car_2'))
+    ch3 = request.form.get(('car_3'))
+    #print(alumno.nombre.data)
+    #print(cur)
+    #print(ch1)
+    nmb = (alumno.nombre.data ,)
+    sql = "SELECT id_materia FROM materias WHERE des_m = %s"
+    mycursor = mydb.cursor()
+    val = [alumno.nombre.data]
+    mycursor.execute(sql, val)
+    id_m = mycursor.fetchall()
+    #print(enf)
+    #print(sec)
+    mycursor = mydb.cursor()
+    if enf == "Sociales": #Dependiendo del enfasis para no consultar la bd
+      enf = 2
+    else:
+      enf = 1
+    #print(enf)
+    if id_m:
+      pass
+    else:
+      mycursor.execute('INSERT INTO materias (des_m) VALUES (%s)', (nmb))
+      mydb.commit()
+    cursos = []
+    for x in range(0, len(cur)): #Sacar los cursos seleccionados
+      #print(x)
+      aux = cur[x]
+      mycursor = mydb.cursor()
+      sql = "SELECT id_curso, id_enfasis FROM cursos WHERE des_c = %s and sec_c = %s and id_enfasis = %s"
+      val = [aux, sec, enf]
+      mycursor.execute(sql, val)
+      aux = mycursor.fetchall()
+      #print(aux)
+      aux = aux[0]
+      #print(aux)
+      cursos.append(aux)
+    print(cursos)
+    sql = "SELECT id_materia FROM materias WHERE des_m = %s"
+    val = [alumno.nombre.data]
+    mycursor.execute(sql, val)
+    id_m = mycursor.fetchall()
+    id_m = id_m[0]
+    print(id_m)
+    for x in range(0, len(cursos)):  # Sacar los cursos seleccionados
+      # print(x)
+      aux = cursos[x]
+      print(aux)
+      print(cur[x])
+      if cur[x] == "Primer Curso":
+        ch = ch1
+      if cur[x] == "Segundo Curso":
+        ch = ch2
+      if cur[x] == "Tercer Curso":
+        ch = ch3
       mycursor = mydb.cursor()
       mycursor.execute(
-        'INSERT INTO materias (des_m) VALUES (%s)',
-        (alumno.nombre.data))
+        'INSERT INTO matxcur (id_curso, id_materia, id_enfasis, car_h) VALUES (%s, %s, %s ,%s)',
+        (aux[0], id_m[0], aux[1], ch))
       mydb.commit()
-      
   return render_template('cargarm.html', alumno = alumno)
+
+
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.

@@ -6,45 +6,34 @@
 </head>
 <body>
      {% block content %}
-        <div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
-        <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic">Curso y Materias</h1>
-        </div>
+              <br>
+     <form method="POST" action="#">
+          <br>
+       <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+			<th>Seleccionar Materia</th>
+		</thead>
+		<tbody>
+     {% for materia in materias %}
+     <tr>
+     <td>{{ materia.1 }}</td>
+     <td><input type="checkbox" value="{{materia.0}}" name="idmat" class="" checked></td>
+     </tr>
+
+    {% endfor %}
+    </tbody>
+	</table>
+    </div>
+ </div>
+
+</div>
+     <center><input type="submit" name="submit" value="Inscribir" class="btn btn-success"></center>
+         </form>
      </div>
-     <form method="POST" action="/inscribiralum">
-     <div class="row">
-       <div class="col-sm-3">
-            <div class="form-group">
-            <label>Curso:</label>
-            <select class="form-control" name="curso">
-              <option value="Primer Curso">Primer Curso</option>
-              <option value="Segundo Curso">Segundo Curso</option>
-              <option value="Tercer Curso">Tercer Curso</option>
-            </select>
-               <br>
-            </div>
-        </div>
-         <div class="col-sm-3">
-            <div class="form-group">
-            <label>Enfasis:</label>
-            <select class="form-control" name="enfasis">
-              <option value="Sociales">Sociales</option>
-              <option value="Contabilidad">Contabilidad</option>
-            </select>
-               <br>
-            </div>
-        </div>
-          <div class="col-sm-3">
-            <div class="form-group">
-            <label>Seccion:</label>
-            <select class="form-control" name="seccion">
-              <option value="A">A</option>
-            </select>
-               <br>
-            </div>
-        </div>
-     </div>
-      <input type="submit" name="submit" value="Ver Materias" class="btn btn-secondary">
+  </div>
+</div>
      </form>
      {% endblock %}
 </body>

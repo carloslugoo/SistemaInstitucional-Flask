@@ -47,7 +47,7 @@
             <br>
              <label>Fecha de Nacimiento:</label>
             <div class="md-form md-outline input-with-post-icon datepicker">
-                <input placeholder="Select date" type="date" name="fec_n" class="form-control">
+                <input placeholder="Select date" type="date" name="fec_n" class="form-control" >
             </div>
         </div>
         </div>
@@ -80,14 +80,14 @@
           <div class="form-group">
             <br>
              <label>Localidad:</label>
-             {{show_form(alumno.localidad, class="form-control")}}
+             {{show_form(alumno.localidad, class="form-control",value="Encarnación")}}
         </div>
         </div>
           <div class="col-sm-3">
           <div class="form-group">
             <br>
-              <label>Nombre del Tutor:</label>
-             {{show_form(alumno.nmb_pa, class="form-control")}}
+                <label>Barrio:</label>
+               {{show_form(alumno.barrio, class="form-control")}}
         </div>
         </div>
         </div>
@@ -97,16 +97,21 @@
         <div class="col-sm-3">
         <div class="form-group">
             <br>
-             <label>Telefono del Tutor:</label>
+              <label>Nombre del Tutor:</label>
+             {{show_form(alumno.nmb_pa, class="form-control")}}
+        </div>
+        </div>
+              <br>
+            <div class="col-sm-3">
+           <div class="form-group">
+               <br>
+               <label>Telefono del Tutor:</label>
              {{show_form(alumno.num_pa, class="form-control")}}
         </div>
-        </div>
-            <div class="col-sm-3">
-            <br>
+                 <br>
         </div>
         </div>
 
- <br>
        <div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic">Documentos</h1>
@@ -140,10 +145,45 @@
         </div>
          </div>
         <br>
-         <center><input type="submit" name="submit" value="Guardar" class="btn btn-secondary"></center>
+        <div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
+        <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic">Curso y Materias</h1>
+        </div>
+     </div>
+        <div class="row">
+       <div class="col-sm-3">
+            <div class="form-group">
+            <label>Curso:</label>
+            <select class="form-control" name="curso">
+              <option value="Primer Curso">Primer Curso</option>
+              <option value="Segundo Curso">Segundo Curso</option>
+              <option value="Tercer Curso">Tercer Curso</option>
+            </select>
+               <br>
+            </div>
+        </div>
+         <div class="col-sm-3">
+            <div class="form-group">
+            <label>Enfasis:</label>
+            <select class="form-control" name="enfasis">
+              <option value="Sociales">Sociales</option>
+              <option value="Contabilidad">Contabilidad</option>
+            </select>
+               <br>
+            </div>
+        </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+            <label>Seccion:</label>
+            <select class="form-control" name="seccion">
+              <option value="A">A</option>
+            </select>
+               <br>
+            </div>
+        </div>
+     </div>
+      <input type="submit" name="submit" value="Ver Materias" class="btn btn-secondary">
     </form>
-
-
      </div>
     {% endblock %}
 </body>

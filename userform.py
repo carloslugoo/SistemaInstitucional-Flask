@@ -61,7 +61,7 @@ class Alumno(Form):
 
     localidad = StringField('Localidad:',
                        [validators.length(min=5, max=40, message='Ingrese el lugar de residencia'),
-                        validators.data_required(message='Ingrese su luar de residencia!')])
+                        validators.data_required(message='Ingrese su lugar de residencia!')])
 
     nmb_pa = StringField('Nombre y Apellido del Tutor:',
                        [validators.length(min=5, max=50, message='Ingrese el nombre completo del tutor'),
@@ -74,5 +74,9 @@ class Alumno(Form):
     email = EmailField('Email:',
                        [validators.length(min=4, max=25, message='Ingrese un usuario de 4 a 25 letras!..'),
                         validators.data_required(message='Ingrese un Usuario!')])
+
+    barrio = StringField('Barrio:',
+                       [validators.length(min=5, max=40, message='Ingrese el lugar de residencia'),
+                        validators.data_required(message='Ingrese su lugar de residencia!')])
 
 
