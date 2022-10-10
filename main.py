@@ -40,7 +40,10 @@ global balumno
 balumno = 0
 global idcurso
 idcurso = 0
-
+global ci
+ci = 0
+global tel
+tel = 0
 #@app.before_request
 def antes():
   # Verificar si existe una sesion o no, en algun punto de acceso
@@ -553,28 +556,70 @@ def inscribirdir():
       ci = alumno.num_c.data
       tel = alumno.num_t.data
       mycursor.execute(
-        'INSERT INTO alumnos (nmb_a, ape_a, tel_a, ci_a, edad, email, loc_a, nmb_tu, tel_tu, fec_a) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+        'INSERT INTO alumnos (nmb_a, ape_a, tel_a, ci_a, edad, email, loc_a, nmb_tu, tel_tu, fec_a, bar_a) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
         (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
-         alumno.email.data, alumno.localidad.data, alumno.nmb_pa.data, alumno.num_pa.data, fecha, alumno.barrio.data))
+         alumno.email.data, alumno.localidad.data, alumno.nmb_pa.data, alumno.num_pa.data, fecha, alumno.barrio.data)) #Inserta en tabla alumnnos
       mydb.commit()
       return redirect(url_for('sacarmat'))
     else:
       flash("", "")
   return render_template('inscribiral.html', datos = datos, alumno = alumno)
 
-@app.route('/inscribiral/<filename>')
+@app.route('/inscribiral/<filename>') #Parte de buscar el archivo o documento del alumno, falta testear mejor
 def getfile(filename):
   return send_file(os.path.join(app.config["folder"], filename))
 
-@app.route('/inscribiralum', methods = ['GET', 'POST'])
+@app.route('/inscribiralum', methods = ['GET', 'POST']) #Parte de inscripcion, carga de materias por alumno
 def inscurmat():
   bver = 0
   datos = session['username']
   global idmaterias
+  global ci
+  global tel
+  fecha = datetime.now()
+  fecha = datetime.strftime(fecha, '%Y')
+  print(fecha)
   if request.method == 'POST':
+    if ci == 0 or tel == 0:
+      return redirect(url_for('inscribirdir'))
     idmat = request.form.getlist(('idmat'))
-    print(idmat)
-    bver = 1
+    mycursor = mydb.cursor()
+    sql = "SELECT id_alumno FROM alumnos WHERE ci_a = %s and tel_a = %s"
+    val = [ci,tel]
+    mycursor.execute(sql, val)
+    id_a = mycursor.fetchall()
+    id_a = id_a[0]
+    print(cur)
+    if id_a:
+      print(id_a[0])
+    if idmaterias:
+      print(idmat)
+      bver = 1
+      for x in range(0, len(idmat)):
+        aux = idmat[x]
+        print(aux)
+        print(x)
+        sql = "SELECT id_profesor FROM matxpro WHERE id_materia = %s"
+        val = [aux]
+        mycursor.execute(sql, val)
+        data = mycursor.fetchall()
+        if data:
+          data = data[0]
+          print(id_a[0])
+          print(data[0])
+          mycursor = mydb.cursor()
+          mycursor.execute(
+             'INSERT INTO matxalum (id_alumno, id_materia, id_curso, ano_m, id_profesor) VALUES (%s, %s, %s, %s, %s)',
+            (id_a[0], aux, cur, fecha, data[0]))
+          mydb.commit()
+        else:
+          pass
+    else:
+      return redirect(url_for('inscribirdir'))
+
+
+
+
   return render_template('inscribiral2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver)
 
 @app.route('/sacarmat', methods = ['GET', 'POST'])
@@ -597,11 +642,15 @@ def sacarmat():
   data = mycursor.fetchall()
   print(data[0])
   data = data[0]
+  #Test
+  #print(ci)
+  #print(tel)
   # Updatea con el curso asignado
   sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
   val = (data[0],ci, tel)
   mycursor.execute(sql, val)
   mydb.commit()
+  cur = data[0]
   #Sacar los nombres de materia y sus id
   sql = "SELECT matxcur.id_materia, des_m FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_enfasis = %s " \
         "and matxcur.id_materia = materias.id_materia "

@@ -40,11 +40,11 @@ class Task(Form):
 
 class Alumno(Form):
     nombre = StringField('Nombre Completo:',
-                         [validators.length(min=5, max=50, message='El nombre debe tener 10 a 50 letras'),
+                         [validators.length(min=4, max=50, message='El nombre debe tener 10 a 50 letras'),
                           validators.data_required(message='Ingrese el nombre del alumno!')])
 
     apellido = StringField('Apellido Completo:',
-                         [validators.length(min=5, max=50, message='El apellido debe tener 10 a 50 letras'),
+                         [validators.length(min=4, max=50, message='El apellido debe tener 10 a 50 letras'),
                           validators.data_required(message='Ingrese el apellido del trabajo!')])
 
     edad = StringField('Edad:',
@@ -64,7 +64,7 @@ class Alumno(Form):
                         validators.data_required(message='Ingrese su lugar de residencia!')])
 
     nmb_pa = StringField('Nombre y Apellido del Tutor:',
-                       [validators.length(min=5, max=50, message='Ingrese el nombre completo del tutor'),
+                       [validators.length(min=4, max=50, message='Ingrese el nombre completo del tutor'),
                         validators.data_required(message='Ingrese un nombre!')])
 
     num_pa = StringField('Numero del Tutor:',

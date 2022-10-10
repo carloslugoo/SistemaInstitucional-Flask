@@ -5,7 +5,9 @@
 
 
 <body>
-     <!-- sweetAlert2 -->
+
+  {% block content %}
+    <!-- sweetAlert2 -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
         <!-- Generamos una nueva variable de messages con sweetalert2 -->
         {% with messages = get_flashed_messages(with_categories=True) %}
@@ -77,11 +79,9 @@
                  {% endfor %}
             {% endif %}
         {% endwith  %}
-  {% block content %}
- <center><h2>Carga de trabajo sumativo para alumnos</h2></center>
 <p></p>
     {% from "macro.html" import show_form %}
-    <div class="">
+    <div class=""> <center><h2>Carga de trabajo sumativo para alumnos</h2></center>
          <div class="row">
           <div class="col-sm-3">
             <div class="form-group">
