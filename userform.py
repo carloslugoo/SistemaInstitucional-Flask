@@ -56,7 +56,7 @@ class Alumno(Form):
                         validators.data_required(message='Ingrese una numero de cedula!')])
 
     num_t = StringField('Numero de Telefono:',
-                       [validators.length(min=9, max=11, message='Ingrese un numero de contacto valido'),
+                       [validators.length(min=10, max=10, message='Ingrese un numero de contacto valido'),
                         validators.data_required(message='Ingrese una numero de contacto!')])
 
     localidad = StringField('Localidad:',

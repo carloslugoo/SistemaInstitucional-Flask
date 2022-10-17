@@ -1,4 +1,4 @@
-from flask import Flask, url_for, redirect, render_template, request, session, flash, g, make_response, current_app, send_file
+from flask import Flask, url_for, redirect, render_template, request, session, send_file
 import mysql.connector
 from flask import flash
 from config import DevConfig
@@ -11,8 +11,8 @@ import string
 import random
 from werkzeug.utils import secure_filename
 import os
-import config
-from io import BytesIO
+import time
+
 app = Flask(__name__)
 
 app.config.from_object(DevConfig)
@@ -44,6 +44,10 @@ global ci
 ci = 0
 global tel
 tel = 0
+global band
+band = 0
+global tipoins
+tipoins = 0
 #@app.before_request
 def antes():
   # Verificar si existe una sesion o no, en algun punto de acceso
@@ -175,6 +179,7 @@ def registro():
     if data:
       print("a")
       data = data[0]
+      print(data)
       if data[6]:
         create = False
         flash("Ya tiene cuenta", "existe_ci")
@@ -433,7 +438,6 @@ def alumnosproceso():
 @app.route('/materias')
 def vermaterias():
   datos = session['username']
-
   print(datos)
   mycursor = mydb.cursor()
   sql = "SELECT matxalum.id_materia,des_m, des_c, sec_c, ano_m, des_e, id_profesor FROM matxalum, materias, cursos, enfasis" \
@@ -442,8 +446,8 @@ def vermaterias():
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
   print(data)
-
-  return render_template('materias.html', datos=datos, materias=data)
+  cont = 0
+  return render_template('materias.html', datos=datos, materias=data, cont = cont)
 
 @app.route('/vermateria/<string:id>') #Ver proceso de la materia seleccionada.
 def verproceso(id):
@@ -472,14 +476,20 @@ def verproceso(id):
   else:
     flash("no", "nom")
     return redirect(url_for('vermaterias'))
-
   return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, porcl = porcl)
 
-@app.route('/inscribiral', methods = ['GET', 'POST'])
+@app.route('/inscribiral', methods = ['GET', 'POST']) #Inscripcion de alumnos. Parte de la Carga
 def inscribirdir():
   alumno = userform.Alumno(request.form)
   datos = session['username']
-  if request.method == "POST":
+  global band
+  print(band)
+  global tipoins
+  tipoins = 1 # Significa inscripcion de alumnos
+  if band == 1:
+    flash("", "si")
+    band = 0
+  if request.method == "POST" and alumno.validate():
     cedu = request.files["cedu"]
     ante = request.files["ante"]
     auto = request.files["auto"]
@@ -555,14 +565,25 @@ def inscribirdir():
       sec = request.form.get(('seccion'))
       ci = alumno.num_c.data
       tel = alumno.num_t.data
-      mycursor.execute(
-        'INSERT INTO alumnos (nmb_a, ape_a, tel_a, ci_a, edad, email, loc_a, nmb_tu, tel_tu, fec_a, bar_a) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
-        (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
-         alumno.email.data, alumno.localidad.data, alumno.nmb_pa.data, alumno.num_pa.data, fecha, alumno.barrio.data)) #Inserta en tabla alumnnos
-      mydb.commit()
-      return redirect(url_for('sacarmat'))
+      # Validar si la cedula y el num de telefono no son repetidos..
+      sql = "SELECT ci_a FROM alumnos WHERE ci_a = %s"
+      val = [ci]
+      mycursor.execute(sql, val)
+      comp_a = mycursor.fetchall()
+      if comp_a:
+        print(comp_a)
+        flash("", "error")
+      else:
+        # Inserta en tabla alumnnos todos los datos
+        mycursor.execute(
+          'INSERT INTO alumnos (nmb_a, ape_a, tel_a, ci_a, edad, email, loc_a, nmb_tu, tel_tu, fec_a, bar_a) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+          (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
+           alumno.email.data, alumno.localidad.data, alumno.nmb_pa.data, alumno.num_pa.data, fecha, alumno.barrio.data))
+        mydb.commit()
+        return redirect(url_for('sacarmat'))
     else:
-      flash("", "")
+      print("no fehca")
+      flash("fecha","fecha")
   return render_template('inscribiral.html', datos = datos, alumno = alumno)
 
 @app.route('/inscribiral/<filename>') #Parte de buscar el archivo o documento del alumno, falta testear mejor
@@ -573,7 +594,7 @@ def getfile(filename):
 def inscurmat():
   bver = 0
   datos = session['username']
-  global idmaterias
+  global idmaterias #Contiene el nombre de las materias y sus id
   global ci
   global tel
   fecha = datetime.now()
@@ -582,7 +603,7 @@ def inscurmat():
   if request.method == 'POST':
     if ci == 0 or tel == 0:
       return redirect(url_for('inscribirdir'))
-    idmat = request.form.getlist(('idmat'))
+    idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
     mycursor = mydb.cursor()
     sql = "SELECT id_alumno FROM alumnos WHERE ci_a = %s and tel_a = %s"
     val = [ci,tel]
@@ -597,10 +618,10 @@ def inscurmat():
       bver = 1
       for x in range(0, len(idmat)):
         aux = idmat[x]
-        print(aux)
-        print(x)
-        sql = "SELECT id_profesor FROM matxpro WHERE id_materia = %s"
-        val = [aux]
+        #print(aux)
+        #print(x)
+        sql = "SELECT id_profesor FROM matxpro WHERE id_materia = %s and id_curso = %s"
+        val = [aux, cur]
         mycursor.execute(sql, val)
         data = mycursor.fetchall()
         if data:
@@ -613,22 +634,32 @@ def inscurmat():
             (id_a[0], aux, cur, fecha, data[0]))
           mydb.commit()
         else:
-          pass
+          mycursor = mydb.cursor()
+          mycursor.execute(
+            'INSERT INTO matxalum (id_alumno, id_materia, id_curso, ano_m, id_profesor) VALUES (%s, %s, %s, %s, %s)',
+            (id_a[0], aux, cur, fecha, 0))
+          mydb.commit()
+      print("termino")
+      categf = "si"
+      mensf(categf)
+      #time.sleep(3.5)
+      flash("", "si")
+      global band
+      band = 1
+      print(band)
+      return redirect(url_for('inscribirdir'))
     else:
       return redirect(url_for('inscribirdir'))
-
-
-
-
   return render_template('inscribiral2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver)
 
-@app.route('/sacarmat', methods = ['GET', 'POST'])
+@app.route('/sacarmat', methods = ['GET', 'POST']) #Parte de Inscripcion de Alumnos, saca las materias con nombre y ID.
 def sacarmat():
   global cur
   global enf
   global sec
   global ci
   global tel
+  global tipoins
   if enf == "Sociales":  # Dependiendo del enfasis para no consultar la bd
     enf = 2
   else:
@@ -645,12 +676,13 @@ def sacarmat():
   #Test
   #print(ci)
   #print(tel)
-  # Updatea con el curso asignado
-  sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
-  val = (data[0],ci, tel)
-  mycursor.execute(sql, val)
-  mydb.commit()
-  cur = data[0]
+  if tipoins == 1: #Solo si es insc de alumnos
+    # Updatea con el curso asignado
+    sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
+    val = (data[0],ci, tel)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    cur = data[0]
   #Sacar los nombres de materia y sus id
   sql = "SELECT matxcur.id_materia, des_m FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_enfasis = %s " \
         "and matxcur.id_materia = materias.id_materia "
@@ -661,10 +693,168 @@ def sacarmat():
   bver = 1
   global idmaterias
   idmaterias = mat
-  return redirect(url_for('inscurmat'))
+  if tipoins == 1:
+    return redirect(url_for('inscurmat'))
+  if tipoins == 2: #Inscripcion de Profes
+    return redirect(url_for('inscmatxprof'))
+
+@app.route('/inscribirprofe', methods = ['GET', 'POST']) #Inscripcion de Profesor, carga.
+def inscribirprof():
+  alumno = userform.Alumno(request.form) #Reutilizo el form
+  datos = session['username']
+  global band
+  print(band)
+  if band == 1:
+    flash("", "si")
+    band = 0
+  global tipoins
+  tipoins = 2
+  if request.method == "POST":
+    co_i = request.files["co_i"]
+    cedu = request.files["cedu_p"]
+    co_c = request.files["co_c"]
+    fecha = (request.form['fec_n'])
+    print(fecha)
+    if fecha:
+      # Parte Cedula...
+      if "cedu_p" not in request.files:
+        # print("No envio nada")
+        pass
+      elif cedu.filename == "":
+        # print("No mando nada")
+        pass
+      elif cedu and archpermi(cedu.filename):
+        filename = secure_filename(cedu.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "cedulaprof_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        cedu.save(os.path.join(app.config["folder"], filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      # Parte Constancia de Ingresos
+      if "co_i" not in request.files:
+        #print("No envio nada")
+        pass
+      elif co_i.filename == "":
+        #print("No mando nada")
+        pass
+      elif co_i and archpermi(co_i.filename):
+        filename = secure_filename(co_i.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "constancia_ingresos_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        co_i.save(os.path.join(app.config["folder"], filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      # Parte Autorizacion de Padres
+      if "co_c" not in request.files:
+        #print("No envio nada")
+        pass
+      elif co_c.filename == "":
+        #print("No mando nada")
+        pass
+      elif co_c and archpermi(co_c.filename):
+        filename = secure_filename(co_c.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "constancia_cargos" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        co_c.save(os.path.join(app.config["folder"], filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      mycursor = mydb.cursor()
+      print(cursos)
+      global cur
+      global enf
+      global sec
+      global ci
+      global tel
+      cur = request.form.get(('curso'))
+      enf = request.form.get(('enfasis'))
+      sec = request.form.get(('seccion'))
+      ci = alumno.num_c.data
+      tel = alumno.num_t.data
+      # Validar si la cedula y el num de telefono no son repetidos..
+      sql = "SELECT ci_p FROM profesores WHERE ci_p = %s"
+      val = [ci]
+      mycursor.execute(sql, val)
+      comp_p = mycursor.fetchall()
+      if comp_p:
+        print(comp_p)
+        flash("", "error")
+      else:
+        # Inserta en tabla profesores todos los datos
+        mycursor.execute(
+          'INSERT INTO profesores (nmb_p, ape_p, tel_p, ci_p, edad, email, loc_p, fec_p, bar_p) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
+          (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
+           alumno.email.data, alumno.localidad.data, fecha, alumno.barrio.data))
+        mydb.commit()
+        return redirect(url_for('sacarmat'))
+    else:
+      print("no fehca")
+      flash("fecha", "fecha")
+  return render_template('inscribirprof.html', datos=datos, alumno=alumno)
+
+@app.route('/inscribirprofee', methods = ['GET', 'POST']) #Parte de inscripcion, carga de materias por alumno
+def inscmatxprof():
+  bver = 0
+  datos = session['username']
+  global idmaterias #Contiene el nombre de las materias y sus id
+  global ci
+  global tel
+  fecha = datetime.now()
+  fecha = datetime.strftime(fecha, '%Y')
+  print(fecha)
+  if request.method == 'POST':
+    if ci == 0 or tel == 0:
+      return redirect(url_for('inscribirdir'))
+    idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
+    mycursor = mydb.cursor()
+    sql = "SELECT id_profesor FROM profesores WHERE ci_a = %s and tel_a = %s"
+    val = [ci,tel]
+    mycursor.execute(sql, val)
+    id_p = mycursor.fetchall()
+    id_p = id_p[0]
+    #print(cur)
+    if id_p:
+      print(id_p[0])
+    if idmaterias:
+      print(idmat)
+      for x in range(0, len(idmat)):
+        aux = idmat[x]
+        #print(aux)
+        #print(x)
+        mycursor = mydb.cursor()
+        mycursor.execute(
+          'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
+          ( aux, id_p[0], cur, fecha))
+        mydb.commit()
+      print("termino")
+      categf = "si"
+      mensf(categf)
+      #time.sleep(3.5)
+      flash("", "si")
+      global band
+      band = 1
+      print(band)
+      return redirect(url_for('inscribirdir'))
+    else:
+      return redirect(url_for('inscribirdir')) #Error y redirige..
+  return render_template('inscribirprof2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver)
 
 
-#@app.route('/cargar', methods = ['GET', 'POST']) #ABM Cargar Materias
+#@app.route('/cargar', methods = ['GET', 'POST']) #ABM Cargar Materias, desabilitado.
 def cargar():
   alumno = userform.Alumno(request.form)
   if request.method == 'POST':
@@ -734,7 +924,12 @@ def cargar():
       mydb.commit()
   return render_template('cargarm.html', alumno = alumno)
 
-
+def mensf(cat):
+  #para testear
+  print('a')
+  print(cat)
+  flash("", cat)
+  return flash("", cat)
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
@@ -751,7 +946,7 @@ def guar_f(id_u,foto):
     f.write(foto)
 def archpermi(filename):
   filename = filename.split('.')
-  #print(filename)
+  print(filename)
   if filename[1] in ext_p:
     return True
   return False
