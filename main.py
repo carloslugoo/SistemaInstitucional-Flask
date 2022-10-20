@@ -6,7 +6,6 @@ from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 import userform
 from datetime import datetime
-import time
 import string
 import random
 from werkzeug.utils import secure_filename
@@ -378,6 +377,8 @@ def procesoss():
     print(id_mat)
     datos = session['username']
     mycursor = mydb.cursor()
+    print(datos[0])
+    print(id_mat)
     sql = "SELECT * FROM matxpro WHERE id_profesor = %s and id_materia =%s"
     val = [datos[0], id_mat]
     global idmaterias
@@ -398,7 +399,7 @@ def procesoss():
       aux = data[x]
       mycursor = mydb.cursor()
       sql = "SELECT id_curso, des_c, sec_c,des_e FROM cursos,enfasis WHERE id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
-      val = [aux[4]]
+      val = [aux[3]]
       mycursor.execute(sql, val)
       aux = mycursor.fetchall()
       aux = aux[0]
@@ -445,8 +446,7 @@ def vermaterias():
   val = [datos[0], datos[4]]
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
-  print(data)
-  cont = 0
+  cont = [1,2,3,4,5,6,7,8,9,10,11,12]
   return render_template('materias.html', datos=datos, materias=data, cont = cont)
 
 @app.route('/vermateria/<string:id>') #Ver proceso de la materia seleccionada.
@@ -484,12 +484,10 @@ def inscribirdir():
   datos = session['username']
   global band
   print(band)
-  global tipoins
-  tipoins = 1 # Significa inscripcion de alumnos
   if band == 1:
     flash("", "si")
     band = 0
-  if request.method == "POST" and alumno.validate():
+  if request.method == "POST":
     cedu = request.files["cedu"]
     ante = request.files["ante"]
     auto = request.files["auto"]
@@ -601,8 +599,11 @@ def inscurmat():
   fecha = datetime.strftime(fecha, '%Y')
   print(fecha)
   if request.method == 'POST':
+    print("a")
     if ci == 0 or tel == 0:
+      print("a2")
       return redirect(url_for('inscribirdir'))
+    
     idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
     mycursor = mydb.cursor()
     sql = "SELECT id_alumno FROM alumnos WHERE ci_a = %s and tel_a = %s"
@@ -611,6 +612,7 @@ def inscurmat():
     id_a = mycursor.fetchall()
     id_a = id_a[0]
     print(cur)
+    print("q pasa")
     if id_a:
       print(id_a[0])
     if idmaterias:
@@ -671,18 +673,18 @@ def sacarmat():
   val = [cur, sec, enf]
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
-  print(data[0])
-  data = data[0]
+  if data:
+    print(data[0])
+    data = data[0]
   #Test
   #print(ci)
   #print(tel)
-  if tipoins == 1: #Solo si es insc de alumnos
-    # Updatea con el curso asignado
-    sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
-    val = (data[0],ci, tel)
-    mycursor.execute(sql, val)
-    mydb.commit()
-    cur = data[0]
+  # Updatea con el curso asignado
+  sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
+  val = (data[0],ci, tel)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  cur = data[0]
   #Sacar los nombres de materia y sus id
   sql = "SELECT matxcur.id_materia, des_m FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_enfasis = %s " \
         "and matxcur.id_materia = materias.id_materia "
@@ -693,22 +695,22 @@ def sacarmat():
   bver = 1
   global idmaterias
   idmaterias = mat
-  if tipoins == 1:
-    return redirect(url_for('inscurmat'))
-  if tipoins == 2: #Inscripcion de Profes
-    return redirect(url_for('inscmatxprof'))
+  print("hola")
+  return redirect(url_for('inscurmat'))
+
 
 @app.route('/inscribirprofe', methods = ['GET', 'POST']) #Inscripcion de Profesor, carga.
 def inscribirprof():
   alumno = userform.Alumno(request.form) #Reutilizo el form
   datos = session['username']
   global band
-  print(band)
+  #print(band)
   if band == 1:
     flash("", "si")
     band = 0
   global tipoins
   tipoins = 2
+  mycursor = mydb.cursor()
   if request.method == "POST":
     co_i = request.files["co_i"]
     cedu = request.files["cedu_p"]

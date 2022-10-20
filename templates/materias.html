@@ -33,27 +33,29 @@
     </div>
   </div>
 
-{% set cont = 0 -%}
-<div class="container">
-<div class="row align-items-md-stretch">
-    {% for materia in materias %}
-    {% if cont == 3 %}
-        <br>
-    {% endif %}
-      <div class="col-md-3">
-        <div class="h-100 p-5 text-bg-dark rounded-3">
-          <h2>{{materia.1}}</h2>
-          <p>Curso: {{materia.2}}</p>
-           <p> Seccion: {{materia.3}}</p>
-          <p>Enfasis: {{materia.5}}</p>
-          <p>Año: {{materia.4}}</p>
+
+{% set count = namespace(value=0) %}
+
+  <div class="row">
+ {% for materia in materias %}
+  {% set count.value = count.value + 1 %}
+
+          <div class="col-sm-4">
+        <div class="h-70 p-1 text-bg-dark rounded-3">
+          <h3>{{materia.1}}</h3>
+          <p>Curso: {{materia.2}} Seccion: {{materia.3}}</p>
+          <p>Enfasis: {{materia.5}}          Año: {{materia.4}}</p>
          <a href="/vermateria/{{materia.0}}{{materia.6}}" class="btn btn-outline-light" role="button">Ver Materia</a>
         </div>
-
-      </div>
-
-   <br>
+          </div>
+    {% if count.value == 2%}
+     </div>
+    <br>
+       <div class="row">
+      {% set count.value = count.value - 2 %}
+           {% endif %}
     {% endfor %}
+
 </div>
 </div>
 {% endblock %}
