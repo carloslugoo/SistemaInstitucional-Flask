@@ -483,6 +483,8 @@ def inscribirdir():
   alumno = userform.Alumno(request.form)
   datos = session['username']
   global band
+  global tipoins
+  tipoins = 1 #Alumnos
   print(band)
   if band == 1:
     flash("", "si")
@@ -598,12 +600,12 @@ def inscurmat():
   fecha = datetime.now()
   fecha = datetime.strftime(fecha, '%Y')
   print(fecha)
+  print("a")
   if request.method == 'POST':
     print("a")
     if ci == 0 or tel == 0:
       print("a2")
       return redirect(url_for('inscribirdir'))
-    
     idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
     mycursor = mydb.cursor()
     sql = "SELECT id_alumno FROM alumnos WHERE ci_a = %s and tel_a = %s"
@@ -649,8 +651,10 @@ def inscurmat():
       global band
       band = 1
       print(band)
+      print("a")
       return redirect(url_for('inscribirdir'))
     else:
+      print("a")
       return redirect(url_for('inscribirdir'))
   return render_template('inscribiral2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver)
 
@@ -662,41 +666,41 @@ def sacarmat():
   global ci
   global tel
   global tipoins
-  if enf == "Sociales":  # Dependiendo del enfasis para no consultar la bd
-    enf = 2
-  else:
-    enf = 1
-  print(cur)
-  print(enf)
-  mycursor = mydb.cursor()
-  sql = "SELECT id_curso FROM cursos WHERE des_c = %s and sec_c = %s and id_enfasis = %s"
-  val = [cur, sec, enf]
-  mycursor.execute(sql, val)
-  data = mycursor.fetchall()
-  if data:
-    print(data[0])
-    data = data[0]
-  #Test
-  #print(ci)
-  #print(tel)
-  # Updatea con el curso asignado
-  sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
-  val = (data[0],ci, tel)
-  mycursor.execute(sql, val)
-  mydb.commit()
-  cur = data[0]
-  #Sacar los nombres de materia y sus id
-  sql = "SELECT matxcur.id_materia, des_m FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_enfasis = %s " \
-        "and matxcur.id_materia = materias.id_materia "
-  val = [data[0], enf]
-  mycursor.execute(sql, val)
-  mat = mycursor.fetchall()
-  print(mat)
-  bver = 1
-  global idmaterias
-  idmaterias = mat
-  print("hola")
-  return redirect(url_for('inscurmat'))
+  if tipoins == 1: # Osea Alumnos
+    if enf == "Sociales":  # Dependiendo del enfasis para no consultar la bd
+      enf = 2
+    else:
+      enf = 1
+    print(cur)
+    print(enf)
+    mycursor = mydb.cursor()
+    sql = "SELECT id_curso FROM cursos WHERE des_c = %s and sec_c = %s and id_enfasis = %s"
+    val = [cur, sec, enf]
+    mycursor.execute(sql, val)
+    data = mycursor.fetchall()
+    if data:
+      print(data[0])
+      data = data[0]
+    #Test
+    #print(ci)
+    #print(tel)
+    # Updatea con el curso asignado
+    sql = "UPDATE alumnos SET id_curso = %s WHERE ci_a = %s and tel_a = %s"
+    val = (data[0],ci, tel)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    cur = data[0]
+    #Sacar los nombres de materia y sus id
+    sql = "SELECT matxcur.id_materia, des_m FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_enfasis = %s " \
+          "and matxcur.id_materia = materias.id_materia "
+    val = [data[0], enf]
+    mycursor.execute(sql, val)
+    mat = mycursor.fetchall()
+    print(mat)
+    bver = 1
+    global idmaterias
+    idmaterias = mat
+    return redirect(url_for('inscurmat'))
 
 
 @app.route('/inscribirprofe', methods = ['GET', 'POST']) #Inscripcion de Profesor, carga.
@@ -704,13 +708,13 @@ def inscribirprof():
   alumno = userform.Alumno(request.form) #Reutilizo el form
   datos = session['username']
   global band
-  #print(band)
+  print(band)
   if band == 1:
     flash("", "si")
     band = 0
   global tipoins
   tipoins = 2
-  mycursor = mydb.cursor()
+
   if request.method == "POST":
     co_i = request.files["co_i"]
     cedu = request.files["cedu_p"]
@@ -802,7 +806,7 @@ def inscribirprof():
           (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
            alumno.email.data, alumno.localidad.data, fecha, alumno.barrio.data))
         mydb.commit()
-        return redirect(url_for('sacarmat'))
+        return redirect(url_for('inscmatxprof'))
     else:
       print("no fehca")
       flash("fecha", "fecha")
@@ -815,45 +819,94 @@ def inscmatxprof():
   global idmaterias #Contiene el nombre de las materias y sus id
   global ci
   global tel
+  global tipoins
+  tipoins = 2 #Profesores
   fecha = datetime.now()
   fecha = datetime.strftime(fecha, '%Y')
   print(fecha)
+  mycursor = mydb.cursor(buffered=True)
+  for x in range(1, 7):
+    print(x)
+    if x <= 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      if x == 1:
+        con_p = mycursor.fetchall()
+        print(con_p)
+      if x == 2:
+        con_s = mycursor.fetchall()
+        print(con_s)
+    if x == 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      soc_p = mycursor.fetchall()
+      print(soc_p)
+    if x == 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      con_t = mycursor.fetchall()
+      print(con_t)
+    if x > 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      if x == 5:
+        soc_s = mycursor.fetchall()
+        print(soc_s)
+      if x == 6:
+        soc_t = mycursor.fetchall()
+        print(soc_t)
   if request.method == 'POST':
     if ci == 0 or tel == 0:
-      return redirect(url_for('inscribirdir'))
+      return redirect(url_for('inscribirprof'))
     idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
+    idcur = request.form.getlist(('idcur'))
+    print(idmat)
+    print(idcur)
     mycursor = mydb.cursor()
-    sql = "SELECT id_profesor FROM profesores WHERE ci_a = %s and tel_a = %s"
+    sql = "SELECT id_profesor FROM profesores WHERE ci_p = %s and tel_p = %s"
     val = [ci,tel]
     mycursor.execute(sql, val)
     id_p = mycursor.fetchall()
-    id_p = id_p[0]
     #print(cur)
-    if id_p:
-      print(id_p[0])
-    if idmaterias:
-      print(idmat)
-      for x in range(0, len(idmat)):
-        aux = idmat[x]
-        #print(aux)
-        #print(x)
-        mycursor = mydb.cursor()
-        mycursor.execute(
-          'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
-          ( aux, id_p[0], cur, fecha))
-        mydb.commit()
-      print("termino")
-      categf = "si"
-      mensf(categf)
-      #time.sleep(3.5)
-      flash("", "si")
-      global band
-      band = 1
-      print(band)
-      return redirect(url_for('inscribirdir'))
+    if len(idmat) != len(idcur):
+      print("asfd")
+      flash("","")
     else:
-      return redirect(url_for('inscribirdir')) #Error y redirige..
-  return render_template('inscribirprof2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver)
+      print("ssss")
+      if id_p:
+        id_p = id_p[0]
+        print(id_p[0])
+      if idmat and idcur:
+        print(idmat)
+        for x in range(0, len(idmat)):
+          aux = idmat[x]
+          aux2 = idcur[x]
+          print(aux)
+          print(aux2)
+          mycursor = mydb.cursor()
+          mycursor.execute(
+            'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
+            (aux, id_p[0], aux2, fecha))
+          mydb.commit()
+        print("termino")
+        categf = "si"
+        mensf(categf)
+        #time.sleep(3.5)
+        flash("", "si")
+        global band
+        band = 1
+        print(band)
+        return redirect(url_for('inscribirprof'))
+  return render_template('inscribirprof2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver,
+                         soc_p = soc_p, soc_s = soc_s, soc_t = soc_t, con_p=con_p, con_s = con_s, con_t = con_t)
 
 
 #@app.route('/cargar', methods = ['GET', 'POST']) #ABM Cargar Materias, desabilitado.
