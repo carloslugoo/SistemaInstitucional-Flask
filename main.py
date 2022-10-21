@@ -993,7 +993,7 @@ def cargar():
         (aux[0], id_m[0], aux[1], ch))
       mydb.commit()
   return render_template('cargarm.html', alumno = alumno)
-@app.route('/misdatos')
+@app.route('/misdatos') #Nav Bar, Boton "Mis Datos"
 def misdatos():
   datos = session['username']
   print(datos)
@@ -1003,6 +1003,95 @@ def misdatos():
     return render_template('verdatosprof.html', datos=datos)
   if datos[6] ==3: #Admin
     return render_template('verdatosad.html', datos=datos)
+
+@app.route('/miconfig', methods = ['GET', 'POST']) #Nav Bar, Boton "Configuracion de Cuenta"
+def misconfig():
+  global band
+  datos = session['username']
+  user = userform.User(request.form)
+  if band == 1:
+    band = 0
+    flash("","c_u")
+  if band == 2:
+    band = 0
+    flash("","co_u")
+  if band == 3:
+    band = 0
+    flash("", "p_u")
+  if datos[7] == 1:  # alumnos
+    mycursor = mydb.cursor()
+    sql = "SELECT * FROM user WHERE id_user = %s"
+    val = [datos[6]]
+    mycursor.execute(sql, val)
+    data = mycursor.fetchall()
+    print(data[0])
+    if request.method == 'POST':
+      us = user.username.data
+      pasw = user.password.data
+      em = user.email.data
+      cpasw = user.confirmpassword.data
+      cpasw2 = user.confirmpassword2.data
+      if us and pasw:
+        sql = "SELECT id_user FROM user WHERE username = %s"
+        val = [us]
+        mycursor.execute(sql, val)
+        comp_u = mycursor.fetchall()
+        if comp_u:
+          flash("", "us_e")
+        else:
+          if data:
+            userdata = data[0]
+            # print(userdata)
+            if userdata:
+              passcheck = userdata[3]
+              # print(passcheck)
+              print(us)
+            if userdata and check_password_hash(passcheck, pasw):
+              sql = "UPDATE user SET username =  %s WHERE id_user = %s"
+              val = (us,datos[6])
+              mycursor.execute(sql, val)
+              mydb.commit()
+              band = 1
+              return redirect(url_for('misconfig'))
+            else:
+              flash("","psw")
+      if em and pasw:
+        if data:
+          userdata = data[0]
+          # print(userdata)
+          if userdata:
+            passcheck = userdata[3]
+          if userdata and check_password_hash(passcheck, pasw):
+            sql = "UPDATE user SET email = %s WHERE id_user = %s"
+            val = (em, datos[6])
+            mycursor.execute(sql, val)
+            mydb.commit()
+            band = 2
+            return redirect(url_for('misconfig'))
+          else:
+            flash("", "psw")
+      if pasw and cpasw and cpasw2:
+        if data:
+          userdata = data[0]
+          if userdata:
+            passcheck = userdata[3]
+          if userdata and check_password_hash(passcheck, pasw):
+            if cpasw == cpasw2:
+              password = createpassword(cpasw)
+              sql = "UPDATE user SET password = %s WHERE id_user = %s"
+              val = (password, datos[6])
+              mycursor.execute(sql, val)
+              mydb.commit()
+              band = 3
+              return redirect(url_for('misconfig'))
+            else:
+              flash("", "psw2")
+          else:
+            flash("", "psw")
+    return render_template('miconfig.html', datos=datos, data = data[0], user = user)
+
+
+
 def mensf(cat):
   #para testear
   print('a')

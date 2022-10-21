@@ -20,7 +20,7 @@ class User(Form):
                           [validators.data_required(message='Ingrese un Contraseña!'),
                            validators.length(min=4, max=25, message='Ingrese un contraseña de 4 a 25 letras!..')])
 
- confirmpassword = PasswordField('Confirmar Contrasena',
+ confirmpassword2 = PasswordField('Confirmar Contrasena',
                                  [validators.data_required(message='Ingrese un Contraseña!'),
                                   validators.length(min=4, max=25,
                                                     message='Ingrese un contraseña de 4 a 25 letras!..')])

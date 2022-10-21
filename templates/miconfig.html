@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Cuenta</title>
+</head>
+<body>
+{% block content %}
+ <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                {% if category == 'c_u' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Usuario actualizado!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                {% if category == 'psw2' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'error',
+  								title: 'Las contraseñas no coinciden!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                 {% if category == 'p_u' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Contraseña Actualizada!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                        {% if category == 'co_u' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Correo actualizado!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                    {% if category == 'psw' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'error',
+  								title: 'Contraseña incorrecta!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                    {% if category == 'us_e' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'error',
+  								title: 'El usuario no esta disponible, intente con otro',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+{% from "macro.html" import show_form %}
+<form method="POST" action="/miconfig">
+<!-- Modal User -->
+<div class="modal fade" id="cambiar_u" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cambiar_ulLabel">Cambiar Usuario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+<table class="table table-hover table-striped table-bordered">
+       <tr>
+     <td>Usuario Actual: </td>
+           <td>{{data.1}} </td>
+        </tr>
+    <tr>
+          <td>Usuario Nuevo: </td>
+      {{show_form(user.username, class="form-control")}}
+    </tr>
+     <tr>
+           <td>Contraseña: </td>
+         {{show_form(user.password, class="form-control")}}
+    </tr>
+    </tbody>
+	</table>
+      </div>
+       <center> <p>La contraseña es una medida de seguridad!</p></center>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <input type="submit" name="submit" value="Guardar Cambios" class="btn btn-secondary">
+      </div>
+    </div>
+  </div>
+</div>
+    </form>
+<!-- Modal User -->
+<!-- Modal Email -->
+<form method="POST" action="/miconfig">
+<div class="modal fade" id="cambiar_e" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cambiar_elLabel">Cambiar Email</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+<table class="table table-hover table-striped table-bordered">
+       <tr>
+     <td>Email Actual: </td>
+           <td>{{data.2}} </td>
+        </tr>
+    <tr>
+          <td>Email Nuevo: </td>
+      {{show_form(user.email, class="form-control")}}
+    </tr>
+     <tr>
+           <td>Contraseña: </td>
+         {{show_form(user.password, class="form-control")}}
+    </tr>
+    </tbody>
+	</table>
+      </div>
+       <center> <p>La contraseña es una medida de seguridad!</p></center>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <input type="submit" name="submit" value="Guardar Cambios" class="btn btn-secondary">
+      </div>
+    </div>
+  </div>
+</div>
+    </form>
+<!-- Modal Email -->
+<!-- Modal Pass -->
+<form method="POST" action="/miconfig">
+<div class="modal fade" id="cambiar_p" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cambiar_plLabel">Cambiar Contraseña</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+<table class="table table-hover table-striped table-bordered">
+       <tr>
+     <td>Contraseña Actual: </td>
+          {{show_form(user.password, class="form-control")}}
+        </tr>
+    <tr>
+          <td>Contraseña Nueva: </td>
+        {{show_form(user.confirmpassword, class="form-control")}}
+    </tr>
+     <tr>
+           <td>Confirmar Contraseña: </td>
+         {{show_form(user.confirmpassword2, class="form-control")}}
+    </tr>
+    </tbody>
+	</table>
+      </div>
+        <center> <p>La contraseña es una medida de seguridad!</p></center>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <input type="submit" name="submit" value="Guardar Cambios" class="btn btn-secondary">
+      </div>
+    </div>
+  </div>
+</div>
+    </form>
+<!-- Modal Pass -->
+<div class="p-3 p-md-3 mb-3 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"><i class="bi bi-gear-fill"></i> Configuración de Cuenta</h1>
+
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Usuario</th>
+		</thead>
+       <tr>
+     <td>{{data.1}}</td>
+        </tr>
+
+    </tr>
+    </tbody>
+	</table>
+    <center><button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cambiar_u">Cambiar Usuario</button></center>
+    </div>
+  <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Email</th>
+		</thead>
+       <tr>
+     <td>{{data.2}}</td>
+        </tr>
+    </tr>
+    </tbody>
+	</table>
+      <center><button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cambiar_e">Cambiar Email</button></center>
+    </div>
+  <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Contraseña</th>
+
+		</thead>
+       <tr>
+     <td>******</td>
+
+        </tr>
+    </tbody>
+
+	</table>
+
+           <center><button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cambiar_p">Cambiar Contraseña</button></center>
+    </div>
+</div>
+
+{% endblock %}
+</body>
+</html>
