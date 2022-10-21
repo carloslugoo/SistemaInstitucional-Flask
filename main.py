@@ -52,7 +52,6 @@ def antes():
   # Verificar si existe una sesion o no, en algun punto de acceso
   datos = session['username']
   print(datos)
-
   if 'datos' not in session and request.endpoint in ['bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe', 'proceso']:
     print("sin")
     return redirect(url_for('login'))
@@ -708,13 +707,19 @@ def inscribirprof():
   alumno = userform.Alumno(request.form) #Reutilizo el form
   datos = session['username']
   global band
+  global idmaterias
   print(band)
   if band == 1:
     flash("", "si")
     band = 0
+  if band == 3:
+    band  = 0
+    flash("", "no")
+  if band == 4:
+    band = 0
+    flash("", "profe")
   global tipoins
   tipoins = 2
-
   if request.method == "POST":
     co_i = request.files["co_i"]
     cedu = request.files["cedu_p"]
@@ -810,7 +815,7 @@ def inscribirprof():
     else:
       print("no fehca")
       flash("fecha", "fecha")
-  return render_template('inscribirprof.html', datos=datos, alumno=alumno)
+  return render_template('inscribirprof.html', datos=datos, alumno=alumno, profe = idmaterias)
 
 @app.route('/inscribirprofee', methods = ['GET', 'POST']) #Parte de inscripcion, carga de materias por alumno
 def inscmatxprof():
@@ -820,6 +825,7 @@ def inscmatxprof():
   global ci
   global tel
   global tipoins
+  global band
   tipoins = 2 #Profesores
   fecha = datetime.now()
   fecha = datetime.strftime(fecha, '%Y')
@@ -865,6 +871,7 @@ def inscmatxprof():
         print(soc_t)
   if request.method == 'POST':
     if ci == 0 or tel == 0:
+      band = 3
       return redirect(url_for('inscribirprof'))
     idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
     idcur = request.form.getlist(('idcur'))
@@ -876,35 +883,43 @@ def inscmatxprof():
     mycursor.execute(sql, val)
     id_p = mycursor.fetchall()
     #print(cur)
-    if len(idmat) != len(idcur):
-      print("asfd")
-      flash("","")
-    else:
-      print("ssss")
-      if id_p:
-        id_p = id_p[0]
-        print(id_p[0])
-      if idmat and idcur:
+    if id_p:
+      id_p = id_p[0]
+      print(id_p[0])
+      if idmat:
         print(idmat)
         for x in range(0, len(idmat)):
           aux = idmat[x]
-          aux2 = idcur[x]
-          print(aux)
-          print(aux2)
+          aux2 = aux.split(',')
+          aux3 = int(aux2[0])
+          aux2 = int(aux2[1])
+          print((aux2))
+          print((aux3))
           mycursor = mydb.cursor()
-          mycursor.execute(
-            'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
-            (aux, id_p[0], aux2, fecha))
-          mydb.commit()
-        print("termino")
-        categf = "si"
-        mensf(categf)
-        #time.sleep(3.5)
-        flash("", "si")
-        global band
+          sql = "SELECT profesores.id_profesor, nmb_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_materia = %s and id_curso = %s and " \
+                "matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia"
+          val = [aux2, aux3]
+          mycursor.execute(sql, val)
+          comp_m = mycursor.fetchall()
+          if comp_m:
+            print(comp_m[0])
+            band = 4
+            idmaterias = comp_m[0]
+            return redirect(url_for('inscribirprof'))
+          else:
+            mycursor.execute(
+              'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
+              (aux2, id_p[0], aux3, fecha))
+            mydb.commit()
         band = 1
         print(band)
         return redirect(url_for('inscribirprof'))
+      else:
+        band = 3
+        return redirect(url_for('inscribirprof'))
+    else:
+      band == 3
+      return redirect(url_for('inscribirprof'))
   return render_template('inscribirprof2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver,
                          soc_p = soc_p, soc_s = soc_s, soc_t = soc_t, con_p=con_p, con_s = con_s, con_t = con_t)
 
@@ -978,7 +993,16 @@ def cargar():
         (aux[0], id_m[0], aux[1], ch))
       mydb.commit()
   return render_template('cargarm.html', alumno = alumno)
-
+@app.route('/misdatos')
+def misdatos():
+  datos = session['username']
+  print(datos)
+  if datos[7] == 1: #alumnos
+    return render_template('verdatos.html', datos = datos)
+  if datos[6] == 2: #profesores
+    return render_template('verdatosprof.html', datos=datos)
+  if datos[6] ==3: #Admin
+    return render_template('verdatosad.html', datos=datos)
 def mensf(cat):
   #para testear
   print('a')

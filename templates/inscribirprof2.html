@@ -23,12 +23,12 @@
        <div class="col-sm-3">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Primer Curso <input type="checkbox" value="3" name="idcur" unchecked></th>
+			<th>Primer Curso</th>
 		</thead>
 		<tbody>
      {% for materia in soc_p %}
        <tr>
-     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.1}}" name="idmat" class="" unchecked></td>
+     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.0}},{{materia.1}}" name="idmat" class="" unchecked></td>
        </tr>
       {% endfor %}
     </tbody>
@@ -37,12 +37,12 @@
        <div class="col-sm-3">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Segundo Curso <input type="checkbox" value="5" name="idcur" unchecked></th>
+			<th>Segundo Curso</th>
 		</thead>
 		<tbody>
      {% for materia in soc_s %}
        <tr>
-     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.1}}" name="idmat" class="" unchecked></td>
+     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.0}},{{materia.1}}" name="idmat" class="" unchecked></td>
        </tr>
       {% endfor %}
     </tbody>
@@ -52,12 +52,12 @@
        <div class="col-sm-3">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Tercer Curso <input type="checkbox" value="6" name="idcur" unchecked></th>
+			<th>Tercer Curso</th>
 		</thead>
 		<tbody>
      {% for materia in soc_t %}
        <tr>
-     <td>{{ materia.2 }} <input type="checkbox" value="{{materia.1}}" name="idmat" class="" unchecked></td>
+     <td>{{ materia.2 }} <input type="checkbox" value="{{materia.0}},{{materia.1}}" name="idmat" class="" unchecked></td>
        </tr>
       {% endfor %}
     </tbody>
@@ -74,12 +74,12 @@
        <div class="col-sm-3">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Primer Curso  <input type="checkbox" value="1" name="idcur" unchecked></th>
+			<th>Primer Curso </th>
 		</thead>
 		<tbody>
      {% for materia in con_p %}
        <tr>
-     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.1}}" name="idmat" class="" unchecked></td>
+     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.0}},{{materia.1}}" name="idmat" class="" unchecked></td>
        </tr>
       {% endfor %}
     </tbody>
@@ -88,12 +88,12 @@
        <div class="col-sm-3">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Segundo Curso  <input type="checkbox" value="2" name="idcur" unchecked></th>
+			<th>Segundo Curso</th>
 		</thead>
 		<tbody>
      {% for materia in con_s %}
        <tr>
-     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.1}}" name="idmat" class="" unchecked></td>
+     <td>{{ materia.2 }}  <input type="checkbox" value="{{materia.0}},{{materia.1}}" name="idmat" class="" unchecked></td>
        </tr>
       {% endfor %}
     </tbody>
@@ -103,12 +103,12 @@
        <div class="col-sm-3">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Tercer Curso  <input type="checkbox" value="4" name="idcur" unchecked></th>
+			<th>Tercer Curso </th>
 		</thead>
 		<tbody>
      {% for materia in con_t %}
        <tr>
-     <td>{{ materia.2 }} <input type="checkbox" value="{{materia.1}}" name="idmat" class="" unchecked></td>
+     <td>{{ materia.2 }} <input type="checkbox" value="{{materia.0}},{{materia.1}}" name="idmat" class="" unchecked></td>
        </tr>
       {% endfor %}
     </tbody>
