@@ -66,12 +66,19 @@ def bienvenidoprofe():
   print(datos)
   return render_template('profesorview.html', datos = datos)
 
+#Parte de vista de alumnos materias
 @app.route('/bienvenidoalumno')
-def bienvenidoalumno():
+def vermaterias():
   datos = session['username']
-  print("estoy en def")
   print(datos)
-  return render_template('materias.html', datos = datos)
+  mycursor = mydb.cursor()
+  sql = "SELECT matxalum.id_materia,des_m, des_c, sec_c, ano_m, des_e, id_profesor FROM matxalum, materias, cursos, enfasis" \
+        " WHERE id_alumno = %s and cursos.id_curso =%s and matxalum.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [datos[0], datos[4]]
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  cont = [1,2,3,4,5,6,7,8,9,10,11,12]
+  return render_template('materias.html', datos=datos, materias=data, cont = cont)
 
 @app.route('/bienvenidoadmin')
 def bienvenidoadmin():
@@ -434,19 +441,6 @@ def alumnosproceso():
     alumnos = data
   return redirect(url_for('proceso'))
 
-#Parte de vista de alumnos materias
-@app.route('/materias')
-def vermaterias():
-  datos = session['username']
-  print(datos)
-  mycursor = mydb.cursor()
-  sql = "SELECT matxalum.id_materia,des_m, des_c, sec_c, ano_m, des_e, id_profesor FROM matxalum, materias, cursos, enfasis" \
-        " WHERE id_alumno = %s and cursos.id_curso =%s and matxalum.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis"
-  val = [datos[0], datos[4]]
-  mycursor.execute(sql, val)
-  data = mycursor.fetchall()
-  cont = [1,2,3,4,5,6,7,8,9,10,11,12]
-  return render_template('materias.html', datos=datos, materias=data, cont = cont)
 
 @app.route('/vermateria/<string:id>') #Ver proceso de la materia seleccionada.
 def verproceso(id):
@@ -1018,77 +1012,97 @@ def misconfig():
   if band == 3:
     band = 0
     flash("", "p_u")
+  mycursor = mydb.cursor()
   if datos[7] == 1:  # alumnos
-    mycursor = mydb.cursor()
     sql = "SELECT * FROM user WHERE id_user = %s"
     val = [datos[6]]
     mycursor.execute(sql, val)
     data = mycursor.fetchall()
     print(data[0])
-    if request.method == 'POST':
-      us = user.username.data
-      pasw = user.password.data
-      em = user.email.data
-      cpasw = user.confirmpassword.data
-      cpasw2 = user.confirmpassword2.data
-      if us and pasw:
-        sql = "SELECT id_user FROM user WHERE username = %s"
-        val = [us]
-        mycursor.execute(sql, val)
-        comp_u = mycursor.fetchall()
-        if comp_u:
-          flash("", "us_e")
-        else:
-          if data:
-            userdata = data[0]
-            # print(userdata)
-            if userdata:
-              passcheck = userdata[3]
-              # print(passcheck)
-              print(us)
-            if userdata and check_password_hash(passcheck, pasw):
-              sql = "UPDATE user SET username =  %s WHERE id_user = %s"
-              val = (us,datos[6])
-              mycursor.execute(sql, val)
-              mydb.commit()
-              band = 1
-              return redirect(url_for('misconfig'))
-            else:
-              flash("","psw")
-      if em and pasw:
+  else:
+    sql = "SELECT * FROM user WHERE id_user = %s"
+    val = [datos[5]]
+    mycursor.execute(sql, val)
+    data = mycursor.fetchall()
+    print(data[0])
+
+  if request.method == 'POST':
+    us = user.username.data
+    pasw = user.password.data
+    em = user.email.data
+    cpasw = user.confirmpassword.data
+    cpasw2 = user.confirmpassword2.data
+    if us and pasw:
+      sql = "SELECT id_user FROM user WHERE username = %s"
+      val = [us]
+      mycursor.execute(sql, val)
+      comp_u = mycursor.fetchall()
+      if comp_u:
+        flash("", "us_e")
+      else:
         if data:
           userdata = data[0]
           # print(userdata)
           if userdata:
             passcheck = userdata[3]
+            # print(passcheck)
+            print(us)
           if userdata and check_password_hash(passcheck, pasw):
-            sql = "UPDATE user SET email = %s WHERE id_user = %s"
-            val = (em, datos[6])
+            sql = "UPDATE user SET username =  %s WHERE id_user = %s"
+            val = (us, datos[6])
             mycursor.execute(sql, val)
             mydb.commit()
-            band = 2
+            band = 1
             return redirect(url_for('misconfig'))
           else:
             flash("", "psw")
-      if pasw and cpasw and cpasw2:
-        if data:
-          userdata = data[0]
-          if userdata:
-            passcheck = userdata[3]
-          if userdata and check_password_hash(passcheck, pasw):
-            if cpasw == cpasw2:
-              password = createpassword(cpasw)
-              sql = "UPDATE user SET password = %s WHERE id_user = %s"
-              val = (password, datos[6])
-              mycursor.execute(sql, val)
-              mydb.commit()
-              band = 3
-              return redirect(url_for('misconfig'))
-            else:
-              flash("", "psw2")
+    if em and pasw:
+      if data:
+        userdata = data[0]
+        # print(userdata)
+        if userdata:
+          passcheck = userdata[3]
+        if userdata and check_password_hash(passcheck, pasw):
+          sql = "UPDATE user SET email = %s WHERE id_user = %s"
+          val = (em, datos[6])
+          mycursor.execute(sql, val)
+          mydb.commit()
+          band = 2
+          return redirect(url_for('misconfig'))
+        else:
+          flash("", "psw")
+    if pasw and cpasw and cpasw2:
+      if data:
+        userdata = data[0]
+        if userdata:
+          passcheck = userdata[3]
+        if userdata and check_password_hash(passcheck, pasw):
+          if cpasw == cpasw2:
+            password = createpassword(cpasw)
+            sql = "UPDATE user SET password = %s WHERE id_user = %s"
+            val = (password, datos[6])
+            mycursor.execute(sql, val)
+            mydb.commit()
+            band = 3
+            return redirect(url_for('misconfig'))
           else:
-            flash("", "psw")
-    return render_template('miconfig.html', datos=datos, data = data[0], user = user)
+            flash("", "psw2")
+        else:
+          flash("", "psw")
+  if datos[7] == 1:  # alumnos
+    return render_template('miconfig.html', datos=datos, data=data[0], user=user)
+  if datos[6] == 2:  # profesores
+    return render_template('miconfigpro.html', datos=datos, data=data[0], user=user)
+  if datos[6] == 3:  # Admin
+    return render_template('miconfigpro.html', datos=datos, data=data[0], user=user)
+
+
+@app.route('/cerrarsesion') #Nav Bar, Boton "Mis Datos"
+def cerrarsesion():
+  if 'username' in session:
+    session.pop('username')
+  return redirect(url_for('login'))
+
 
 
 
