@@ -47,17 +47,38 @@ global band
 band = 0
 global tipoins
 tipoins = 0
-#@app.before_request
-def antes():
+@app.before_request
+def before_request(): #antes de cargar la pag
   # Verificar si existe una sesion o no, en algun punto de acceso
-  datos = session['username']
-  print(datos)
-  if 'datos' not in session and request.endpoint in ['bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe', 'proceso']:
-    print("sin")
+  print(request.endpoint)
+  if 'username' not in session and request.endpoint in ['bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe',
+                                                        'proceso', 'verproceso', 'vermaterias', 'inscribirdir',
+                                                        'sacarmat', 'inscurmat', 'inscribirprof', 'inscmatxprof',
+                                                        'misconfig', 'misdatos', 'cerrarsesion', 'procesoss',
+                                                        'alumnosproceso']:
+
     return redirect(url_for('login'))
-  if 'datos' in session and request.endpoint in ['login', 'registro']:
-    print("con")
-    return redirect(url_for('bienvenidoalumno'))
+  if 'username' in session and request.endpoint in ['login', 'registro', 'recuperar']:
+    datos = session['username']
+    if datos[7] == 1:  # alumnos
+      return redirect(url_for('vermaterias'))
+    if datos[6] == 2:  # profesores
+      return redirect(url_for('bienvenidoprofe'))
+    if datos[6] == 3:  # Admin
+      return redirect(url_for('bienvenidoadmin'))
+  if 'username' in session:
+    datos = session['username']
+    if datos[7] == 1:
+      if request.endpoint in ['bienvenidoadmin', 'inscribirdir','sacarmat', ' inscurmat', 'inscribirprof','proceso',
+                              'procesoss', 'alumnosproceso', 'inscmatxprof']:
+        return redirect(url_for('vermaterias'))
+    if datos[6] == 2:
+      if request.endpoint in ['verproceso','vermaterias ', 'bienvenidoadmin', 'inscribirdir', 'sacarmat',
+                              'inscurmat', 'inscribirprof', 'inscmatxprof']:
+        return redirect(url_for('bienvenidoprofe'))
+    if datos[6] == 3:
+      if request.endpoint in ['verproceso', 'vermaterias', 'proceso', 'procesoss', 'alumnosproceso']:
+        return redirect(url_for('bienvenidoadmin'))
 
 
 @app.route('/bienvenidoprofe')
@@ -89,10 +110,14 @@ def bienvenidoadmin():
 
 @app.route('/', methods = ['GET', 'POST']) #Login, funciona pero falta ver el bug de la alerta de inicio de sesion
 def login():
+  global band
   user = userform.User(request.form)
   username = user.username.data
   password = user.password.data
   t_u = 0
+  if band == 1:
+    band = 0
+    flash("","creado")
   #print(username)
   if request.method == 'POST':
     mycursor = mydb.cursor()
@@ -146,10 +171,10 @@ def login():
 @app.route('/registro', methods = ['GET', 'POST']) #Registro, falta ver username cambiar por cedula ❌
 def registro():
   user = userform.User(request.form)
+  global band
   #pasw = user.password.data
-  if request.method == 'POST' and user.validate():
+  if request.method == 'POST':
     password = createpassword(user.password.data)
-    mycursor = mydb.cursor()
     create = False
     ci = int(user.ci.data)
     print(ci)
@@ -162,6 +187,7 @@ def registro():
     if data:
       t_u = 1 #Alumnos
       print("alumno encontrado")
+      create = True
     else:
       sql = "SELECT * FROM profesores WHERE ci_p = %s"
       val = [ci]
@@ -180,7 +206,6 @@ def registro():
           t_u = 3  # Admin
           print("admin encontrado")
           create = True
-
     if data:
       print("a")
       data = data[0]
@@ -238,8 +263,9 @@ def registro():
           val = (id, ci)
           mycursor.execute(sql, val)
           mydb.commit()
-        flash("Correcto", "success")
-        # return redirect(url_for('login'))
+        band = 1
+        #flash("Correcto", "success")
+        return redirect(url_for('login'))
       else:
         print("e")
         flash("Error", "psw")
@@ -651,7 +677,7 @@ def inscurmat():
       return redirect(url_for('inscribirdir'))
   return render_template('inscribiral2.html', datos = datos, cursos = cursos, materias=idmaterias, bver = bver)
 
-@app.route('/sacarmat', methods = ['GET', 'POST']) #Parte de Inscripcion de Alumnos, saca las materias con nombre y ID.
+@app.route('/sacarmat', methods = ['GET', 'POST']) #Va antes que inscurmat #Parte de Inscripcion de Alumnos, saca las materias con nombre y ID.
 def sacarmat():
   global cur
   global enf
@@ -811,7 +837,7 @@ def inscribirprof():
       flash("fecha", "fecha")
   return render_template('inscribirprof.html', datos=datos, alumno=alumno, profe = idmaterias)
 
-@app.route('/inscribirprofee', methods = ['GET', 'POST']) #Parte de inscripcion, carga de materias por alumno
+@app.route('/inscribirprofee', methods = ['GET', 'POST']) #Parte de incorporacion, carga de materias por  profe
 def inscmatxprof():
   bver = 0
   datos = session['username']

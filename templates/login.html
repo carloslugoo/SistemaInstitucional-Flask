@@ -55,6 +55,17 @@
                             })
                         </script>
                     {% endif %}
+                    {% if category == 'creado' %}
+                         <script>
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'success',
+                                text: "Cuenta creada de manera correcta!",
+                                showConfirmButton: true,
+                                timer: 5000
+                            })
+                        </script>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith  %}
