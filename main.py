@@ -50,7 +50,6 @@ tipoins = 0
 @app.before_request
 def before_request(): #antes de cargar la pag
   # Verificar si existe una sesion o no, en algun punto de acceso
-  print(request.endpoint)
   if 'username' not in session and request.endpoint in ['bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe',
                                                         'proceso', 'verproceso', 'vermaterias', 'inscribirdir',
                                                         'sacarmat', 'inscurmat', 'inscribirprof', 'inscmatxprof',
@@ -1128,8 +1127,102 @@ def cerrarsesion():
   if 'username' in session:
     session.pop('username')
   return redirect(url_for('login'))
+@app.route('/modificarproceso')
+def modproceso():
+  global band
+  if band == 1:
+    band = 0
+    flash("", "si_c")
+  datos = session['username']
+  mycursor = mydb.cursor()
+  print(datos)
+  sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and " \
+        "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
+  val = [datos[0]]
+  mycursor.execute(sql, val)
+  trabajos = mycursor.fetchall()
+  print(trabajos)
+  return render_template('modproceso.html', datos=datos, trabajos = trabajos)
 
+@app.route('/modificarproceso/<int:id>', methods = ['GET', 'POST'])
+def modificarproceso2(id):
+  print(id)
+  global band
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT nmb_a, ape_a, id_txa, traxalum.id_alumno, pun_l, fec_t, id_trabajo FROM traxalum, alumnos WHERE id_trabajo = %s and traxalum.id_alumno = alumnos.id_alumno"
+  val = [id]
+  mycursor.execute(sql, val)
+  datas = mycursor.fetchall()
+  sql = "SELECT des_t, pun_t, tipo_t, id_materia FROM trabajos WHERE id_trabajo = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  trabajos = mycursor.fetchall()
+  print(datas)
+  punt_t = trabajos[0]
+  print(punt_t)
+  cargar = True
+  cont = 0
+  if request.method == 'POST':
+    puntalum = request.form.getlist(('punt_a'))
+    print(puntalum)
+    if len(puntalum) == len(datas):
+      for x in range(0, len(datas)):
+        aux = 0
+        if puntalum[x]:
+          aux = int(puntalum[x])
+        else:
+          print("no teine punt")
+          cargar = False
+          flash("", "no_p")
+        if aux != 0:
+          if aux > int(punt_t[1]):
+            cargar = False
+            print("si es ma")
+            flash("puntajem", "pun_m")
+        else:
+          print('puso 0')
+          flash("puntajem", "no_p")
+      if cargar == True:
+        for x in range(0, len(datas)):
+          print('a')
+          aux = int(puntalum[x])
+          aux2 = datas[x]
+          if aux != int(aux2[4]):
+            ac =   aux - int(aux2[4])
+            print(ac)
+            sql = "UPDATE traxalum SET pun_l =%s WHERE id_alumno = %s and id_trabajo = %s" #Saco mas puntaje
+            val = (aux, aux2[3], id)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            band = 1
+            if ac > 0:
+              print('mas')
+              print(ac)
+              sql = "UPDATE matxalum SET pun_ac =(pun_ac + %s) WHERE id_alumno = %s and id_materia = %s"  # Saco mas puntaje
+              val = (ac, aux2[3], punt_t[3])
+              mycursor.execute(sql, val)
+              mydb.commit()
+            else:
+              print('menos')
+              ac *= -1
+              print(ac)
+              sql = "UPDATE matxalum SET pun_ac =(pun_ac - %s) WHERE id_alumno = %s and id_materia = %s"  # Saco mas puntaje
+              val = (ac, aux2[3], punt_t[3])
+              mycursor.execute(sql, val)
+              mydb.commit()
+          else:
+            cont += 1
+        if cont == len(datas):
+          flash("puntajem", "no_c")
+        else:
+          band = 1
+          return redirect(url_for('modproceso'))
 
+    else:
+      print("sin punt")
+      flash("puntaje", "pun_e")
+  return render_template('modproceso2.html', datos=datos, datas = datas, trabajos = trabajos[0], id=id)
 
 
 def mensf(cat):

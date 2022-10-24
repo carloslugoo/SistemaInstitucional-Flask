@@ -1,0 +1,70 @@
+{% extends 'baseprof.html' %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar Trabajos de Proceso</title>
+</head>
+<body>
+{% block content %}
+<!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                        {% if category == 'si_c' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Puntajes Actualizados!',
+  								text: 'Se realizaron los cambios...'
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+<div class="p-3 p-md-3 mb-3 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar Trabajos de Proceso</h1>
+    </div>
+  </div>
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> </i> Ultimos trajos cargados</h1>
+    </div>
+</div>
+
+  <div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Curso</th>
+            <th>Materia</th>
+            <th>Nombre del Trabajo</th>
+            <th>Puntaje</th>
+            <th>Fecha</th>
+            <th>Modificar</th>
+		</thead>
+        {% for trabajo in trabajos %}
+       <tr>
+     <td>{{trabajo.7}}, {{trabajo.8}}</td>
+     <td>{{trabajo.5}}</td>
+    <td>{{trabajo.2}} </td>
+     <td>{{trabajo.3}}</td>
+     <td>{{trabajo.1}}</td>
+           <td> <center><a class="btn btn-secondary" role="button" href="/modificarproceso/{{trabajo.0}}"><i class="bi bi-clipboard2-check"></i></a></center></td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+    <br>
+
+
+
+{% endblock %}
+</body>
+</html>
