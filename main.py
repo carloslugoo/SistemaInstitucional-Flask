@@ -29,6 +29,8 @@ mydb = mysql.connector.connect(
 )
 global bcurso
 bcurso =0
+global user_datos
+user_datos=[]
 global cursos
 cursos=[]
 global idmaterias
@@ -54,7 +56,7 @@ def before_request(): #antes de cargar la pag
                                                         'proceso', 'verproceso', 'vermaterias', 'inscribirdir',
                                                         'sacarmat', 'inscurmat', 'inscribirprof', 'inscmatxprof',
                                                         'misconfig', 'misdatos', 'cerrarsesion', 'procesoss',
-                                                        'alumnosproceso']:
+                                                        'alumnosproceso', 'modificarproceso2', 'modproceso', 'miscursos']:
 
     return redirect(url_for('login'))
   if 'username' in session and request.endpoint in ['login', 'registro', 'recuperar']:
@@ -69,14 +71,15 @@ def before_request(): #antes de cargar la pag
     datos = session['username']
     if datos[7] == 1:
       if request.endpoint in ['bienvenidoadmin', 'inscribirdir','sacarmat', ' inscurmat', 'inscribirprof','proceso',
-                              'procesoss', 'alumnosproceso', 'inscmatxprof']:
+                              'procesoss', 'alumnosproceso', 'inscmatxprof', 'modproceso', 'modificarproceso2','miscursos']:
         return redirect(url_for('vermaterias'))
     if datos[6] == 2:
       if request.endpoint in ['verproceso','vermaterias ', 'bienvenidoadmin', 'inscribirdir', 'sacarmat',
                               'inscurmat', 'inscribirprof', 'inscmatxprof']:
         return redirect(url_for('bienvenidoprofe'))
     if datos[6] == 3:
-      if request.endpoint in ['verproceso', 'vermaterias', 'proceso', 'procesoss', 'alumnosproceso']:
+      if request.endpoint in ['verproceso', 'vermaterias', 'proceso', 'procesoss', 'alumnosproceso', 'modproceso',
+                              'modificarproceso2','miscursos']:
         return redirect(url_for('bienvenidoadmin'))
 
 
@@ -98,6 +101,7 @@ def vermaterias():
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
   cont = [1,2,3,4,5,6,7,8,9,10,11,12]
+  print(data)
   return render_template('materias.html', datos=datos, materias=data, cont = cont)
 
 @app.route('/bienvenidoadmin')
@@ -458,6 +462,7 @@ def alumnosproceso():
     global idcurso
     idcurso = id_curso
     data = mycursor.fetchall()
+    data = sorted(data, key=lambda data: data[2])  # Ordena por orden alfabetico
     print(id_curso)
     print(idmaterias)
     print("Alumnos con esta materia:")
@@ -475,9 +480,11 @@ def verproceso(id):
   #print(x)
   mycursor = mydb.cursor()
   sql = "SELECT trabajos.id_trabajo,des_t, trabajos.fec_t, pun_t, pun_l FROM trabajos, traxalum WHERE trabajos.id_trabajo = traxalum.id_trabajo and id_materia = %s and id_alumno = %s"
-  val = [x[0], datos[0]]
+  val = [id, datos[0]]
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
+  print(data)
+  print(id)
   if data:
     print(data)
     suml = 0
@@ -1154,6 +1161,8 @@ def modificarproceso2(id):
   val = [id]
   mycursor.execute(sql, val)
   datas = mycursor.fetchall()
+  datas = sorted(datas, key=lambda datas: datas[1]) #Ordena por orden alfabetico
+  print(datas)
   sql = "SELECT des_t, pun_t, tipo_t, id_materia FROM trabajos WHERE id_trabajo = %s"
   val = [id]
   mycursor.execute(sql, val)
@@ -1218,13 +1227,49 @@ def modificarproceso2(id):
         else:
           band = 1
           return redirect(url_for('modproceso'))
-
     else:
       print("sin punt")
       flash("puntaje", "pun_e")
   return render_template('modproceso2.html', datos=datos, datas = datas, trabajos = trabajos[0], id=id)
 
 
+@app.route('/miscursos') #Listar las materias que tiene por curso el prof
+def miscursos():
+  datos = session['username']
+  print(datos)
+  mycursor = mydb.cursor()
+  sql = "SELECT id_mxp, matxpro.id_materia, matxpro.id_profesor, matxpro.id_curso, des_m, des_c, des_e, fecha" \
+        " FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s and matxpro.id_materia = materias.id_materia " \
+        "and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis "
+  val = [datos[0]]
+  mycursor.execute(sql, val)
+  mat = mycursor.fetchall()
+  print(mat)
+  return render_template('miscursos.html', datos = datos, materias = mat)
+
+@app.route('/veralum/<int:id>') #Ver los alumnos matriculados con sus cal y puntajes
+def misalumnos(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_mxa, matxalum.id_alumno, matxalum.id_materia, cal, matxalum.id_curso, pun_ac, des_m, des_c, des_e , nmb_a, ape_a" \
+        " FROM matxalum, materias, cursos, enfasis, alumnos WHERE id_profesor = %s and matxalum.id_materia = %s and matxalum.id_materia = materias.id_materia " \
+        "and matxalum.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis and matxalum.id_alumno = alumnos.id_alumno"
+  val = [datos[0], id]
+  mycursor.execute(sql, val)
+  mat = mycursor.fetchall()
+  for x in range(0, 1):
+    aux = mat[x]
+    data = aux
+    print(data)
+  mat = sorted(mat, key=lambda mat: mat[10])
+  print(mat)
+  return render_template('misalumnos.html', datos = datos, materias = mat, data = data)
+
+@app.route('/crearseman', methods = ['GET', 'POST']) #Creacion de Semana de Clases
+def crearsemana():
+  datos = session['username']
+
+  return render_template('crear_sem.html', datos=datos)
 def mensf(cat):
   #para testear
   print('a')

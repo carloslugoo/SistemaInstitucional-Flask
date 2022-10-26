@@ -8,30 +8,36 @@
 <body>
 {% block content %}
 
-<div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
-
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Proceso </h1>
     </div>
 </div>
-<div class="container">
-<div class="row align-items-md-stretch">
+{% set count = namespace(value=0) %}
+
+ <div class="row">
      {% for proceso in procesos %}
+       {% set count.value = count.value + 1 %}
       <div class="col-md-3">
-        <div class="h-100 p-5 text-bg-dark rounded-3">
+        <div class="h-70 p-1 text-bg-dark rounded-3">
           <h2>{{proceso.1}}</h2>
           <p>Fecha: {{proceso.2}} Puntos: {{proceso.3}}/{{proceso.4}}</p>
         </div>
       </div>
+     {% if count.value == 3%}
+     </div>
+        <br>
+       <div class="row">
+           {% set count.value = count.value - 3 %}
+           {% endif %}
     {% endfor %}
+</div>
 
-</div>
-</div>
 <br>
-<div class="container">
+
 <div class="row align-items-md-stretch">
     <div class="col-md-3">
-        <div class="h-100 p-5 text-bg-dark rounded-3">
+        <div class="h-70 p-5 text-bg-dark rounded-3">
         <p>Sumatorias: {{suml}}/{{sumt}}</p>
             <canvas id="myChart" max-width="50" height="100"></canvas>
         </div>
@@ -39,7 +45,7 @@
     </div>
 </div>
 </div>
-<div>
+
 
   <script>
   const labels = [

@@ -1,0 +1,25 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <title>{% block title %}Crear Semana{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-15 fst-italic"><i class="bi bi-calendar-plus"></i> Crear Semana de Clases</h1>
+    </div>
+  </div>
+<form method="POST" action="/crearseman">
+     <div class="row">
+        <div class="col-sm-3">
+         <div class="form-group">
+
+         </div>
+        </div>
+     </div>
+</form>
+{% endblock %}
+</body>
+</html>

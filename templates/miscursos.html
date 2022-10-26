@@ -1,0 +1,42 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<body>
+{% block content %}
+
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-folder2-open"></i> Mis Cursos</h1>
+    </div>
+</div>
+{% set count = namespace(value=0) %}
+
+  <div class="row">
+ {% for materia in materias %}
+  {% set count.value = count.value + 1 %}
+
+          <div class="col-sm-4">
+        <div class="h-70 p-1 text-bg-dark rounded-3">
+          <h3>{{materia.4}}</h3>
+          <p>Curso: {{materia.5}} Enfasis: {{materia.6}} </p>
+          <p>Año: {{materia.7}}</p>
+         <a href="/veralum/{{materia.1}}" class="btn btn-outline-light" role="button">Ver Alumnos</a>
+        </div>
+          </div>
+    {% if count.value == 2%}
+     </div>
+    <br>
+       <div class="row">
+      {% set count.value = count.value - 2 %}
+           {% endif %}
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
+</body>
+
+</html>
