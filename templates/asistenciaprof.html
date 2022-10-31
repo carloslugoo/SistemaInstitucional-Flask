@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+<title>Registrar Asistencia</title>
+	 <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="{{url_for('static', filename='css/login.css')}}">
+    {% from "macro.html" import show_form %}
+</head>
+
+<body>
+<div class="signup-form" style="">
+    <form method="POST" action="/asistencia">
+        <center><img src="/static/logo.png" width="100" height="100"></center>
+        <br>
+		<center><h2>Registrar Asistencia</h2></center>
+		<center><p style="color: white;">Escanea tu tarjeta para registrar tu asistencia!</p></center>
+        <div class="form-group">
+			<div class="input-group">
+				<span class="input-group-addon" style="background: #863F9B;"><i class="bi bi-upc-scan" style="color: white;"></i></span>
+				 {{show_form(user.username, class="form-control")}}
+			</div>
+        </div>
+        <div class="form-group">
+            <center><button type="submit" class="btn btn-primary btn-lg">Confirmar</button></center>
+        </div>
+          <div class="" style="background: #212429">
+              <p class="text-center" style="color: white;"> Recuerda revisar tus datos.</p>
+	</div>
+    </form>
+</div>
+</body>
+</html>

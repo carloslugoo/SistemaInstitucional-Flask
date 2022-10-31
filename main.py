@@ -1401,7 +1401,7 @@ def asignarpof(id):
       return redirect(url_for('crearsemana'))
   return render_template('crear_dias.html', datos=datos, cursos = cursos[0], materias = materias, band = band)
 
-@app.route('/verhorario/<int:id>')
+@app.route('/verhorario/<int:id>') #Ver Horarios
 def verhorarioadmin(id):
   datos = session['username']
   mycursor = mydb.cursor()
@@ -1437,6 +1437,58 @@ def verhorarioadmin(id):
                            h_ju=h_ju, h_vi=h_vi, h_sa=h_sa)
   if datos[6] == 3:  # Admin
     return render_template('verhorariosad.html', cursos = cursos[0], datos = datos, h_lu = h_lu, h_ma = h_ma, h_mi = h_mi, h_ju = h_ju, h_vi = h_vi, h_sa= h_sa)
+
+@app.route('/asistencia',  methods = ['GET', 'POST']) #Marcar Asistencia por Docente
+def asistenciaprof():
+  user = userform.User(request.form)
+  datos = session['username']
+  inf = datetime.now()
+  #Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  #Extraemos la hora
+  hora = datetime.strftime(inf, '%H:%M:%S')
+  dia = datetime.today().weekday()
+  print(fecha)
+  print(hora)
+  dia += 2 #Por que yo realize que Lunes = 1
+  #dia += 1
+  print(dia)
+  if request.method == 'POST':
+    codigo = user.username.data
+    codigo = codigo.split('P')
+    print(codigo)
+    mycursor = mydb.cursor()
+    sql = "SELECT * FROM profesores WHERE ci_p = %s"
+    val = [codigo[1]]
+    mycursor.execute(sql, val)
+    profesor = mycursor.fetchall()
+    profesor = profesor[0]
+    print(profesor)
+    sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s"
+    val = [profesor[0]]
+    mycursor.execute(sql, val)
+    horarios = mycursor.fetchall()
+    print(horarios)
+    cont = 0
+    for x in range(0, len(horarios)):
+      aux = horarios[x]
+      if aux[3] == dia:
+        if cont == 0:
+          cont += 1
+          ent = (aux[4])
+          sal = (aux[5])
+          print(ent)
+          print(sal)
+        if cont > 0:
+          if ent > (aux[4]):
+            ent = (aux[4])
+            print("entrada up")
+            print(ent)
+          if sal < (aux[5]):
+            ent = (aux[5])
+            print("salida up")
+            print(sal)
+  return render_template('asistenciaprof.html', datos = datos, user = user)
 
 def createpassword(password):
   return generate_password_hash(password)
