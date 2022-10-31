@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-     <title>{% block title %}Crear Semana{% endblock %}</title>
+     <title>{% block title %}Horarios{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -28,7 +28,7 @@
 
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-15 fst-italic"><i class="bi bi-calendar-plus"></i> Crear Semana de Clases</h1>
+       <h1 class="display-15 fst-italic"><i class="bi bi-calendar3"></i> Horarios</h1>
     </div>
   </div>
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
@@ -47,6 +47,7 @@
           <h3>{{cursos.1}}</h3>
           <p>Seccion: {{cursos.2}} Enfasis: {{cursos.3}}</p>
        <a href="/cargar/{{cursos.0}}" class="btn btn-outline-light" role="button">Crear Horario</a>
+       <a href="/verhorario/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver Horario</a>
         </div>
           </div>
     {% if count.value == 3%}
@@ -74,6 +75,7 @@
           <h3>{{cursos.1}}</h3>
           <p>Seccion: {{cursos.2}} Enfasis: {{cursos.3}}</p>
          <a href="/cargar/{{cursos.0}}" class="btn btn-outline-light" role="button">Crear Horario</a>
+            <a href="/verhorario/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver Horario</a>
         </div>
           </div>
     {% if count.value == 3%}

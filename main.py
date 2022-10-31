@@ -1401,6 +1401,42 @@ def asignarpof(id):
       return redirect(url_for('crearsemana'))
   return render_template('crear_dias.html', datos=datos, cursos = cursos[0], materias = materias, band = band)
 
+@app.route('/verhorario/<int:id>')
+def verhorarioadmin(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  mycursor = mydb.cursor()
+  for x in range(1, 7):
+    sql = "SELECT id_horario, horarios.id_profesor, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE horarios.id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia"
+    val = [id, x]
+    mycursor.execute(sql, val)
+    if x == 1: #Lunes
+      h_lu = mycursor.fetchall()
+      print(h_lu)
+    if x == 2: #Martes
+      h_ma = mycursor.fetchall()
+      print(h_ma)
+    if x == 3:  # Miercoles
+      h_mi = mycursor.fetchall()
+      print(h_mi)
+    if x == 4:  # Jueves
+      h_ju = mycursor.fetchall()
+      print(h_ju)
+    if x == 5:  # Viernes
+      h_vi = mycursor.fetchall()
+      print(h_vi)
+    if x == 6:  # Sabado
+      h_sa = mycursor.fetchall()
+      print(h_sa)
+  if datos[7] == 1:  # alumnos
+    return render_template('verhorariosal.html', cursos=cursos[0], datos=datos, h_lu=h_lu, h_ma=h_ma, h_mi=h_mi,
+                           h_ju=h_ju, h_vi=h_vi, h_sa=h_sa)
+  if datos[6] == 3:  # Admin
+    return render_template('verhorariosad.html', cursos = cursos[0], datos = datos, h_lu = h_lu, h_ma = h_ma, h_mi = h_mi, h_ju = h_ju, h_vi = h_vi, h_sa= h_sa)
 
 def createpassword(password):
   return generate_password_hash(password)
