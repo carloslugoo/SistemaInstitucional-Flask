@@ -6,20 +6,87 @@
 </head>
 <body>
 {% block content %}
+<!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                {% if category == 'si' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Horario creado correctamente!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-15 fst-italic"><i class="bi bi-calendar-plus"></i> Crear Semana de Clases</h1>
     </div>
   </div>
-<form method="POST" action="/crearseman">
-     <div class="row">
-        <div class="col-sm-3">
-         <div class="form-group">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-15 fst-italic"> Contabilidad</h1>
+    </div>
+  </div>
+{% set count = namespace(value=0) %}
 
-         </div>
+  <div class="row">
+ {% for cursos in cursos_c %}
+  {% set count.value = count.value + 1 %}
+
+          <div class="col-sm-3">
+        <div class="h-70 p-1 text-bg-dark rounded-3">
+          <h3>{{cursos.1}}</h3>
+          <p>Seccion: {{cursos.2}} Enfasis: {{cursos.3}}</p>
+       <a href="/cargar/{{cursos.0}}" class="btn btn-outline-light" role="button">Crear Horario</a>
         </div>
+          </div>
+    {% if count.value == 3%}
      </div>
-</form>
+    <br>
+       <div class="row">
+      {% set count.value = count.value - 3 %}
+           {% endif %}
+    {% endfor %}
+ </div>
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-15 fst-italic"> Sociales </h1>
+    </div>
+  </div>
+
+{% set count = namespace(value=0) %}
+
+  <div class="row">
+ {% for cursos in cursos_s %}
+  {% set count.value = count.value + 1 %}
+
+          <div class="col-sm-3">
+        <div class="h-70 p-1 text-bg-dark rounded-3">
+          <h3>{{cursos.1}}</h3>
+          <p>Seccion: {{cursos.2}} Enfasis: {{cursos.3}}</p>
+         <a href="/cargar/{{cursos.0}}" class="btn btn-outline-light" role="button">Crear Horario</a>
+        </div>
+          </div>
+    {% if count.value == 3%}
+     </div>
+    <br>
+       <div class="row">
+      {% set count.value = count.value - 3 %}
+           {% endif %}
+    {% endfor %}
+
+</div>
+</div>
+
 {% endblock %}
 </body>
 </html>

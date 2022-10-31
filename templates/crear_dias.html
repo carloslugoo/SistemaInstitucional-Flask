@@ -1,0 +1,122 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <title>{% block title %}Crear Semana{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+    <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                {% if category == 'dias' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Esta asignando muchas materias a un solo dia!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                 {% if category == 'misma' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Una materia tiene el mismo horario de inicio y de finalización!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+
+
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-15 fst-italic"><i class="bi bi-calendar-plus"></i> Horario de
+        {%if band == 0%}
+           Lunes </h1>
+        {% endif %}
+        {%if band == 1%}
+           Martes </h1>
+        {% endif %}
+         {%if band == 2%}
+           Miercoles </h1>
+        {% endif %}
+         {%if band == 3%}
+           Jueves </h1>
+        {% endif %}
+         {%if band == 4%}
+           Viernes </h1>
+        {% endif %}
+         {%if band == 5%}
+           Sabado</h1>
+        {% endif %}
+    </div>
+  </div>
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic">{{cursos.1}}, {{cursos.3}}, {{cursos.2}}</h1>
+    </div>
+  </div>
+
+<form method="POST" action="/cargar/{{cursos.0}}">
+ <div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+            <th>Carga Horaria</th>
+            <th>Dia</th>
+            <th>Horario de Inicio</th>
+            <th>Horario de Final</th>
+		</thead>
+        {% for materia in materias %}
+       <tr>
+     <td>{{materia.3}}</td>
+     <td>{{materia.4}}</td>
+           {%if band == 0%}
+       <td><input type="text" name="dias"  class="form-control" value="Lunes" readonly> </td>
+           {% endif %}
+         {%if band == 1%}
+       <td><input type="text" name="dias"  class="form-control" value="Martes" readonly> </td>
+           {% endif %}
+           {%if band == 2%}
+       <td><input type="text" name="dias"  class="form-control" value="Miercoles" readonly></td>
+           {% endif %}
+           {%if band == 3%}
+       <td><input type="text" name="dias"  class="form-control" value="Jueves" readonly> </td>
+           {% endif %}
+           {%if band == 4%}
+       <td><input type="text" name="dias"  class="form-control" value="Viernes" readonly> </td>
+           {% endif %}
+            {%if band == 5%}
+       <td><input type="text" name="dias"  class="form-control" value="Sabado" readonly> </td>
+           {% endif %}
+     <td><input type="text" name="hora_i"  class="form-control" value=""></td>
+           <td><input type="text" name="hora_f"  class="form-control" value=""></td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+
+    <a href="/crearseman" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
+     {%if band != 5%}
+       <input type="submit" name="submit" value="Siguiente" class="btn btn-success">
+     {% else %}
+       <input type="submit" name="submit" value="Finalizar" class="btn btn-success">
+    {% endif %}
+
+ </form>
+<br>
+{% endblock %}
+</body>
+</html>

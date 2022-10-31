@@ -669,8 +669,6 @@ def inscurmat():
             (id_a[0], aux, cur, fecha, 0))
           mydb.commit()
       print("termino")
-      categf = "si"
-      mensf(categf)
       #time.sleep(3.5)
       flash("", "si")
       global band
@@ -1126,7 +1124,7 @@ def misconfig():
   if datos[6] == 2:  # profesores
     return render_template('miconfigpro.html', datos=datos, data=data[0], user=user)
   if datos[6] == 3:  # Admin
-    return render_template('miconfigpro.html', datos=datos, data=data[0], user=user)
+    return render_template('miconfigad.html', datos=datos, data=data[0], user=user)
 
 
 @app.route('/cerrarsesion') #Nav Bar, Boton "Mis Datos"
@@ -1265,17 +1263,145 @@ def misalumnos(id):
   print(mat)
   return render_template('misalumnos.html', datos = datos, materias = mat, data = data)
 
-@app.route('/crearseman', methods = ['GET', 'POST']) #Creacion de Semana de Clases
-def crearsemana():
-  datos = session['username']
 
-  return render_template('crear_sem.html', datos=datos)
-def mensf(cat):
-  #para testear
-  print('a')
-  print(cat)
-  flash("", cat)
-  return flash("", cat)
+@app.route('/crearseman') #Creacion de Semana de Clases
+def crearsemana():
+  global band
+  if band == 6:
+    flash("","si")
+    band =0
+  else:
+    band = 0
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT cursos.id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_enfasis = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [1]
+  mycursor.execute(sql, val)
+  cursos_c = mycursor.fetchall()
+  sql = "SELECT cursos.id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_enfasis = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [2]
+  mycursor.execute(sql, val)
+  cursos_s = mycursor.fetchall()
+  return render_template('crear_sem.html', datos=datos, cursos_c = cursos_c, cursos_s = cursos_s)
+
+@app.route('/cargar/<int:id>' , methods = ['GET', 'POST'])
+def asignarpof(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  sql = "SELECT id_matxcur, matxcur.id_curso, matxcur.id_materia, des_m, car_h, matxcur.id_profesor FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_materia = materias.id_materia "
+  val = [id]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  materias = sorted(materias, key=lambda materias: materias[3])
+  sql = "SELECT id_materia, id_profesor FROM matxpro WHERE id_curso = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  profesores = mycursor.fetchall()
+  print(cursos)
+  print(materias)
+  print(profesores)
+  create = True
+  global band
+  if request.method == 'POST':
+    dias = request.form.getlist(('dias'))
+    hora_i = request.form.getlist(('hora_i'))
+    hora_f = request.form.getlist(('hora_f'))
+    #Cantidad de dias
+    clu = 0
+    cma = 0
+    cmi = 0
+    cju = 0
+    cvi = 0
+    csa = 0
+    for x in range(0, len(dias)):
+      aux1 = dias[x]
+      aux2 = hora_i[x]
+      aux3 = hora_f[x]
+      if aux1 and aux2 and aux3:
+        hora1 = aux2.split(':')
+        hora2 = aux3.split(':')
+        print(hora2)
+        if len(hora1) == 1:
+          aux2 = aux2 + ":00"
+        if len(hora2) == 1:
+          aux3 = aux3 + ":00"
+        print(aux2)
+        print(aux3)
+        if aux1 == "Lunes":
+          clu += 1
+        if aux1 == "Martes":
+          cma += 1
+        if aux1 == "Miercoles":
+          cmi += 1
+        if aux1 == "Jueves":
+          cju += 1
+        if aux1 == "Viernes":
+          cvi += 1
+        if aux1 == "Sabado":
+          csa += 1
+        if aux2 == aux3:
+          flash("","misma")
+          print("misma hora")
+          create = False
+    if clu > 5 or cma > 5 or cmi > 5 or cju > 5 or cvi > 5 or csa > 5: # Comprueba que no se asignen muchas materias a ese dia
+      print("dias")
+      create = False
+    if create == True:
+      band += 1
+      for x in range(0, len(dias)):
+        aux1 = dias[x]
+        aux2 = hora_i[x]
+        aux3 = hora_f[x]
+        if aux1 and aux2 and aux3:
+          hora1 = aux2.split(':')
+          hora2 = aux3.split(':')
+          aux4 = materias[x]
+          if len(hora1) == 1:
+            aux2 = aux2 + ":00"
+          if len(hora2) == 1:
+            aux3 = aux3 + ":00"
+          if aux1 == "Lunes":
+            aux1 = 1
+          if aux1 == "Martes":
+            aux1 = 2
+          if aux1 == "Miercoles":
+            aux1 = 3
+          if aux1 == "Jueves":
+            aux1 = 4
+          if aux1 == "Viernes":
+            aux1 = 5
+          if aux1 == "Sabado":
+            aux1 = 6
+          print('Datos:')
+          print(aux1)
+          print(aux2)
+          print(aux3)
+          print(aux4)
+          if aux4[5]:
+            mycursor = mydb.cursor()
+            mycursor.execute(
+              'INSERT INTO horarios (id_profesor, id_curso, id_materia, id_dia, hora_i, hora_f) VALUES (%s, %s, %s ,%s, %s, %s)',
+              (aux4[5], id, aux4[2], aux1, aux2, aux3))
+            mydb.commit()
+          else:
+            mycursor = mydb.cursor()
+            mycursor.execute(
+              'INSERT INTO horarios (id_curso, id_materia, id_dia, hora_i, hora_f) VALUES (%s, %s ,%s, %s, %s)',
+              (id, aux4[2], aux1, aux2, aux3))
+            mydb.commit()
+    print(band)
+    print(dias)
+    print(hora_i)
+    print(hora_f)
+    if band == 6:
+      return redirect(url_for('crearsemana'))
+  return render_template('crear_dias.html', datos=datos, cursos = cursos[0], materias = materias, band = band)
+
+
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
