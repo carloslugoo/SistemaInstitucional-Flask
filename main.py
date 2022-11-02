@@ -1475,7 +1475,6 @@ def asistenciaprof():
   if band == 5:
     band = 0
   user = userform.User(request.form)
-  datos = session['username']
   inf = datetime.now()
   #Extraemos la fecha
   fecha = datetime.strftime(inf, '%Y/%m/%d')
@@ -1557,7 +1556,7 @@ def asistenciaprof():
       band = 4
       return redirect(url_for('asistenciaprof'))
 
-  return render_template('asistenciaprof.html', datos = datos, user = user, profesor = profesor, vector= vector, vector2= vector2, hora = hora)
+  return render_template('asistenciaprof.html', user = user, profesor = profesor, vector= vector, vector2= vector2, hora = hora)
 
 @app.route('/listadocursos') #Listado de Alumnos admin
 def listadocursos():
