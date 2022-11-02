@@ -1599,9 +1599,12 @@ def listadoalumnos(id):
   band = id
   return render_template('listadoalumnosad.html', datos=datos, cursos = cursos[0], materias = materias, alum_t = alum_t)
 
-@app.route('/moddatos/<int:id>') #Ver datos del alumno
+@app.route('/moddatos/<int:id>', methods = ['POST', 'GET']) #Ver o modificar datos del alumno
 def moddatosalum(id):
   global band
+  if band == 1:
+    flash("", "ok")
+    band = 0
   user = userform.User(request.form)
   datos = session['username']
   mycursor = mydb.cursor()
@@ -1610,6 +1613,28 @@ def moddatosalum(id):
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
   print(data)
+  if request.method == 'POST':
+    edad = request.form.get("edad")
+    loca = request.form.get("loc")
+    barr = request.form.get("bar")
+    nume = request.form.get("num")
+    emai = request.form.get("ema")
+    nomt = request.form.get("nmt")
+    numt = request.form.get("nut")
+    print(edad)
+    print(loca)
+    print(barr)
+    print(nume)
+    print(emai)
+    print(nomt)
+    print(numt)
+    sql = "UPDATE alumnos SET edad = %s, loc_a = %s, bar_a = %s, tel_a = %s, email = %s, nmb_tu = %s, tel_tu =%s" \
+          " WHERE id_alumno = %s"  # Saco mas puntaje
+    val = (edad,loca,barr,nume,emai,nomt, numt, id)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    band = 1
+    return redirect(url_for('moddatosalum', id = id))
   return render_template('moddatosal.html', datos=datos, data = data[0], band=band, user = user)
 @app.route('/listadodocentes/<int:id>') #Ver todos los docentes del curso
 def listadodocentes(id):
@@ -1626,6 +1651,7 @@ def listadodocentes(id):
   mycursor.execute(sql, val)
   materias = mycursor.fetchall()
   print(materias)
+
   return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias)
 
 def createpassword(password):

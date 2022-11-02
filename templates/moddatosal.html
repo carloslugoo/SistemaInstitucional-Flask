@@ -3,10 +3,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mis Datos</title>
+    <title>{% block title %}Modificar Datos{% endblock %}</title>
 </head>
 <body>
 {% block content %}
+ <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                     {% if category == 'ok' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Datos Actualizados!',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
 {% from "macro.html" import show_form %}
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
@@ -70,10 +88,13 @@
     </div>
     <br>
 </div>
-<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cambiar_d">Modificar Datos</button>
+
 {% if band != 0%}
 <a href="/listadoalumnos/{{band}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
+{%else%}
+<a href="/listadocursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
 {% endif %}
+<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cambiar_d">Modificar Datos</button>
 </div>
 
 <form method="POST" action="/moddatos/{{data.0}}">
