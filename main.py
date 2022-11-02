@@ -31,6 +31,10 @@ global bcurso
 bcurso =0
 global user_datos
 user_datos=[]
+global vector
+vector = []
+global vector2
+vector2 = []
 global cursos
 cursos=[]
 global idmaterias
@@ -1411,7 +1415,7 @@ def verhorarioadmin(id):
   cursos = mycursor.fetchall()
   mycursor = mydb.cursor()
   for x in range(1, 7):
-    sql = "SELECT id_horario, horarios.id_profesor, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE horarios.id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia"
+    sql = "SELECT id_horario, horarios.id_profesor, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE horarios.id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
     val = [id, x]
     mycursor.execute(sql, val)
     if x == 1: #Lunes
@@ -1440,6 +1444,36 @@ def verhorarioadmin(id):
 
 @app.route('/asistencia',  methods = ['GET', 'POST']) #Marcar Asistencia por Docente
 def asistenciaprof():
+  global user_datos #datos del profe para alerta
+  global vector # hora de entrada
+  global band
+  global vector2 # hora de salida
+  print(band)
+  if band == 1:
+    profesor = user_datos
+    print(profesor)
+    flash("", "entrada")
+    band = 0
+  if band == 2:
+    profesor = user_datos
+    print(profesor)
+    print(vector)
+    flash("", "salida")
+    band = 0
+  if band == 3: #ya marco
+    profesor = user_datos
+    print(profesor)
+    print(vector2)
+    print(vector)
+    flash("", "no")
+    band = 0
+  if band == 4:
+    profesor = user_datos
+    print(profesor)
+    flash("", "no_dia")
+    band = 0
+  if band == 5:
+    band = 0
   user = userform.User(request.form)
   datos = session['username']
   inf = datetime.now()
@@ -1450,9 +1484,10 @@ def asistenciaprof():
   dia = datetime.today().weekday()
   print(fecha)
   print(hora)
-  dia += 2 #Por que yo realize que Lunes = 1
+  dia += 1  #Por que yo realize que Lunes = 1
   #dia += 1
   print(dia)
+  profesor = user_datos
   if request.method == 'POST':
     codigo = user.username.data
     codigo = codigo.split('P')
@@ -1463,32 +1498,136 @@ def asistenciaprof():
     mycursor.execute(sql, val)
     profesor = mycursor.fetchall()
     profesor = profesor[0]
+    user_datos = profesor #guardar para las alertas
     print(profesor)
-    sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s"
-    val = [profesor[0]]
+    sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s and id_dia =%s  ORDER BY horarios.hora_i ASC"
+    val = [profesor[0], dia]
     mycursor.execute(sql, val)
-    horarios = mycursor.fetchall()
-    print(horarios)
-    cont = 0
-    for x in range(0, len(horarios)):
-      aux = horarios[x]
-      if aux[3] == dia:
-        if cont == 0:
-          cont += 1
-          ent = (aux[4])
-          sal = (aux[5])
-          print(ent)
-          print(sal)
-        if cont > 0:
-          if ent > (aux[4]):
-            ent = (aux[4])
-            print("entrada up")
-            print(ent)
-          if sal < (aux[5]):
-            ent = (aux[5])
-            print("salida up")
-            print(sal)
-  return render_template('asistenciaprof.html', datos = datos, user = user)
+    ent = mycursor.fetchall()
+    if ent:
+      ent = ent[0]
+      ent = ent[4]
+    print("Entrada:")
+    print(ent)
+    sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s and id_dia =%s  ORDER BY horarios.hora_f DESC"
+    val = [profesor[0], dia]
+    mycursor.execute(sql, val)
+    sal = mycursor.fetchall()
+    if sal:
+      sal = sal[0]
+      sal = sal[5]
+    print("Salida:")
+    print(sal)
+    if ent and sal:
+      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s and fec_a = %s"
+      val = [profesor[0], fecha]
+      mycursor.execute(sql, val)
+      comp = mycursor.fetchall()
+      print(comp)
+      if comp:
+        print("Ya marco hoy")
+        comp = comp[0]
+        if comp[0] and not comp[1]:
+          print("Ya Marco entrada, marca salida")
+          vector = comp[0]  # entrada
+          sql = "UPDATE asistenciaprof SET hora_s = %s WHERE id_profesor = %s and fec_a = %s"  # Saco mas puntaje
+          val = (hora ,profesor[0], fecha)
+          mycursor.execute(sql, val)
+          mydb.commit()
+          band = 2
+          return redirect(url_for('asistenciaprof'))
+        if comp[1]:
+          vector = comp[0]
+          vector2 = comp[1] #salida
+          print("Marco Salida, ya no puede marcar hoy")
+          band = 3
+          return redirect(url_for('asistenciaprof'))
+      else:
+        print("No marco hoy, marca entrada")
+        mycursor = mydb.cursor()
+        mycursor.execute(
+          'INSERT INTO asistenciaprof (id_profesor, fec_a, hora_e) VALUES (%s, %s ,%s)',
+          (profesor[0], fecha, hora))
+        mydb.commit()
+        band = 1
+        return redirect(url_for('asistenciaprof'))
+    else:
+      print("No es su dia, no puede marcar")
+      print(user_datos)
+      band = 4
+      return redirect(url_for('asistenciaprof'))
+
+  return render_template('asistenciaprof.html', datos = datos, user = user, profesor = profesor, vector= vector, vector2= vector2, hora = hora)
+
+@app.route('/listadocursos') #Listado de Alumnos admin
+def listadocursos():
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT cursos.id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_enfasis = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [1]
+  mycursor.execute(sql, val)
+  cursos_c = mycursor.fetchall()
+  sql = "SELECT cursos.id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_enfasis = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [2]
+  mycursor.execute(sql, val)
+  cursos_s = mycursor.fetchall()
+  return render_template('listadocursos.html', datos=datos, cursos_c = cursos_c, cursos_s= cursos_s)
+
+@app.route('/listadoalumnos/<int:id>') #Ver todos los alumnos del curso
+def listadoalumnos(id):
+  global band
+  if band:
+    band = 0
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  print(cursos)
+  sql = "SELECT id_matxcur, matxcur.id_curso, matxcur.id_materia, des_m, car_h, matxcur.id_profesor FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_materia = materias.id_materia "
+  val = [id]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  materias = sorted(materias, key=lambda materias: materias[3])
+  print(materias)
+  sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and matxalum.id_alumno = alumnos.id_alumno"
+  val = [id]
+  mycursor.execute(sql, val)
+  alum_t = mycursor.fetchall()
+  alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
+  print(alum_t)
+  band = id
+  return render_template('listadoalumnosad.html', datos=datos, cursos = cursos[0], materias = materias, alum_t = alum_t)
+
+@app.route('/moddatos/<int:id>') #Ver datos del alumno
+def moddatosalum(id):
+  global band
+  user = userform.User(request.form)
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM alumnos WHERE id_alumno = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  print(data)
+  return render_template('moddatosal.html', datos=datos, data = data[0], band=band, user = user)
+@app.route('/listadodocentes/<int:id>') #Ver todos los docentes del curso
+def listadodocentes(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  cursos = cursos[0]
+  print(cursos)
+  sql = "SELECT id_matxcur, matxcur.id_curso, matxcur.id_materia, des_m, car_h, matxcur.id_profesor FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_materia = materias.id_materia "
+  val = [id]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  print(materias)
+  return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias)
 
 def createpassword(password):
   return generate_password_hash(password)

@@ -18,6 +18,58 @@
 </head>
 
 <body>
+<!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                {% if category == 'entrada' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: '{{profesor.1}} {{profesor.2}}. Se registro su entrada:',
+  								html: '<h3>Entrada: {{hora}}   Salida: Pendiente...</h3>',
+  								timer: 4000,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                 {% if category == 'salida' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: '{{profesor.1}} {{profesor.2}}, se registro su salida:',
+  								html:  '<h3>Entrada: {{vector}}   Salida: {{hora}}...</h3>',
+  								timer: 4000,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                    {% if category == 'no' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: '{{profesor.1}} {{profesor.2}}, ya registro su salida:',
+  								html: '<h3>Entrada: {{vector}}   Salida: {{vector2}}...</h3>',
+  								timer: 6000,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                    {% if category == 'no_dia' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: '{{profesor.1}} {{profesor.2}}, no tiene disciplinas hoy!',
+  								timer: 6000,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                 {% endfor %}
+            {% endif %}
+        {% endwith  %}
 <div class="signup-form" style="">
     <form method="POST" action="/asistencia">
         <center><img src="/static/logo.png" width="100" height="100"></center>
@@ -27,8 +79,11 @@
         <div class="form-group">
 			<div class="input-group">
 				<span class="input-group-addon" style="background: #863F9B;"><i class="bi bi-upc-scan" style="color: white;"></i></span>
-				 {{show_form(user.username, class="form-control")}}
+				 {{show_form(user.username, class="form-control",id="miTexto")}}
 			</div>
+            <script>
+                $("#miTexto").focus();
+            </script>
         </div>
         <div class="form-group">
             <center><button type="submit" class="btn btn-primary btn-lg">Confirmar</button></center>
