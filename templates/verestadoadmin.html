@@ -1,0 +1,74 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Estado Academico{% endblock %}</title>
+</head>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<body>
+{% block content %}
+
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Estado Académico </h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+            <th>Puntaje Logrado</th>
+		</thead>
+        {% for materia in materias %}
+       <tr>
+     <td>{{materia.2}}</td>
+           {%if materia.5 == 0 %}
+     <td> Sin puntaje</td>
+           {% else %}
+             <td>{{materia.5}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+    <div class="col-sm-2">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Puntaje Total</th>
+		</thead>
+        {% for puntaje in puntos_t %}
+       <tr>
+           {%if puntaje == [] %}
+     <td> Sin puntaje</td>
+           {% else %}
+     <td>{{puntaje}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+<div class="col-sm-2">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Estado</th>
+		</thead>
+        {% for estado in estado_a %}
+       <tr>
+           {%if estado == "mal" %}
+     <td><center><i class="bi bi-exclamation-circle-fill text-danger"></i></center></td>
+           {% else %}
+     <td><center><i class="bi bi-check-circle-fill text-success"></i></center></td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+{% endblock %}
+</body>
+
+</html>

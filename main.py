@@ -1483,7 +1483,7 @@ def asistenciaprof():
   dia = datetime.today().weekday()
   print(fecha)
   print(hora)
-  dia += 1  #Por que yo realize que Lunes = 1
+  dia += 1   #Por que yo realize que Lunes = 1
   #dia += 1
   print(dia)
   profesor = user_datos
@@ -1572,11 +1572,9 @@ def listadocursos():
   cursos_s = mycursor.fetchall()
   return render_template('listadocursos.html', datos=datos, cursos_c = cursos_c, cursos_s= cursos_s)
 
-@app.route('/listadoalumnos/<int:id>') #Ver todos los alumnos del curso
+@app.route('/listadoalumnos/<int:id>', methods = ['POST', 'GET']) #Ver todos los alumnos del curso
 def listadoalumnos(id):
   global band
-  if band:
-    band = 0
   datos = session['username']
   mycursor = mydb.cursor()
   sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
@@ -1597,14 +1595,47 @@ def listadoalumnos(id):
   alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
   print(alum_t)
   band = id
+  if request.method == 'POST':
+    nmb_a = request.form.get("nmb_a")
+    print(nmb_a)
+    idmat = request.form.get("idmat")
+    print(idmat)
+    idmat = int(idmat)
+    if nmb_a:
+      sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and ape_a LIKE = %s and matxalum.id_alumno = alumnos.id_alumno "
+      val = [id, nmb_a]
+      mycursor.execute(sql, val)
+      alum_b = mycursor.fetchall()
+      print(alum_b)
+      if not alum_b:
+        sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and nmb_a LIKE = %s and matxalum.id_alumno = alumnos.id_alumno "
+        val = [id, nmb_a]
+        mycursor.execute(sql, val)
+        alum_b = mycursor.fetchall()
+        print(alum_b)
+    if idmat > 6:
+      sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and matxalum.id_materia = %s and matxalum.id_alumno = alumnos.id_alumno "
+      val = [id, idmat]
+      mycursor.execute(sql, val)
+      alum_t = mycursor.fetchall()
+      alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
+      print(alum_t)
+    else:
+      sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and matxalum.id_alumno = alumnos.id_alumno"
+      val = [id]
+      mycursor.execute(sql, val)
+      alum_t = mycursor.fetchall()
+      alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
+      print(alum_t)
   return render_template('listadoalumnosad.html', datos=datos, cursos = cursos[0], materias = materias, alum_t = alum_t)
 
-@app.route('/moddatos/<int:id>', methods = ['POST', 'GET']) #Ver o modificar datos del alumno
+@app.route('/moddatos/<int:id>', methods = ['POST', 'GET']) #Ver o modificar datos del alumno, listo
 def moddatosalum(id):
   global band
-  if band == 1:
+  if band == 3:
     flash("", "ok")
     band = 0
+
   user = userform.User(request.form)
   datos = session['username']
   mycursor = mydb.cursor()
@@ -1629,13 +1660,68 @@ def moddatosalum(id):
     print(nomt)
     print(numt)
     sql = "UPDATE alumnos SET edad = %s, loc_a = %s, bar_a = %s, tel_a = %s, email = %s, nmb_tu = %s, tel_tu =%s" \
-          " WHERE id_alumno = %s"  # Saco mas puntaje
+          " WHERE id_alumno = %s"
     val = (edad,loca,barr,nume,emai,nomt, numt, id)
     mycursor.execute(sql, val)
     mydb.commit()
-    band = 1
+    band = 3
     return redirect(url_for('moddatosalum', id = id))
   return render_template('moddatosal.html', datos=datos, data = data[0], band=band, user = user)
+
+@app.route('/estado/<int:id>')
+def verestado(id):
+  datos = session['username']
+  global band
+  mycursor = mydb.cursor()
+  print(band)
+  print(id)
+  mycursor = mydb.cursor()
+  sql = "SELECT id_alumno, matxalum.id_materia, des_m, cal, id_curso, pun_ac, ano_m, id_profesor FROM matxalum, materias WHERE id_alumno = %s and id_curso = %s and matxalum.id_materia = materias.id_materia"
+  val = [id, band]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  print(materias)
+  puntos_t = []
+  estado_a = []
+  total = 0
+  for x in range(0, len(materias)): #Busca trabajos asociados a la materia
+    aux = materias[x]
+    #print(aux)
+    sql = "SELECT id_materia, pun_t FROM trabajos WHERE id_materia = %s and id_curso = %s"
+    val = [aux[1], band]
+    mycursor.execute(sql, val)
+    trabajos = mycursor.fetchall()
+    if trabajos:
+      #print(trabajos)
+      for x in range(0, len(trabajos)): #puntaje total por materia
+        aux2 = trabajos[x]
+        aux3 = int(aux2[1])
+        total = total + aux3
+      puntos_t.append(total)
+      total = 0
+    else:
+      puntos_t.append(trabajos)
+  print(puntos_t)
+  for x in range(0, len(materias)): #Calcula el estado en la materia
+    aux = materias[x]
+    aux2 = puntos_t[x]
+    if aux2:
+      estado = (70 * aux2) / 100 #Calcula el 70% del total
+      if aux[5] >= estado:
+        estado = "bien"
+        print(estado)
+        estado_a.append(estado)
+      else:
+        estado = "mal"
+        print(estado)
+        estado_a.append(estado)
+    else:
+      estado = "bien"
+      estado_a.append(estado)
+  print(estado_a)
+  if band == 0:
+    return redirect(url_for('listadocursos'))
+  return render_template('verestadoadmin.html', datos=datos, materias = materias, puntos_t = puntos_t, estado_a=estado_a)
 @app.route('/listadodocentes/<int:id>') #Ver todos los docentes del curso
 def listadodocentes(id):
   datos = session['username']
@@ -1651,7 +1737,6 @@ def listadodocentes(id):
   mycursor.execute(sql, val)
   materias = mycursor.fetchall()
   print(materias)
-
   return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias)
 
 def createpassword(password):

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>{% block title %}Lista de Alumnos{% endblock %}</title>
 </head>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <body>
@@ -22,21 +22,17 @@
                 <label>Filtrar por materia:</label>
                 <select class="form-control" name="idmat">
                      {% for materia in materias %}
-                         <option value="{{materia.2}}">{{materia.3}}</option>
+                    <option value="{{materia.2}}">{{materia.3}}</option>
                      {% endfor %}
+                    <option value="{{cursos.0}}">Todos los alumnos</option>
                     </select>
              <br>
                 <input type="submit" name="submit" value="Ver Alumnos" class="btn btn-secondary">
              </form>
             </div>
         </div>
-    <div class="col-md-3">
-    <label>Buscar por nombre o apellido:</label>
-    <input type="text" name="nmb_a" class="form-control" value="">
-        <br>
-      <input type="submit" name="submit" value="Buscar" class="btn btn-secondary">
-    </div>
   </div>
+
 <br>
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
@@ -57,7 +53,7 @@
      <td>{{alumnos.2}}</td>
      <td>{{alumnos.1}}</td>
          <td><center><a class="btn btn-secondary" role="button" href="/moddatos/{{alumnos.0}}"> Datos Personales</a>
-         <a class="btn btn-secondary" role="button" href="/moddatos/{{alumnos.0}}"> Estado Académico</a></center></td>
+         <a class="btn btn-secondary" role="button" href="/estado/{{alumnos.0}}"> Estado Académico</a></center></td>
        </tr>
         {% endfor %}
 
