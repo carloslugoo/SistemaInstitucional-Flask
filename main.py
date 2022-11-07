@@ -1296,7 +1296,7 @@ def asignarpof(id):
   val = [id]
   mycursor.execute(sql, val)
   cursos = mycursor.fetchall()
-  sql = "SELECT id_matxcur, matxcur.id_curso, matxcur.id_materia, des_m, car_h, matxcur.id_profesor FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_materia = materias.id_materia "
+  sql = "SELECT id_matxcur, matxcur.id_curso, matxcur.id_materia, des_m, car_h FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_materia = materias.id_materia "
   val = [id]
   mycursor.execute(sql, val)
   materias = mycursor.fetchall()
@@ -1779,7 +1779,6 @@ def listadodocentes(id):
       profe_t = mycursor.fetchall()
       profe_t = sorted(profe_t, key=lambda profe_t: profe_t[2])
       print(profe_t)
-
   return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias, profesores = profe_t)
 def createpassword(password):
   return generate_password_hash(password)
