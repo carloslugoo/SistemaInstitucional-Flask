@@ -72,7 +72,7 @@ class Alumno(Form):
                         validators.data_required(message='Ingrese un numero de contacto!')])
 
     email = EmailField('Email:',
-                       [validators.length(min=4, max=25, message='Ingrese un usuario de 4 a 25 letras!..'),
+                       [validators.length(min=4, max=30, message='Ingrese un usuario de 4 a 25 letras!..'),
                         validators.data_required(message='Ingrese un Usuario!')])
 
     barrio = StringField('Barrio:',
