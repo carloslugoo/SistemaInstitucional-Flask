@@ -1780,6 +1780,110 @@ def listadodocentes(id):
       profe_t = sorted(profe_t, key=lambda profe_t: profe_t[2])
       print(profe_t)
   return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias, profesores = profe_t)
+
+@app.route('/asignarprofe') #Listado de Alumnos admin
+def asignarprofe():
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores"
+  val = []
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  data = sorted(data, key=lambda data: data[2])
+  print(data)
+  return render_template('asignarprofe.html', datos=datos, data = data)
+
+@app.route('/asignarmaterias/<int:id>', methods = ['POST', 'GET'])
+def asignarmaterias(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores WHERE id_profesor = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  profesor = mycursor.fetchall()
+  profesor = profesor[0]
+  print(profesor)
+  sql = "SELECT matxpro.id_materia, des_m, des_c, des_e FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s " \
+        "and matxpro.id_materia = materias.id_materia and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  print(materias)
+  fecha = datetime.now()
+  fecha = datetime.strftime(fecha, '%Y')
+  print(fecha)
+  mycursor = mydb.cursor(buffered=True)
+  for x in range(1, 7):
+    print(x)
+    if x <= 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      if x == 1:
+        con_p = mycursor.fetchall()
+        print(con_p)
+      if x == 2:
+        con_s = mycursor.fetchall()
+        print(con_s)
+    if x == 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      soc_p = mycursor.fetchall()
+      print(soc_p)
+    if x == 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      con_t = mycursor.fetchall()
+      print(con_t)
+    if x > 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      if x == 5:
+        soc_s = mycursor.fetchall()
+        print(soc_s)
+      if x == 6:
+        soc_t = mycursor.fetchall()
+        print(soc_t)
+  if request.method == "POST":
+    idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
+    print(idmat)
+    if idmat:
+      for x in range(0, len(idmat)):
+        aux = idmat[x]
+        aux2 = aux.split(',')
+        aux3 = int(aux2[0])
+        aux2 = int(aux2[1])
+        print((aux2))
+        print((aux3))
+        mycursor = mydb.cursor()
+        sql = "SELECT profesores.id_profesor, nmb_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_materia = %s and id_curso = %s and " \
+              "matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia"
+        val = [aux2, aux3]
+        mycursor.execute(sql, val)
+        comp_m = mycursor.fetchall()
+        if comp_m:
+          print(comp_m[0])
+          band = 4
+          return redirect(url_for('inscribirprof'))
+        else:
+          mycursor.execute(
+            'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
+            (aux2, id, aux3, fecha))
+          mydb.commit()
+          band = 1
+          print(band)
+          return redirect(url_for('asignarmaterias'), id = id)
+  return render_template('asginarmaterias.html', datos=datos, profesor = profesor,
+                         soc_p = soc_p, soc_s = soc_s, soc_t = soc_t, con_p=con_p, con_s = con_s, con_t = con_t, materias = materias)
+
+
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
