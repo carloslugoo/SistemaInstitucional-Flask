@@ -924,23 +924,45 @@ def inscmatxprof():
           print((aux2))
           print((aux3))
           mycursor = mydb.cursor()
-          sql = "SELECT profesores.id_profesor, nmb_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_materia = %s and id_curso = %s and " \
-                "matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia"
+          sql = "SELECT * FROM matxpro WHERE id_materia = %s and id_curso = %s"
           val = [aux2, aux3]
           mycursor.execute(sql, val)
           comp_m = mycursor.fetchall()
           if comp_m:
-            print(comp_m[0])
-            band = 4
-            idmaterias = comp_m[0]
-            return redirect(url_for('inscribirprof'))
+            comp_m = comp_m[0]
+            print(comp_m)
+            if comp_m[2] != 0:
+              band = 4
+              print("ya tiene profesor")
+            if comp_m[2] == 0:
+              sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id_p, aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              # Comprueba si cargo un trabajo
+              sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s"
+              val = [0, aux2, aux3]
+              mycursor.execute(sql, val)
+              trabajos = mycursor.fetchall()
+              if trabajos:
+                for x in range(0, len(trabajos)):
+                  aux = trabajos[x]
+                  id_t = aux[0]
+                  sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+                  val = (id, id_t)
+                  mycursor.execute(sql, val)
+                  mydb.commit()
+              print("el profesor fue dado de baja")
+              band = 1
+
           else:
             mycursor.execute(
               'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
-              (aux2, id_p[0], aux3, fecha))
+              (aux2, id_p, aux3, fecha))
             mydb.commit()
-        band = 1
-        print(band)
+            band = 1
+            print(band)
+            print("se le asigna")
         return redirect(url_for('inscribirprof'))
       else:
         band = 3
@@ -1781,7 +1803,7 @@ def listadodocentes(id):
       print(profe_t)
   return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias, profesores = profe_t)
 
-@app.route('/asignarprofe') #Listado de Alumnos admin
+@app.route('/asignarprofe') #Listado de Alumnos admin  #falta swa
 def asignarprofe():
   datos = session['username']
   mycursor = mydb.cursor()
@@ -1793,8 +1815,10 @@ def asignarprofe():
   print(data)
   return render_template('asignarprofe.html', datos=datos, data = data)
 
-@app.route('/asignarmaterias/<int:id>', methods = ['POST', 'GET'])
+@app.route('/asignarmaterias/<int:id>', methods = ['POST', 'GET']) #falta swa
 def asignarmaterias(id):
+  global user_datos
+  user_datos = id
   datos = session['username']
   mycursor = mydb.cursor()
   sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores WHERE id_profesor = %s"
@@ -1803,7 +1827,7 @@ def asignarmaterias(id):
   profesor = mycursor.fetchall()
   profesor = profesor[0]
   print(profesor)
-  sql = "SELECT matxpro.id_materia, des_m, des_c, des_e FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s " \
+  sql = "SELECT matxpro.id_materia, des_m, des_c, des_e, matxpro.id_curso FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s " \
         "and matxpro.id_materia = materias.id_materia and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis"
   val = [id]
   mycursor.execute(sql, val)
@@ -1814,7 +1838,7 @@ def asignarmaterias(id):
   print(fecha)
   mycursor = mydb.cursor(buffered=True)
   for x in range(1, 7):
-    print(x)
+    #print(x)
     if x <= 3:
       sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
             "materias.id_materia = matxcur.id_materia"
@@ -1822,24 +1846,24 @@ def asignarmaterias(id):
       mycursor.execute(sql, val)
       if x == 1:
         con_p = mycursor.fetchall()
-        print(con_p)
+        #print(con_p)
       if x == 2:
         con_s = mycursor.fetchall()
-        print(con_s)
+        #print(con_s)
     if x == 3:
       sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
             "materias.id_materia = matxcur.id_materia"
       val = [x, 2]
       mycursor.execute(sql, val)
       soc_p = mycursor.fetchall()
-      print(soc_p)
+      #print(soc_p)
     if x == 4:
       sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
             "materias.id_materia = matxcur.id_materia"
       val = [x, 1]
       mycursor.execute(sql, val)
       con_t = mycursor.fetchall()
-      print(con_t)
+      #print(con_t)
     if x > 4:
       sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
             "materias.id_materia = matxcur.id_materia"
@@ -1847,10 +1871,10 @@ def asignarmaterias(id):
       mycursor.execute(sql, val)
       if x == 5:
         soc_s = mycursor.fetchall()
-        print(soc_s)
+        #print(soc_s)
       if x == 6:
         soc_t = mycursor.fetchall()
-        print(soc_t)
+        #print(soc_t)
   if request.method == "POST":
     idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
     print(idmat)
@@ -1863,15 +1887,37 @@ def asignarmaterias(id):
         print((aux2))
         print((aux3))
         mycursor = mydb.cursor()
-        sql = "SELECT profesores.id_profesor, nmb_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_materia = %s and id_curso = %s and " \
-              "matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia"
+        sql = "SELECT * FROM matxpro WHERE id_materia = %s and id_curso = %s"
         val = [aux2, aux3]
         mycursor.execute(sql, val)
         comp_m = mycursor.fetchall()
+        print(comp_m)
         if comp_m:
-          print(comp_m[0])
-          band = 4
-          return redirect(url_for('inscribirprof'))
+            comp_m = comp_m[0]
+            print(comp_m)
+            if comp_m[2] != 0:
+              band = 4
+              print("ya tiene profesor")
+            if comp_m[2] == 0:
+              sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id,aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              #Comprueba si cargo un trabajo
+              sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s"
+              val = [0, aux2,aux3]
+              mycursor.execute(sql, val)
+              trabajos = mycursor.fetchall()
+              print(trabajos)
+              if trabajos:
+                for x in range(0, len(trabajos)):
+                  aux = trabajos[x]
+                  id_t = aux[0]
+                  sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+                  val = (id, id_t)
+                  mycursor.execute(sql, val)
+                  mydb.commit()
+              print("se asigno, el profesor anterior fue dado de baja")
         else:
           mycursor.execute(
             'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
@@ -1879,10 +1925,88 @@ def asignarmaterias(id):
           mydb.commit()
           band = 1
           print(band)
-          return redirect(url_for('asignarmaterias'), id = id)
+          print("se le asigna")
+    return redirect(url_for('asignarmaterias', id=id))
   return render_template('asginarmaterias.html', datos=datos, profesor = profesor,
                          soc_p = soc_p, soc_s = soc_s, soc_t = soc_t, con_p=con_p, con_s = con_s, con_t = con_t, materias = materias)
 
+@app.route('/dardebajaprofe/<int:id>', methods = ['POST', 'GET']) #Se debe guardar en el log,  #falta swa
+def dardebajaprofe(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores WHERE id_profesor = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  profesor = mycursor.fetchall()
+  profesor = profesor[0]
+  print(profesor)
+  sql = "SELECT matxpro.id_materia, des_m, des_c, des_e, matxpro.id_curso FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s " \
+        "and matxpro.id_materia = materias.id_materia and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  print(materias)
+  fecha = datetime.now()
+  fecha = datetime.strftime(fecha, '%Y')
+  print(fecha)
+  if request.method == "POST":
+    sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_profesor = %s"
+    val = [id]
+    mycursor.execute(sql, val)
+    trabajos = mycursor.fetchall()
+    if materias:
+      for x in range(0, len(materias)):
+        aux = materias[x]
+        id_m = aux[0]
+        id_c = aux[4]
+        sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+        val = (0, id_m, id_c)
+        mycursor.execute(sql, val)
+        mydb.commit()
+    if trabajos:
+      print(trabajos)
+      for x in range(0, len(trabajos)):
+        aux = trabajos[x]
+        id_t = aux[0]
+        sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+        val = (0, id_t)
+        mycursor.execute(sql, val)
+        mydb.commit()
+    sql = "UPDATE profesores SET estado = %s WHERE id_profesor = %s"
+    val = (0, id)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    return redirect(url_for('asignarprofe'))
+  return render_template('dardebajaprofe.html', datos=datos, profesor = profesor, materias = materias)
+
+@app.route('/eliminarmatxpro/<string:id>') #falta swa
+def eliminarmatxpro(id):
+  print(id)
+  global user_datos
+  print(user_datos)
+  aux = id.split('C')
+  id_m = aux[0]
+  id_c = aux[1]
+  mycursor = mydb.cursor()
+  sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s and id_profesor = %s"
+  val = (0, id_m, id_c, user_datos)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_materia = %s and id_curso = %s and id_profesor = %s"
+  val = [id_m, id_c, user_datos]
+  mycursor.execute(sql, val)
+  trabajos = mycursor.fetchall()
+  print(trabajos)
+  if trabajos:
+    for x in range(0, len(trabajos)):
+      aux = trabajos[x]
+      id_t = aux[0]
+      sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+      val = (0, id_t)
+      mycursor.execute(sql, val)
+      mydb.commit()
+
+  return redirect(url_for('asignarmaterias', id = user_datos))
 
 def createpassword(password):
   return generate_password_hash(password)

@@ -17,12 +17,13 @@
     </div>
   </div>
 <div class="row">
+
        <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Materia</th>
             <th>Curso</th>
-             <th>Contabilidad</th>
+             <th>Enfasis</th>
             <th>Acciones</th>
 		</thead>
 		<tbody>
@@ -31,7 +32,7 @@
            <td>{{materia.1}}</td>
            <td>{{materia.2}}</td>
            <td>{{materia.3}}</td>
-             <td> <center><a class="btn btn-danger" role="button" href="/vermateriasprof/{{profesor.0}}">Eliminar Materia</a></center></td>
+             <td> <center><a class="btn btn-danger" role="button" href="/eliminarmatxpro/{{materia.0}}C{{materia.4}}">Eliminar Materia</a></center></td>
        </tr>
       {% endfor %}
     </tbody>
