@@ -6,9 +6,42 @@
 </head>
 <body>
   {% block content %}
+
   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic">Asignar Materias a Docentes</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/asignarprofe">
+                <label>Filtrar por estado del docente:</label>
+                <select class="form-control" name="estado">
+                    <option value="1">Activos</option>
+                    <option value="0">Inactivos</option>
+                    <option value="2">Todos los docentes</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver docentes" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+  </div>
+  <br>
+   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic">
+           {%if estado == 3%}
+           Todos los docentes
+           {%endif%}
+           {%if estado == 0%}
+           Docentes inactivos
+           {%endif%}
+           {%if estado == 1%}
+           Docentes Activos
+           {%endif%}
+       </h1>
     </div>
   </div>
    <div class="row">

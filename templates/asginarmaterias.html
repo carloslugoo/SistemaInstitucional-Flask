@@ -6,6 +6,25 @@
 </head>
 <body>
   {% block content %}
+  <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                {% if category == 'c_u' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Usuario actualizado!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+             {% endfor %}
+            {% endif %}
+        {% endwith  %}
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic">{{profesor.1}},{{profesor.2}}</h1>
@@ -148,7 +167,10 @@
 	</table>
     </div>
    </div>
-     <center><input type="submit" name="submit" value="Agregar" class="btn btn-success"></center>
+
+     <center>
+         <a href="/asignarprofe" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver atras</i></a>
+         <input type="submit" name="submit" value="Agregar" class="btn btn-success"></center>
          <br>
          </form>
      </div>

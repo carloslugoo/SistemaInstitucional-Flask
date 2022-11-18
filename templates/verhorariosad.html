@@ -27,8 +27,8 @@
 		<tbody>
          {% for horarios in h_lu %}
      <tr>
-     <td>{{horarios.3}}-{{horarios.4}}</td>
-     <td>{{horarios.5}}</td>
+      <td>{{horarios.2}}-{{horarios.3}}</td>
+     <td>{{horarios.4}}</td>
      </tr>
      {% endfor %}
     </tbody>
@@ -44,8 +44,8 @@
 		<tbody>
          {% for horarios in h_ma %}
      <tr>
-     <td>{{horarios.3}}-{{horarios.4}}</td>
-     <td>{{horarios.5}}</td>
+      <td>{{horarios.2}}-{{horarios.3}}</td>
+     <td>{{horarios.4}}</td>
      </tr>
      {% endfor %}
     </tbody>
@@ -64,8 +64,8 @@
 		<tbody>
          {% for horarios in h_mi %}
      <tr>
-     <td>{{horarios.3}}-{{horarios.4}}</td>
-     <td>{{horarios.5}}</td>
+     <td>{{horarios.2}}-{{horarios.3}}</td>
+     <td>{{horarios.4}}</td>
      </tr>
      {% endfor %}
     </tbody>
@@ -81,8 +81,8 @@
 		<tbody>
          {% for horarios in h_ju %}
      <tr>
-     <td>{{horarios.3}}-{{horarios.4}}</td>
-     <td>{{horarios.5}}</td>
+   <td>{{horarios.2}}-{{horarios.3}}</td>
+     <td>{{horarios.4}}</td>
      </tr>
      {% endfor %}
     </tbody>
@@ -101,13 +101,13 @@
 		<tbody>
          {% for horarios in h_vi %}
      <tr>
-     <td>{{horarios.3}}-{{horarios.4}}</td>
-     <td>{{horarios.5}}</td>
+       <td>{{horarios.2}}-{{horarios.3}}</td>
+     <td>{{horarios.4}}</td>
      </tr>
      {% endfor %}
     </tbody>
 	</table>
-   <a href="/crearseman" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
+
     </div>
  <div class="col-sm-5">
   <center><h4>Sabado</h4></center>
@@ -119,16 +119,20 @@
 		<tbody>
          {% for horarios in h_ma %}
      <tr>
-     <td>{{horarios.3}}-{{horarios.4}}</td>
-     <td>{{horarios.5}}</td>
+     <td>{{horarios.2}}-{{horarios.3}}</td>
+     <td>{{horarios.4}}</td>
      </tr>
      {% endfor %}
     </tbody>
 	</table>
 
-    </div>
-
 </div>
+  <form method="POST" action="/verhorario/{{cursos.0}}">
+    <a href="/crearseman" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+      <input type="submit" name="submit" value="Eliminar Horario" class="btn btn-danger">
+        </form>
+
+
 
 {% endblock %}
 </body>

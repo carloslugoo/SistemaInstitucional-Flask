@@ -65,49 +65,165 @@
         <h1  class="display-15 fst-italic">{{cursos.1}}, {{cursos.3}}, {{cursos.2}}</h1>
     </div>
   </div>
-
-<form method="POST" action="/cargar/{{cursos.0}}">
- <div class="row">
-    <div class="col-sm-10">
+<form method="POST" action="/cargar2/{{cursos.0}}">
+<div class="row">
+    <div class="col-sm-2">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Materia</th>
-            <th>Carga Horaria</th>
-            <th>Dia</th>
-            <th>Horario de Inicio</th>
-            <th>Horario de Final</th>
-		</thead>
-        {% for materia in materias %}
+       </thead>
+    {% set count = namespace(value=0) %}
+{% for materia in materias %}
+    {% set count.value = count.value + 1 %}
+         {%if count.value < 8 %}
        <tr>
-     <td>{{materia.3}}</td>
-     <td>{{materia.4}}</td>
-           {%if band == 0%}
-       <td><input type="text" name="dias"  class="form-control" value="Lunes" readonly> </td>
-           {% endif %}
-         {%if band == 1%}
-       <td><input type="text" name="dias"  class="form-control" value="Martes" readonly> </td>
-           {% endif %}
-           {%if band == 2%}
-       <td><input type="text" name="dias"  class="form-control" value="Miercoles" readonly></td>
-           {% endif %}
-           {%if band == 3%}
-       <td><input type="text" name="dias"  class="form-control" value="Jueves" readonly> </td>
-           {% endif %}
-           {%if band == 4%}
-       <td><input type="text" name="dias"  class="form-control" value="Viernes" readonly> </td>
-           {% endif %}
-            {%if band == 5%}
-       <td><input type="text" name="dias"  class="form-control" value="Sabado" readonly> </td>
-           {% endif %}
-     <td><input type="text" name="hora_i"  class="form-control" value=""></td>
-           <td><input type="text" name="hora_f"  class="form-control" value=""></td>
-       </tr>
-        {% endfor %}
+
+     <td><select class="form-control" name="idmat">
+                    <option value="">Seleccione la materia</option>
+                     {% for materia in materias %}
+                    <option value="{{materia.2}}">{{materia.3}}</option>
+                     {% endfor %}
+                    </select></td>
+
+   </tr>
+    {%endif%}
+       {% endfor %}
     </tbody>
 	</table>
     </div>
-  </div>
+    {%if band != 5%}
+    {% set count = namespace(value=0) %}
+    <div class="col-sm-4">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Horario de Inicio</th>
+            <th>Horario de Final</th>
+		</thead>
+         {%if count.value == 0 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="17:00:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="17:40:00" readonly></td>
+            </tr>
+              {% endif %}
 
+     {%if count.value == 1 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="17:40:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="18:20:00" readonly></td>
+            </tr>
+              {% endif %}
+
+     {%if count.value == 2 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="18:20:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="19:00:00" readonly></td>
+            </tr>
+              {% endif %}
+
+           {%if count.value == 3 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="19:00:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="19:40:00" readonly></td>
+            </tr>
+              {% endif %}
+
+           {%if count.value == 3 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="19:40:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="20:20:00" readonly></td>
+            </tr>
+              {% endif %}
+        {%if count.value == 4 %}
+           {% set count.value = count.value + 1 %}
+            <td><input type="text" name="hora_i"  class="form-control" value="20:20:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="21:00:00" readonly></td>
+            </tr>
+              {% endif %}
+
+         {%if count.value == 5 %}
+           {% set count.value = count.value + 1 %}
+            <td><input type="text" name="hora_i"  class="form-control" value="21:00:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="21:40:00" readonly></td>
+            </tr>
+              {% endif %}
+
+         {%if count.value == 6 %}
+           {% set count.value = count.value + 1 %}
+            <td><input type="text" name="hora_i"  class="form-control" value="21:40:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="22:20:00" readonly></td>
+            </tr>
+              {% endif %}
+   </tbody>
+	</table>
+    </div>
+    {% endif %}
+      {%if band == 5%}
+     {% set count = namespace(value=0) %}
+      <div class="col-sm-4">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Horario de Inicio</th>
+            <th>Horario de Final</th>
+		</thead>
+         {%if count.value == 0 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="13:00:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="13:40:00" readonly></td>
+            </tr>
+              {% endif %}
+
+     {%if count.value == 1 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="13:40:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="14:20:00" readonly></td>
+            </tr>
+              {% endif %}
+
+     {%if count.value == 2 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="14:20:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="15:00:00" readonly></td>
+            </tr>
+              {% endif %}
+
+           {%if count.value == 3 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="15:00:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="15:40:00" readonly></td>
+            </tr>
+              {% endif %}
+
+           {%if count.value == 3 %}
+           {% set count.value = count.value + 1 %}
+     <td><input type="text" name="hora_i"  class="form-control" value="15:40:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="16:20:00" readonly></td>
+            </tr>
+              {% endif %}
+        {%if count.value == 4 %}
+           {% set count.value = count.value + 1 %}
+            <td><input type="text" name="hora_i"  class="form-control" value="16:20:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="17:00:00" readonly></td>
+            </tr>
+              {% endif %}
+
+         {%if count.value == 5 %}
+           {% set count.value = count.value + 1 %}
+            <td><input type="text" name="hora_i"  class="form-control" value="17:00:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="17:40:00" readonly></td>
+            </tr>
+              {% endif %}
+
+         {%if count.value == 6 %}
+           {% set count.value = count.value + 1 %}
+            <td><input type="text" name="hora_i"  class="form-control" value="17:40:00" readonly></td>
+           <td><input type="text" name="hora_f"  class="form-control" value="18:20:00" readonly></td>
+            </tr>
+              {% endif %}
+    </tbody>
+	</table>
+    </div>
+ {% endif %}
+  </div>
     <a href="/crearseman" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
      {%if band != 5%}
        <input type="submit" name="submit" value="Siguiente" class="btn btn-success">
