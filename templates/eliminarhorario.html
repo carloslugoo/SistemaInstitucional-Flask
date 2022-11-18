@@ -8,7 +8,7 @@
 {% block content %}
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-15 fst-italic"><i class="bi bi-calendar2-check"></i> Ver Horarios</h1>
+       <h1 class="display-15 fst-italic"><i class="bi bi-calendar2-check"></i> Eliminar Horarios</h1>
     </div>
   </div>
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
@@ -16,9 +16,13 @@
         <h1  class="display-15 fst-italic">{{cursos.1}}, {{cursos.3}}, {{cursos.2}}</h1>
     </div>
   </div>
+  <h3>¿Estas seguro?</h3>
+   <label>El siguiente horario será eliminado y deberá crearse uno nuevo.</label>
+<br>
 
 <div class="row">
  <div class="col-sm-5">
+     <br>
   <center> <h4>Lunes</h4></center>
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
@@ -34,9 +38,9 @@
      {% endfor %}
     </tbody>
 	</table>
-       <a class="btn btn-secondary" role="button" href="/editarhorario/{{cursos.0}}D{{1}}"> Modificar el horario</a></center></td>
     </div>
  <div class="col-sm-5">
+     <br>
   <center><h4>Martes</h4></center>
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
@@ -52,7 +56,6 @@
      {% endfor %}
     </tbody>
 	</table>
-       <a class="btn btn-secondary" role="button" href="/editarhorario/{{cursos.0}}D{{2}}"> Modificar el horario</a></center></td>
     </div>
 </div>
 
@@ -73,8 +76,7 @@
      {% endfor %}
     </tbody>
 	</table>
-       <a class="btn btn-secondary" role="button" href="/editarhorario/{{cursos.0}}D{{3}}"> Modificar el horario</a></center></td>
-    </div>
+ </div>
  <div class="col-sm-5">
   <center><h4>Jueves</h4></center>
 <table class="table table-hover table-striped table-bordered">
@@ -91,7 +93,6 @@
      {% endfor %}
     </tbody>
 	</table>
-      <a class="btn btn-secondary" role="button" href="/editarhorario/{{cursos.0}}D{{4}}"> Modificar el horario</a></center></td>
     </div>
 </div>
 
@@ -112,8 +113,10 @@
      {% endfor %}
     </tbody>
 	</table>
+          <form method="POST" action="/eliminarhorario/{{cursos.0}}">
     <a href="/crearseman" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
-        <a class="btn btn-secondary" role="button" href="/editarhorario/{{cursos.0}}D{{5}}"> Modificar el horario</a></center></td>
+       <input type="submit" name="submit" value="Eliminar Horario" class="btn btn-danger">
+     </form>
     </div>
  <div class="col-sm-5">
   <center><h4>Sabado</h4></center>
@@ -131,7 +134,6 @@
      {% endfor %}
     </tbody>
 	</table>
-       <a class="btn btn-secondary" role="button" href="/editarhorario/{{cursos.0}}D{{6}}"> Modificar el horario</a></center></td>
 </div>
 </div>
 {% endblock %}

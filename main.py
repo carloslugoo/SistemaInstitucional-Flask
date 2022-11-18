@@ -1329,7 +1329,7 @@ def crearsemana():
   cursos_s = mycursor.fetchall()
   return render_template('crear_sem.html', datos=datos, cursos_c = cursos_c, cursos_s = cursos_s)
 
-@app.route('/cargar/<int:id>' , methods = ['GET', 'POST'])
+@app.route('/cargar/<int:id>' , methods = ['GET', 'POST']) #Sin utilizar
 def asignarpof(id):
   datos = session['username']
   mycursor = mydb.cursor()
@@ -1495,7 +1495,47 @@ def cargarhora(id):
       if band == 5:
         return redirect(url_for('crearsemana'))
   return render_template('crear_dias.html', datos=datos, cursos=cursos[0], materias=materias, band=band)
-@app.route('/verhorario/<int:id>', methods = ['GET', 'POST']) #Ver Horarios
+
+@app.route('/eliminarhorario/<int:id>' , methods = ['GET', 'POST'])
+def eliminarhora(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  mycursor = mydb.cursor()
+  for x in range(1, 7):
+    sql = "SELECT id_horario, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
+    val = [id, x]
+    mycursor.execute(sql, val)
+    if x == 1:  # Lunes
+      h_lu = mycursor.fetchall()
+      print(h_lu)
+    if x == 2:  # Martes
+      h_ma = mycursor.fetchall()
+      print(h_ma)
+    if x == 3:  # Miercoles
+      h_mi = mycursor.fetchall()
+      print(h_mi)
+    if x == 4:  # Jueves
+      h_ju = mycursor.fetchall()
+      print(h_ju)
+    if x == 5:  # Viernes
+      h_vi = mycursor.fetchall()
+      print(h_vi)
+    if x == 6:  # Sabado
+      h_sa = mycursor.fetchall()
+      print(h_sa)
+  if request.method == 'POST':
+    mycursor = mydb.cursor()
+    sql = "DELETE FROM horarios WHERE id_curso = %s"
+    val = [id]
+    mycursor.execute(sql, val)
+    mydb.commit()
+    return redirect(url_for('crearsemana'))
+  return render_template('eliminarhorario.html', cursos=cursos[0], datos=datos, h_lu=h_lu, h_ma=h_ma, h_mi=h_mi, h_ju=h_ju, h_vi=h_vi, h_sa=h_sa)
+@app.route('/verhorario/<int:id>') #Ver Horarios
 def verhorarioadmin(id):
   datos = session['username']
   mycursor = mydb.cursor()
@@ -1505,7 +1545,7 @@ def verhorarioadmin(id):
   cursos = mycursor.fetchall()
   mycursor = mydb.cursor()
   for x in range(1, 7):
-    sql = "SELECT id_horario, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE horarios.id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
+    sql = "SELECT id_horario, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
     val = [id, x]
     mycursor.execute(sql, val)
     if x == 1: #Lunes
@@ -1526,17 +1566,83 @@ def verhorarioadmin(id):
     if x == 6:  # Sabado
       h_sa = mycursor.fetchall()
       print(h_sa)
-  if request.method == 'POST':
-    sql = "DELETE * FROM horarios WHERE id_curso = %s"
-    val = (id)
-    mycursor.execute(sql, val)
-    mydb.commit()
   if datos[7] == 1:  # alumnos
     return render_template('verhorariosal.html', cursos=cursos[0], datos=datos, h_lu=h_lu, h_ma=h_ma, h_mi=h_mi,
                            h_ju=h_ju, h_vi=h_vi, h_sa=h_sa)
   if datos[6] == 3:  # Admin
-    return render_template('verhorariosad.html', cursos = cursos[0], datos = datos, h_lu = h_lu, h_ma = h_ma, h_mi = h_mi, h_ju = h_ju, h_vi = h_vi, h_sa= h_sa)
+    if h_lu and h_ma and h_mi and h_ju and h_vi and h_sa:
+      return render_template('verhorariosad.html', cursos = cursos[0], datos = datos, h_lu = h_lu, h_ma = h_ma, h_mi = h_mi, h_ju = h_ju, h_vi = h_vi, h_sa= h_sa)
+    else: #Si no existe un horario totalmente cargado
+      return redirect(url_for('crearsemana'))
 
+
+
+@app.route('/editarhorario/<string:id>' , methods = ['GET', 'POST'])
+def editarhorario(id):
+  datos = session['username']
+  aux = id.split('D')
+  id_c = int(aux[0])
+  id_d = int(aux[1])
+  #print(id_c)
+  #print(id_d)
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id_c]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  sql = "SELECT id_horario, des_m FROM horarios, materias WHERE id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
+  val = [id_c, id_d]
+  mycursor.execute(sql, val)
+  horarios = mycursor.fetchall()
+  #print(horarios)
+  sql = "SELECT id_matxcur, matxcur.id_curso, matxcur.id_materia, des_m, car_h FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_materia = materias.id_materia "
+  val = [id_c]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  materias = sorted(materias, key=lambda materias: materias[3])
+  create = True
+  if request.method == 'POST':
+    idmat = request.form.getlist(('idmat'))
+    print(idmat)
+    for x in range(0, len(idmat)):
+      aux = idmat[x]
+      if not aux:
+        create = False
+    if create == True:
+      for x in range(0, len(idmat)):
+        aux = idmat[x]
+        print(aux)
+        sql = "SELECT id_mxp, id_profesor FROM matxpro WHERE id_materia = %s and id_curso = %s"
+        val = [aux, id_c]
+        mycursor.execute(sql, val)
+        aux4 = mycursor.fetchall()
+        print(aux4)
+        aux5 = horarios[x]
+        print(aux5)
+        if aux4:
+          aux4 = aux4[0]
+          aux4 = aux4[1]
+          print(aux4)
+        if aux4 and aux4 != 0: #Osea que tiene profesor
+          mycursor = mydb.cursor()
+          aux5 = aux5[0]
+          print(aux5)
+          print(aux)
+          sql = "UPDATE horarios SET id_materia = %s, id_profesor = %s WHERE id_horario = %s"
+          val = (aux, aux4, aux5)
+          mycursor.execute(sql, val)
+          mydb.commit()
+        else:
+          mycursor = mydb.cursor()
+          aux5 = aux5[0]
+          print(aux5)
+          print(aux)
+          sql = "UPDATE horarios SET id_materia = %s, id_profesor = %s WHERE id_horario = %s"
+          val = (aux, 0, aux5)
+          mycursor.execute(sql, val)
+          mydb.commit()
+      return redirect(url_for('verhorarioadmin', id = id_c))
+  return render_template('editarhorario.html', datos = datos, cursos=cursos[0], horarios = horarios, materias = materias, band = id_d - 1)
 @app.route('/asistencia',  methods = ['GET', 'POST']) #Marcar Asistencia por Docente
 def asistenciaprof():
   global user_datos #datos del profe para alerta
