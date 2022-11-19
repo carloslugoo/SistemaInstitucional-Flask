@@ -1317,6 +1317,8 @@ def crearsemana():
     band =0
   else:
     band = 0
+  if band != 0:
+    band = 0
   datos = session['username']
   mycursor = mydb.cursor()
   sql = "SELECT cursos.id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_enfasis = %s and cursos.id_enfasis = enfasis.id_enfasis"
