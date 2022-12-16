@@ -1,0 +1,58 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <title>{% block title %}Carga de Proceso{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+      <div class="col-md-6 px-0">
+          <h1  class="display-15 fst-italic"> <i class="bi bi-clipboard-plus"></i> Trabajo: {{trabajo.0}}.   Puntaje Total: {{trabajo.1}}  </h1>
+          <p>Curso: {{cursos.1}}, {{cursos.2}}, {{cursos.3}}</p>
+      </div>
+    </div>
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+      <div class="col-md-6 px-0">
+          <h1  class="display-15 fst-italic">Lista de alumnos matriculados </h1>
+      </div>
+    </div>
+<form method="POST" action="/cargarpuntaje">
+{% set counti = namespace(value=0) %}
+{% set count = namespace(value=0) %}
+{% set counta = namespace(value=0) %}
+      <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th></th>
+            {%for indicador in indicadores%}
+             {% set counti.value = counti.value + 1 %}
+			<th>{{indicador.1}}</th>
+            {%endfor%}
+		</thead>
+		<tbody>
+     {% for alumno in alumnos %}
+      {% set counta.value = counta.value + 1 %}
+     <tr>
+     <td>{{counta.value}}. {{ alumno.2 }}, {{ alumno.1 }}
+        <input type="checkbox" value="{{alumno.0}}" name="idalum" class="invisible" checked></td>
+          {%for indicador in indicadores%}
+         {% set count.value = count.value + 1 %}
+     <td>L: <input type="checkbox" value="1" name="{{count.value}}" class="visible" unchecked>
+     NL: <input type="checkbox" value="0" name="{{count.value}}" class="visible" unchecked>
+     </span>
+     </td>
+
+     	{%endfor%}
+         {%if count.value == counti.value%}
+         {% set count.value = count.value - counti.value%}
+        {%endif%}
+     <tr>
+    {%endfor%}
+</table>
+</div>
+     <input type="submit" name="submit" value="Guardar Puntajes" class="btn btn-success">
+</form>
+{% endblock %}
+</body>
+</html>

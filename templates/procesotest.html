@@ -140,8 +140,8 @@
         <div class="row">
         <div class="col-sm-3">
          <div class="form-group">
-           <label>Nombre del Trabajo:</label>
-            {{show_form(task.nombre, class="form-control", placeholder="Ej: Exposicion Oral")}}
+           <label>Titulo del Trabajo:</label>
+            {{show_form(task.nombre, class="form-control", placeholder="Ej: La célula")}}
          </div>
         </div>
     <br>
@@ -157,93 +157,179 @@
             </div>
         </div>
     <br>
-        <div class="col-sm-3">
+        <div class="col-sm-1">
         <div class="form-group">
              <label>Puntaje (1-100):</label>
              {{show_form(task.puntaje, class="form-control")}}
         </div>
          </div>
 <br>
+             <div class="col-sm-2">
+        <div class="form-group">
+             <label>Etapa:</label>
+            <select class="form-control" name="etapa_t">
+              <option value="1">Primera Etapa</option>
+              <option value="2">Segunda Etapa</option>
+            </select>
+        </div>
+         </div>
 <div>
-
-     <div class="row">
-        <div class="col-sm-3">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Indicadores</h1>
+    </div>
+  </div>
+    <div class="row">
+        <div class="col-sm-2">
          <div class="form-group">
-           <label>Indicadores:</label>
             <input type="text" name="i1"  class="form-control" value="" placeholder="Ej: Entrega en Fecha">
          </div>
         </div>
     <br>
-        <div class="col-sm-3">
+        <div class="col-sm-1">
             <div class="form-group">
-                   <br>
-                    <input type="text" name="i2"  class="form-control" value="" placeholder="">
+            <input type="text" name="p1"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
             </div>
         </div>
     <br>
-        <div class="col-sm-3">
+         <!--Indicador 2-->
+        <div class="col-sm-2">
         <div class="form-group">
-                 <br>
-                <input type="text" name="i3"  class="form-control" value="" placeholder="">
+             <input type="text" name="i2"  class="form-control" value="" placeholder="Indicador 2">
         </div>
          </div>
-
-         <div class="row">
-
-        <div class="col-sm-3">
-         <div class="form-group">
-                   <br>
-            <input type="text" name="i4"  class="form-control" value="" placeholder="">
-         </div>
-        </div>
-    <br>
-        <div class="col-sm-3">
+     <div class="col-sm-1">
             <div class="form-group">
-                 <br>
-                <input type="text" name="i5"  class="form-control" value="" placeholder="">
+            <input type="text" name="p2"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
             </div>
         </div>
     <br>
-        <div class="col-sm-3">
+         <!--Indicador 3-->
+            <div class="col-sm-2">
         <div class="form-group">
-             <br>
-            <input type="text" name="i6"  class="form-control" value="" placeholder="">
+             <input type="text" name="i3"  class="form-control" value="" placeholder="Indicador 3">
         </div>
          </div>
-
+     <div class="col-sm-1">
+            <div class="form-group">
+            <input type="text" name="p3"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
+            </div>
+        </div>
+    <br>
+</div>
+ <div class="row">
+       <!--Indicador 4-->
+            <div class="col-sm-2">
+        <div class="form-group">
+                  <br>
+            <input type="text" name="i4"  class="form-control" value="" placeholder="Indicador 4">
+        </div>
+         </div>
+     <div class="col-sm-1">
+            <div class="form-group">
+                      <br>
+            <input type="text" name="p4"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
+            </div>
+        </div>
+    <br>
+        <!--Indicador 5-->
+        <div class="col-sm-2">
+        <div class="form-group">
+                  <br>
+            <input type="text" name="i5"  class="form-control" value="" placeholder="Indicador 5">
+        </div>
+         </div>
+     <div class="col-sm-1">
+            <div class="form-group">
+                      <br>
+            <input type="text" name="p5"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
+            </div>
+        </div>
+    <br>
+       <!--Indicador 6-->
+        <div class="col-sm-2">
+        <div class="form-group">
+                  <br>
+            <input type="text" name="i6"  class="form-control" value="" placeholder="Indicador 6">
+        </div>
+         </div>
+     <div class="col-sm-1">
+            <div class="form-group">
+                      <br>
+            <input type="text" name="p6"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
+            </div>
+        </div>
 <br>
-		<center><h1>Lista de Alumnos Matriculados:</h1></center>
 </div>
-        <div class="col-sm-10">
-<table class="table table-hover table-striped table-bordered">
-		<thead style="background-color: grey; color: white;">
-			<th>Apellido</th>
-			<th>Nombre</th>
-			<th>Puntaje Logrado</th>
-		</thead>
-		<tbody>
-     {% for alumno in alumnos %}
-     <tr>
-     <td><input type="checkbox" value="{{alumno.0}}" name="idalum" class="invisible" checked>
-         {{ alumno.2 }}</td>
-     <td>{{ alumno.1 }}</td>
-     <td>
-     <span style="font-size: 24px; color: green;">
-         <input type="text" name="punt_a" class="form-control" placeholder="Puntaje">
-     </span>
-     </td>
-     </tr>
+  <div class="row">
+       <!--Indicador 7-->
+      <div class="col-sm-2">
+        <div class="form-group">
+                  <br>
+            <input type="text" name="i7"  class="form-control" value="" placeholder="Indicador 7">
+        </div>
+      </div>
+            <div class="col-sm-1">
+            <div class="form-group">
+                      <br>
+            <input type="text" name="p7"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
+            </div>
+        </div>
+      <!--Indicador 8-->
+      <div class="col-sm-2">
+        <div class="form-group">
+                  <br>
+            <input type="text" name="i8"  class="form-control" value="" placeholder="Indicador 8">
+        </div>
+      </div>
+            <div class="col-sm-1">
+            <div class="form-group">
+                      <br>
+            <input type="text" name="p8"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
+            </div>
+        </div>
+       <!--Indicador 9-->
+      <div class="col-sm-2">
+        <div class="form-group">
+                  <br>
+            <input type="text" name="i9"  class="form-control" value="" placeholder="Indicador 9">
+        </div>
+      </div>
+            <div class="col-sm-1">
+            <div class="form-group">
+                      <br>
+            <input type="text" name="p9"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
+            </div>
+        </div>
+</div>
+           <div class="row">
+       <!--Indicador 10-->
+      <div class="col-sm-2">
+        <div class="form-group">
+                  <br>
+            <input type="text" name="i10"  class="form-control" value="" placeholder="Indicador 10">
+            <br>
+                <input type="submit" name="submit" value="Siguiente" class="btn btn-success">
+        </div>
+      </div>
+            <div class="col-sm-1">
+            <div class="form-group">
+                      <br>
+            <input type="text" name="p10"  class="form-control" value="" placeholder="Puntaje" style="width : 80px; heigth : 5px">
 
-    {% endfor %}
-    </tbody>
-	</table>
-    </div>
+            </div>
+        </div>
+
+
+          <div class="col-sm-1">
+            <div class="form-group">
+                <br>
+                  </div>
+        </div>
+</div>
  </div>
-    <center><input type="submit" name="submit" value="Cargar Proceso" class="btn btn-success"></center>
-</div>
+            </div>
     </div>
-  </div>
-</div>
 </form>
 {% endif %}
 {% endblock %}
