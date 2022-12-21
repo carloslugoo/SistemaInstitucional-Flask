@@ -428,7 +428,6 @@ def proceso():
     fecha = datetime.strftime(fecha, '%Y/%m/%d')
     if idmaterias != 0 and create == True:
       if idcurso !=0:
-
         clavet = crearclavet()
         #Guardamos el trabajo
         mycursor = mydb.cursor()
@@ -545,7 +544,7 @@ def cargarpuntaje():
   print(idtra)
   # Saca el trabajo
   mycursor = mydb.cursor()
-  sql = "SELECT des_t, pun_t, id_materia, id_curso FROM trabajos WHERE id_trabajo = %s"
+  sql = "SELECT id_trabajo, des_t, pun_t, id_materia, id_curso FROM trabajos WHERE id_trabajo = %s"
   val = [idtra]
   mycursor.execute(sql, val)
   trabajos = mycursor.fetchall()
@@ -563,25 +562,41 @@ def cargarpuntaje():
   print(alumnos)
   # Saca el curso:
   sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
-  val = [trabajos[3]]
+  val = [trabajos[4]]
   mycursor.execute(sql, val)
   cursos = mycursor.fetchall()
   cursos = cursos[0]
   print(cursos)
   if request.method == 'POST':
+    puntajes = []
+    create = True
     idalumnos = request.form.getlist(('idalum'))
-    puntalum = request.form.getlist(('punt_a'))
+    for x in range(1, 11):
+      #Comprueba que no te olvides de cargar ningun indicador
+      if request.form.getlist(('{}'.format(x))):
+        print(request.form.getlist(('{}'.format(x))))
+        if len(request.form.getlist(('{}'.format(x)))) == len(alumnos):
+          create = True
+        else:
+          create = False
+          print("No se cargaron todos los indicadores")
+    if create == True:
+      for x in range(1, 11):
+        print(request.form.getlist(('{}'.format(x))))
+        if request.form.getlist(('{}'.format(x))):
+          aux1 = indicadores[x - 1]
+          aux2 = request.form.getlist(('{}'.format(x)))
+          for a in range(0, len(alumnos)):
+            aux3 = alumnos[a]
+            aux4 = aux2[a]
+            puntajes.append(aux4)
+            mycursor.execute(
+              'INSERT INTO indxalum (id_indicador, id_trabajo, id_alumno, pun_l) VALUES (%s, %s, %s, %s)',
+              (aux1[0], trabajos[0], aux3[0], aux4))
+            mydb.commit()
+                    
+    print(idalumnos)
 
-    ind1 = request.form.getlist(('1'))
-    ind2 = request.form.getlist(('2'))
-    ind3 = request.form.getlist(('3'))
-    ind4 = request.form.getlist(('4'))
-    ind5 = request.form.getlist(('5'))
-    print(ind1)
-    print(ind2)
-    print(ind3)
-    print(ind4)
-    print(ind5)
   return render_template('cargartrabajo.html', datos = datos, trabajo = trabajos, alumnos = alumnos, indicadores= indicadores,
                          cursos = cursos)
 
