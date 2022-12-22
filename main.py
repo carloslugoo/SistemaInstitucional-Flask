@@ -583,15 +583,19 @@ def cargarpuntaje(id):
       for y in range(1, len(indicadores) + 1):
         aux2 = indicadores[y - 1]
         print(aux2)
+
         if y == 1:
           pl = 0
           #print("Alumno {}".format(alumnos[x]))
         aux = request.form.getlist(('{a}{i}'.format(a = x + 1, i = y)))
+        print('{a}{i}'.format(a=x + 1, i=y))
         print(aux)
+        p = int(aux[0])
+        print(p)
         pl +=int(aux[0])
         mycursor.execute(
           'INSERT INTO indxalum (id_indicador, id_trabajo, id_alumno, pun_l) VALUES (%s, %s, %s, %s)',
-          (aux2[0], trabajos[0], aux1[0], int(aux[0])))
+          (aux2[0], trabajos[0], aux1[0], p))
         mydb.commit()
         if y == len(indicadores):
           puntajes.append(pl)
@@ -606,9 +610,9 @@ def cargarpuntaje(id):
         'INSERT INTO traxalum (id_alumno, pun_l, fec_t, id_trabajo) VALUES (%s, %s, %s, %s)',
         (aux1[0], aux2, fecha, trabajos[0]))
       mydb.commit()
-      global band
-      band = 1
-      return redirect(url_for('proceso'))
+    global band
+    band = 1
+    return redirect(url_for('proceso'))
   return render_template('cargartrabajo.html', datos = datos, trabajo = trabajos, alumnos = alumnos, indicadores= indicadores,
                          cursos = cursos)
 
