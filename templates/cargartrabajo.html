@@ -8,7 +8,7 @@
 {% block content %}
    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
       <div class="col-md-6 px-0">
-          <h1  class="display-15 fst-italic"> <i class="bi bi-clipboard-plus"></i> Trabajo: {{trabajo.0}}.   Puntaje Total: {{trabajo.1}}  </h1>
+          <h1  class="display-15 fst-italic"> <i class="bi bi-clipboard-plus"></i> Trabajo: {{trabajo.1}}.   Puntaje Total: {{trabajo.2}}  </h1>
           <p>Curso: {{cursos.1}}, {{cursos.2}}, {{cursos.3}}</p>
       </div>
     </div>
@@ -17,7 +17,7 @@
           <h1  class="display-15 fst-italic">Lista de alumnos matriculados </h1>
       </div>
     </div>
-<form method="POST" action="/cargarpuntaje">
+<form method="POST" action="/cargarpuntaje/{{trabajo.0}}">
 {% set counti = namespace(value=0) %}
 {% set count = namespace(value=0) %}
 {% set counta = namespace(value=0) %}
@@ -38,8 +38,8 @@
         <input type="checkbox" value="{{alumno.0}}" name="idalum" class="invisible" checked></td>
           {%for indicador in indicadores%}
          {% set count.value = count.value + 1 %}
-     <td>L: <input type="checkbox" value="1" name="{{count.value}}" class="visible" unchecked>
-     NL: <input type="checkbox" value="0" name="{{count.value}}" class="visible" unchecked>
+     <td>{{counta.value}}{{count.value}} L:  <input type="radio" name="{{counta.value}}{{count.value}}" id="option1" value="{{indicador.2}}">  </input>
+      NL: <input type="radio" name="{{counta.value}}{{count.value}}" id="option2" value="0">  </input>
      </span>
      </td>
 

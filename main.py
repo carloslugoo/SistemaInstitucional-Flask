@@ -301,7 +301,11 @@ def proceso():
   cantm = 0
   global user_datos
   global tipoins
+  #Mensajes flash
   global band
+  if band == 1:
+    flash("car","car")
+    band = 0
   global cursos
   global alumnos
   for x in range(0, len(profe)):
@@ -417,50 +421,49 @@ def proceso():
     #Comprobar si el puntaje de los indicadores es mayor que el puntaje del trabajo o si no esta completo
     if tt > puntaje_t:
       create = False
-      print("Es mayor")
+      flash("pun_m", "pun_m")
       #flash("")
     if tt != puntaje_t:
       create = False
       print("El puntaje no coincide")
-      #flash("")
+      flash("pun_m", "pun_m")
     global idmaterias
     fecha = datetime.now()
     fecha = datetime.strftime(fecha, '%Y/%m/%d')
-    if idmaterias != 0 and create == True:
+    if idmaterias != 0:
       if idcurso !=0:
-        clavet = crearclavet()
-        #Guardamos el trabajo
-        mycursor = mydb.cursor()
-        mycursor.execute(
-          'INSERT INTO trabajos (fec_t, des_t, pun_t, id_profesor, id_materia, tipo_t, clave_t, id_curso, etapa) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
-          (fecha, nombre_t, puntaje_t, datos[0], idmaterias, tipo_t, clavet, idcurso, etapa_t))
-        mydb.commit()
-        # Saca el id del trabajo
-        sql = "SELECT id_trabajo, id_curso FROM trabajos WHERE id_materia = %s and id_profesor = %s and fec_t = %s and des_t= %s and pun_t = %s and tipo_t = %s and clave_t = %s"
-        val = [idmaterias, datos[0], fecha, task.nombre.data, task.puntaje.data, tipo_t, clavet]
-        mycursor.execute(sql, val)
-        idtra = mycursor.fetchall()
-        idtra = idtra[0]
-        print(idtra[0])
-        #Guarda los indicadores
-        for x in range(0, len(puntaje_i)):
-          aux = indicadores[x]
-          aux2 = puntaje_i[x]
-          #print(aux)
-          #print(aux2)
+        if create == True:
+          clavet = crearclavet()
+          #Guardamos el trabajo
+          mycursor = mydb.cursor()
           mycursor.execute(
-            'INSERT INTO indicadores (des_i, pun_i, id_trabajo) VALUES (%s, %s, %s)',
-            (aux, aux2, idtra[0]))
+            'INSERT INTO trabajos (fec_t, des_t, pun_t, id_profesor, id_materia, tipo_t, clave_t, id_curso, etapa) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
+            (fecha, nombre_t, puntaje_t, datos[0], idmaterias, tipo_t, clavet, idcurso, etapa_t))
           mydb.commit()
-        user_datos = idtra[0]
-        return redirect(url_for('cargarpuntaje'))
+          # Saca el id del trabajo
+          sql = "SELECT id_trabajo, id_curso FROM trabajos WHERE id_materia = %s and id_profesor = %s and fec_t = %s and des_t= %s and pun_t = %s and tipo_t = %s and clave_t = %s"
+          val = [idmaterias, datos[0], fecha, task.nombre.data, task.puntaje.data, tipo_t, clavet]
+          mycursor.execute(sql, val)
+          idtra = mycursor.fetchall()
+          idtra = idtra[0]
+          print(idtra[0])
+          #Guarda los indicadores
+          for x in range(0, len(puntaje_i)):
+            aux = indicadores[x]
+            aux2 = puntaje_i[x]
+            #print(aux)
+            #print(aux2)
+            mycursor.execute(
+              'INSERT INTO indicadores (des_i, pun_i, id_trabajo) VALUES (%s, %s, %s)',
+              (aux, aux2, idtra[0]))
+            mydb.commit()
+            print(idtra[0])
+          return redirect(url_for('cargarpuntaje', id = idtra[0]))
       else:
         # Errorsito
-        cargar = False
         flash("Error", "cur")
     else:
       # Errorsito
-      cargar = False
       flash("Error", "mat")
 
 
@@ -521,7 +524,6 @@ def alumnosproceso():
     sql = "SELECT alumnos.id_alumno,nmb_a, ape_a FROM alumnos, " \
           "matxalum WHERE matxalum.id_curso =%s and alumnos.id_alumno = matxalum.id_alumno " \
           "and matxalum.id_materia = %s"
-
     val = [id_curso, idmaterias]
     mycursor.execute(sql, val)
     global idcurso
@@ -536,11 +538,10 @@ def alumnosproceso():
     alumnos = data
   return redirect(url_for('proceso'))
 
-@app.route('/cargarpuntaje', methods =  ['GET', 'POST'])# Carga de trabajo y indicadores ✔
-def cargarpuntaje():
+@app.route('/cargarpuntaje/<int:id>', methods =  ['GET', 'POST'])# Carga de trabajo y indicadores ✔
+def cargarpuntaje(id):
   datos = session['username']
-  global user_datos
-  idtra = user_datos
+  idtra = id
   print(idtra)
   # Saca el trabajo
   mycursor = mydb.cursor()
@@ -557,7 +558,13 @@ def cargarpuntaje():
   indicadores = mycursor.fetchall()
   print(indicadores)
   # Saca los alumnos
-  global alumnos
+  mycursor = mydb.cursor()
+  sql = "SELECT alumnos.id_alumno,nmb_a, ape_a FROM alumnos, " \
+        "matxalum WHERE matxalum.id_curso =%s and alumnos.id_alumno = matxalum.id_alumno " \
+        "and matxalum.id_materia = %s"
+  val = [trabajos[4], trabajos[3]]
+  mycursor.execute(sql, val)
+  alumnos = mycursor.fetchall()
   alumnos = sorted(alumnos, key=lambda alumnos: alumnos[2])
   print(alumnos)
   # Saca el curso:
@@ -569,34 +576,39 @@ def cargarpuntaje():
   print(cursos)
   if request.method == 'POST':
     puntajes = []
-    create = True
-    idalumnos = request.form.getlist(('idalum'))
-    for x in range(1, 11):
-      #Comprueba que no te olvides de cargar ningun indicador
-      if request.form.getlist(('{}'.format(x))):
-        print(request.form.getlist(('{}'.format(x))))
-        if len(request.form.getlist(('{}'.format(x)))) == len(alumnos):
-          create = True
-        else:
-          create = False
-          print("No se cargaron todos los indicadores")
-    if create == True:
-      for x in range(1, 11):
-        print(request.form.getlist(('{}'.format(x))))
-        if request.form.getlist(('{}'.format(x))):
-          aux1 = indicadores[x - 1]
-          aux2 = request.form.getlist(('{}'.format(x)))
-          for a in range(0, len(alumnos)):
-            aux3 = alumnos[a]
-            aux4 = aux2[a]
-            puntajes.append(aux4)
-            mycursor.execute(
-              'INSERT INTO indxalum (id_indicador, id_trabajo, id_alumno, pun_l) VALUES (%s, %s, %s, %s)',
-              (aux1[0], trabajos[0], aux3[0], aux4))
-            mydb.commit()
-                    
-    print(idalumnos)
-
+    pl = 0
+    for x in range(0, len(alumnos)):
+      aux1 = alumnos[x]
+      print(aux1)
+      for y in range(1, len(indicadores) + 1):
+        aux2 = indicadores[y - 1]
+        print(aux2)
+        if y == 1:
+          pl = 0
+          #print("Alumno {}".format(alumnos[x]))
+        aux = request.form.getlist(('{a}{i}'.format(a = x + 1, i = y)))
+        print(aux)
+        pl +=int(aux[0])
+        mycursor.execute(
+          'INSERT INTO indxalum (id_indicador, id_trabajo, id_alumno, pun_l) VALUES (%s, %s, %s, %s)',
+          (aux2[0], trabajos[0], aux1[0], int(aux[0])))
+        mydb.commit()
+        if y == len(indicadores):
+          puntajes.append(pl)
+    print(puntajes)
+    fecha = datetime.now()
+    fecha = datetime.strftime(fecha, '%Y')
+    print(fecha)
+    for x in range(0, len(alumnos)):
+      aux1 = alumnos[x]
+      aux2 = puntajes[x]
+      mycursor.execute(
+        'INSERT INTO traxalum (id_alumno, pun_l, fec_t, id_trabajo) VALUES (%s, %s, %s, %s)',
+        (aux1[0], aux2, fecha, trabajos[0]))
+      mydb.commit()
+      global band
+      band = 1
+      return redirect(url_for('proceso'))
   return render_template('cargartrabajo.html', datos = datos, trabajo = trabajos, alumnos = alumnos, indicadores= indicadores,
                          cursos = cursos)
 
