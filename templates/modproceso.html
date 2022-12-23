@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Modificar Trabajos de Proceso</title>
+    <title>{% block title %}Modificar Trabajos de Procesos{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -25,24 +25,63 @@
                 {% endfor %}
             {% endif %}
         {% endwith  %}
-<div class="p-3 p-md-3 mb-3 rounded text-bg-dark">
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar Trabajos de Proceso</h1>
     </div>
-  </div>
-<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
-    <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> </i> Ultimos trajos cargados</h1>
-    </div>
 </div>
 
+<div class="row">
+    <div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/modificarproceso">
+                <label>Filtrar por etapa:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Primera Etapa</option>
+                    <option value="2">Segunda Etapa</option>
+                    <option value="3">Ultimos trabajos cargados</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver trabajos" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+  </div>
+<br>
+{%if filtro == 0%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> </i> Ultimos trabajos cargados</h1>
+    </div>
+</div>
+{%endif%}
+{%if filtro == 1%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> </i> Primera Etapa</h1>
+    </div>
+</div>
+{%endif%}
+{%if filtro == 2%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> </i> Segunda Etapa</h1>
+    </div>
+</div>
+{%endif%}
+
+{% set count = namespace(value=0) %}
+     {% for trabajo in trabajos %}
+    {% set count.value = count.value + 1 %}
+          {% endfor %}
   <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Curso</th>
             <th>Materia</th>
-            <th>Nombre del Trabajo</th>
+            <th>Titulo del Trabajo</th>
+            <th>Etapa</th>
             <th>Puntaje</th>
             <th>Fecha</th>
             <th>Modificar</th>
@@ -52,6 +91,11 @@
      <td>{{trabajo.7}}, {{trabajo.8}}</td>
      <td>{{trabajo.5}}</td>
     <td>{{trabajo.2}} </td>
+     {% if trabajo.9 == 1 %}
+    <td>Primera Etapa</td>
+     {%else%}
+      <td>Segunda Etapa</td>
+     {%endif%}
      <td>{{trabajo.3}}</td>
      <td>{{trabajo.1}}</td>
            <td> <center><a class="btn btn-secondary" role="button" href="/modificarproceso/{{trabajo.0}}"><i class="bi bi-clipboard2-check"></i></a></center></td>
@@ -62,8 +106,6 @@
     </div>
   </div>
     <br>
-
-
 
 {% endblock %}
 </body>

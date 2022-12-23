@@ -1318,7 +1318,7 @@ def cerrarsesion():
   if 'username' in session:
     session.pop('username')
   return redirect(url_for('login'))
-@app.route('/modificarproceso')
+@app.route('/modificarproceso', methods = ['GET', 'POST'])
 def modproceso():
   global band
   if band == 1:
@@ -1327,13 +1327,32 @@ def modproceso():
   datos = session['username']
   mycursor = mydb.cursor()
   print(datos)
-  sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and " \
+  sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and " \
         "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
   val = [datos[0]]
   mycursor.execute(sql, val)
   trabajos = mycursor.fetchall()
   print(trabajos)
-  return render_template('modproceso.html', datos=datos, trabajos = trabajos)
+  if request.method == 'POST':
+    filtro = int(request.form.get(('idfiltro')))
+    print(filtro)
+    if filtro == 1:
+      sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and etapa = %s and " \
+            "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
+      val = [datos[0], filtro]
+      mycursor.execute(sql, val)
+      trabajos = mycursor.fetchall()
+    if filtro == 2:
+      sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and etapa = %s and " \
+            "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
+      val = [datos[0], filtro]
+      mycursor.execute(sql, val)
+      trabajos = mycursor.fetchall()
+    if filtro == 3:
+      return redirect(url_for('modproceso'))
+    print(trabajos)
+    return render_template('modproceso.html', datos=datos, trabajos=trabajos, filtro = filtro)
+  return render_template('modproceso.html', datos=datos, trabajos = trabajos, filtro = 0)
 
 @app.route('/modificarproceso/<int:id>', methods = ['GET', 'POST'])
 def modificarproceso2(id):
