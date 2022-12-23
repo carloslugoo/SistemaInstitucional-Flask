@@ -81,6 +81,7 @@
 			<th>Curso</th>
             <th>Materia</th>
             <th>Titulo del Trabajo</th>
+            <th>Tipo de Trabajo</th>
             <th>Etapa</th>
             <th>Puntaje</th>
             <th>Fecha</th>
@@ -91,10 +92,19 @@
      <td>{{trabajo.7}}, {{trabajo.8}}</td>
      <td>{{trabajo.5}}</td>
     <td>{{trabajo.2}} </td>
+    {% if trabajo.6 == 'tra_pro' %}
+      <td>Trabajo de Proceso</td>
+   {%endif%}
+    {% if trabajo.6  == 'tra_pru' %}
+      <td>Prueba</td>
+    {%endif%}
+    {% if trabajo.6  == 'tra_exa' %}
+      <td>Prueba</td>
+    {%endif%}
      {% if trabajo.9 == 1 %}
     <td>Primera Etapa</td>
      {%else%}
-      <td>Segunda Etapa</td>
+    <td>Segunda Etapa</td>
      {%endif%}
      <td>{{trabajo.3}}</td>
      <td>{{trabajo.1}}</td>
@@ -106,7 +116,6 @@
     </div>
   </div>
     <br>
-
 {% endblock %}
 </body>
 </html>

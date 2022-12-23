@@ -545,7 +545,7 @@ def cargarpuntaje(id):
   print(idtra)
   # Saca el trabajo
   mycursor = mydb.cursor()
-  sql = "SELECT id_trabajo, des_t, pun_t, id_materia, id_curso FROM trabajos WHERE id_trabajo = %s"
+  sql = "SELECT id_trabajo, des_t, pun_t, id_materia, id_curso, id_profesor, etapa FROM trabajos WHERE id_trabajo = %s"
   val = [idtra]
   mycursor.execute(sql, val)
   trabajos = mycursor.fetchall()
@@ -577,21 +577,21 @@ def cargarpuntaje(id):
   if request.method == 'POST':
     puntajes = []
     pl = 0
+    #Carga de indicador por alumno, puntaje logrado por indicador y acumular puntaje total logrado
     for x in range(0, len(alumnos)):
       aux1 = alumnos[x]
-      print(aux1)
+      #print(aux1)
       for y in range(1, len(indicadores) + 1):
         aux2 = indicadores[y - 1]
-        print(aux2)
-
+        #print(aux2)
         if y == 1:
           pl = 0
           #print("Alumno {}".format(alumnos[x]))
         aux = request.form.getlist(('{a}{i}'.format(a = x + 1, i = y)))
-        print('{a}{i}'.format(a=x + 1, i=y))
-        print(aux)
+        #print('{a}{i}'.format(a=x + 1, i=y))
+        #print(aux)
         p = int(aux[0])
-        print(p)
+        #print(p)
         pl +=int(aux[0])
         mycursor.execute(
           'INSERT INTO indxalum (id_indicador, id_trabajo, id_alumno, pun_l) VALUES (%s, %s, %s, %s)',
@@ -602,14 +602,27 @@ def cargarpuntaje(id):
     print(puntajes)
     fecha = datetime.now()
     fecha = datetime.strftime(fecha, '%Y')
-    print(fecha)
+    #print(fecha)
     for x in range(0, len(alumnos)):
       aux1 = alumnos[x]
       aux2 = puntajes[x]
+      #Cargando el trabajo al alumno con su puntaje logrado
       mycursor.execute(
         'INSERT INTO traxalum (id_alumno, pun_l, fec_t, id_trabajo) VALUES (%s, %s, %s, %s)',
         (aux1[0], aux2, fecha, trabajos[0]))
       mydb.commit()
+      #Sumando a su puntaje acumulado
+      if trabajos[6] == 1: #Primera Etapa..
+        sql = "UPDATE matxalum SET pun_ac = (pun_ac + %s) WHERE id_alumno = %s and id_materia = %s and id_curso = %s and id_profesor = %s"
+        val = (aux2, aux1[0],  trabajos[3], trabajos[4], trabajos[5])
+        mycursor.execute(sql, val)
+        mydb.commit()
+      if trabajos[6] == 2:
+        sql = "UPDATE matxalum SET pun_ac2 = (pun_ac2 + %s) WHERE id_alumno = %s and id_materia = %s and id_curso = %s and id_profesor = %s"
+        val = (aux2, aux1[0], trabajos[3], trabajos[4], trabajos[5])
+        mycursor.execute(sql, val)
+        mydb.commit()
+    #Mandar mensaje flash..
     global band
     band = 1
     return redirect(url_for('proceso'))
