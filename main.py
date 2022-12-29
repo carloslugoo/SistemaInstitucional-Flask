@@ -1459,11 +1459,11 @@ def modificarpuntaje(id):
   create = True
   #Para mandar mensajes
   global band
+  # Comprueba que la variable global este funcionando correctamente
+  if not alumnos:
+    band = 2
+    return redirect(url_for('modificarproceso2', id=id))
   if request.method == 'POST':
-  #Comprueba que la variable global este funcionando correctamente
-    if not alumnos:
-      band = 2
-      return redirect(url_for('modificarproceso', id = id))
     puntajes = []
     pl = 0
     #Comprobar que se hayan cargado todos los indicadores
@@ -1524,11 +1524,12 @@ def modificarpuntaje(id):
             mydb.commit()
           else:
             print('menos')
+            ac *= -1 #sino no  resta bien el acumulado
             sql = "UPDATE matxalum SET pun_ac = (pun_ac - %s) WHERE id_alumno = %s and id_materia = %s and id_profesor = %s"  # Saco mas puntaje
             val = (ac, aux1[0], trabajos[3], trabajos[5])
             mycursor.execute(sql, val)
             mydb.commit()
-        if trabajos[6] == 2:
+        if trabajos[6] == 2: #Segunda
           if ac > 0:
             print('mas')
             sql = "UPDATE matxalum SET pun_ac2 = (pun_ac2 + %s) WHERE id_alumno = %s and id_materia = %s and id_profesor = %s"  # Saco mas puntaje
@@ -1537,12 +1538,13 @@ def modificarpuntaje(id):
             mydb.commit()
           else:
             print('menos')
+            ac *= -1 #sino no  resta bien el acumulado
             sql = "UPDATE matxalum SET pun_ac2 = (pun_ac2 - %s) WHERE id_alumno = %s and id_materia = %s and id_profesor = %s"  # Saco mas puntaje
             val = (ac, aux1[0], trabajos[3], trabajos[5])
             mycursor.execute(sql, val)
             mydb.commit()
             band = 1
-            return redirect(url_for('modificarproceso', id=id))
+        return redirect(url_for('modificarproceso2', id=id))
     else:
       flash("error", "error")
   return render_template('modproceso3.html', datos=datos, trabajos =trabajos, indicadores = indicadores, alumnos=user_datos)
