@@ -1,0 +1,76 @@
+{% extends 'baseprof.html' %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+      <title>{% block title %}Modificar Trabajos de Procesos{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+<!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                     {% if category == 'error' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Un alumno tiene seleccionado un indicador!',
+  								text: 'No se realizo ningun cambio...'
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar Trabajos de Proceso</h1>
+    </div>
+  </div>
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"></i>Trabajo: {{trabajos.1}}. Puntaje Total: {{trabajos.2}}</h1>
+    </div>
+</div>
+<form method="POST" action="/modificarpuntaje/{{trabajos.0}}">
+{% set counti = namespace(value=0) %}
+{% set count = namespace(value=0) %}
+{% set counta = namespace(value=0) %}
+      <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th></th>
+            {%for indicador in indicadores%}
+             {% set counti.value = counti.value + 1 %}
+			<th>{{indicador.1}}</th>
+            {%endfor%}
+		</thead>
+		<tbody>
+     {% for alumno in alumnos %}
+      {% set counta.value = counta.value + 1 %}
+     <tr>
+     <td>{{counta.value}}. {{ alumno.2 }}, {{ alumno.1 }}
+        <input type="checkbox" value="{{alumno.0}}" name="idalum" class="invisible" checked></td>
+          {%for indicador in indicadores%}
+         {% set count.value = count.value + 1 %}
+     <td> L:  <input type="radio" name="{{counta.value}}{{count.value}}" id="option1" value="{{indicador.2}}">  </input>
+      NL: <input type="radio" name="{{counta.value}}{{count.value}}" id="option2" value="0">  </input>
+     </span>
+     </td>
+     	{%endfor%}
+         {%if count.value == counti.value%}
+         {% set count.value = count.value - counti.value%}
+        {%endif%}
+     <tr>
+    {%endfor%}
+</table>
+</div>
+      <a href="/modificarproceso/{{trabajos.0}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Atrás</i></a>
+     <input type="submit" name="submit" value="Guardar Puntajes" class="btn btn-success">
+</form>
+{% endblock %}
+</body>
+</html>

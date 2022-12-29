@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Modificar Trabajos de Proceso</title>
+      <title>{% block title %}Modificar Trabajos de Procesos{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -49,47 +49,62 @@
                             })
                         </script>
                     {%endif%}
+                    {% if category == 'error' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Un alumno tiene seleccionado un indicador!',
+  								text: 'No se realizo ningun cambio...'
+                            })
+                        </script>
+                    {%endif%}
+                    {% if category == 'ocurrio' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Ocurrio un error, intentelo de nuevo!..',
+                            })
+                        </script>
+                    {%endif%}
                 {% endfor %}
             {% endif %}
         {% endwith  %}
-<div class="p-3 p-md-3 mb-3 rounded text-bg-dark">
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar Trabajos de Proceso</h1>
     </div>
   </div>
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> </i> {{trabajos.0}} Puntaje Total: {{trabajos.1}}</h1>
+       <h1 class="display-9 fst-italic"></i>Trabajo: {{trabajos.0}}. Puntaje Total: {{trabajos.1}}</h1>
     </div>
 </div>
- <form method="POST" action="/modificarproceso/{{id}}">
+{% set counta = namespace(value=0) %}
+ <form method="POST" action="/modificarproceso/{{trabajos.4}}">
   <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Apellido</th>
-            <th>Nombre</th>
+			<th>Alumno</th>
             <th>Puntaje Logrado </th>
+            <th>Modificar Puntaje </th>
 		</thead>
         {% for data in datas %}
+       {% set counta.value = counta.value + 1 %}
        <tr>
-     <td>{{data.1}}</td>
-     <td>{{data.0}}</td>
-    <td><input type="text" name="punt_a" class="form-control" value="{{data.4}}"></td>
+     <td>{{counta.value}}. {{data.1}}, {{data.0}}</td>
+    <td>{{data.4}}</td>
+      <td> <center><input type="checkbox" value="{{data.3}}" name="idalum" class="visible" unchecked></center></td>
        </tr>
         {% endfor %}
-
     </tbody>
 	</table>
     </div>
   </div>
-
-    <br>
      <a href="/modificarproceso" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Atrás</i></a>
-   <input type="submit" name="submit" value="Actualizar Puntajes" class="btn btn-success">
-
-
+   <input type="submit" name="submit" value="Modificar puntajes seleccionados" class="btn btn-success">
  </form>
+
 {% endblock %}
 </body>
 </html>
