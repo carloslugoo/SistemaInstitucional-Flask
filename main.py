@@ -1562,23 +1562,88 @@ def miscursos():
   print(mat)
   return render_template('miscursos.html', datos = datos, materias = mat)
 
-@app.route('/veralum/<int:id>') #Ver los alumnos matriculados con sus cal y puntajes
+@app.route('/veralum/<int:id>', methods = ['GET', 'POST']) #Ver los alumnos matriculados con sus cal y puntajes
 def misalumnos(id):
   datos = session['username']
   mycursor = mydb.cursor()
-  sql = "SELECT id_mxa, matxalum.id_alumno, matxalum.id_materia, cal, matxalum.id_curso, pun_ac, des_m, des_c, des_e , nmb_a, ape_a" \
+  #Saca los datos del alumno, los nombres y puntajes obtenidos en la materia
+  sql = "SELECT id_mxa, matxalum.id_alumno, matxalum.id_materia, cal, matxalum.id_curso, pun_ac, des_m, des_c, des_e , nmb_a, ape_a, pun_ac2, cal2" \
         " FROM matxalum, materias, cursos, enfasis, alumnos WHERE id_profesor = %s and matxalum.id_materia = %s and matxalum.id_materia = materias.id_materia " \
         "and matxalum.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis and matxalum.id_alumno = alumnos.id_alumno"
   val = [datos[0], id]
   mycursor.execute(sql, val)
   mat = mycursor.fetchall()
+  #Saco los datos de la materia del vector...
   for x in range(0, 1):
     aux = mat[x]
     data = aux
     print(data)
+  #Ordena alfabetaicamente los alumnos del vector...
   mat = sorted(mat, key=lambda mat: mat[10])
   print(mat)
-  return render_template('misalumnos.html', datos = datos, materias = mat, data = data)
+  #Saca el total de puntos en la primera etapa
+  sql = "SELECT id_trabajo, pun_t FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s and etapa = %s"
+  val = [datos[0], id, data[4], 1]
+  mycursor.execute(sql, val)
+  trabajosp = mycursor.fetchall()
+  total_p = 0
+  print(trabajosp)
+  for x in range(0, len(trabajosp)):
+    aux = trabajosp[x]
+    aux = aux[1]
+    total_p += aux
+  print(total_p)
+  # Saca el total de puntos en la segunda etapa
+  sql = "SELECT id_trabajo, pun_t FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s and etapa = %s"
+  val = [datos[0], id, data[4], 2]
+  mycursor.execute(sql, val)
+  trabajoss = mycursor.fetchall()
+  total_s = 0
+  #print(trabajoss)
+  for x in range(0, len(trabajoss)):
+    aux = trabajoss[x]
+    aux = aux[1]
+    total_s += aux
+  #print(total_s)
+  #Alumnos criticos y buenos en primera etapa
+  criticos_p = []
+  bien_p = []
+  estado = (70 * total_p) / 100  # Calcula el 70% del total
+  print(estado)
+  for x in range(0, len(mat)):
+    aux = mat[x]
+    aux2 = aux[5] #Puntaje primera etapa
+    if aux2 >= estado:
+      bien_p.append(aux)
+    else:
+      criticos_p.append(aux)
+  print(criticos_p)
+  print(bien_p)
+  # Alumnos criticos y buenos en segunda etapa
+  criticos_s = []
+  bien_s = []
+  estado2 = (70 * total_s) / 100  # Calcula el 70% del total
+  print(estado2)
+  for x in range(0, len(mat)):
+    aux3 = mat[x]
+    aux4 = aux3[11]  # Puntaje primera etapa
+    if aux4 >= estado2:
+      bien_s.append(aux3)
+    else:
+      criticos_s.append(aux3)
+  print(criticos_s)
+  print(bien_s)
+  if request.method == 'POST':
+    filtro = int(request.form.get(('idfiltro')))
+    #print(filtro)
+    if filtro == 1:
+      return render_template('misalumnos.html', datos=datos, materias=mat, data=data, filtro=1, id = id, criticos_p = criticos_p, bien_p = bien_p,
+                             criticos_s = criticos_s, bien_s = bien_s, total_s = total_s, total_p = total_p)
+    if filtro == 2:
+      return render_template('misalumnos.html', datos=datos, materias=mat, data=data, filtro=2, id = id, criticos_p = criticos_p, bien_p = bien_p,
+                             criticos_s = criticos_s, bien_s = bien_s, total_s = total_s, total_p = total_p )
+  return render_template('misalumnos.html', datos = datos, materias = mat, data = data, filtro = 0, id = id, criticos_p = criticos_p, bien_p = bien_p,
+                             criticos_s = criticos_s, bien_s = bien_s, total_s = total_s, total_p = total_p)
 
 
 @app.route('/crearseman') #Creacion de Semana de Clases
