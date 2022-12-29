@@ -7,11 +7,13 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <body>
 {% block content %}
+<div class="col-sm-10">
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-7 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-person-video3"></i> Alumnos Matriculados en {{data.6}}</h1>
         <p>Curso:  {{data.7}}, {{data.8}}</p>
     </div>
+</div>
 </div>
 <div class="row">
     <div class="col-md-3">
@@ -31,11 +33,13 @@
   </div>
 <br>
 {%if filtro == 0%}
+<div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-7 px-0">
            <h1 class="display-9 fst-italic">Ambas Etapas</h1>
     </div>
 </div>
+ </div>
 {% set counta = namespace(value=0) %}
   <div class="row">
     <div class="col-sm-10">
@@ -69,27 +73,165 @@
 	</table>
     </div>
   </div>
+<div class="col-sm-10">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Primera Etapa</h1>
+    </div>
+</div>
 <div class="row">
-    <div class="col-sm-5">
+    <div class="col-sm-6">
         <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-7 px-0">
            <h1 class="display-9 fst-italic">Estado critico</h1>
     </div>
 </div>
-     {% set counta = namespace(value=0) %}
-  <div class="row">
-    <div class="col-sm-2">
+ {% set countb = namespace(value=0) %}
+    <div class="col-sm-12">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Alumno</th>
-            <th>Puntaje primera etapa PT: {{total_p}}</th>
+            <th>Puntaje primera etapa</th>
+            <th>Calificación</th>
 		</thead>
-        {% for materia in critico_p %}
-          {% set counta.value = counta.value + 1 %}
+        {% for materia in criticos_p %}
+          {% set countb.value = countb.value + 1 %}
        <tr>
-     <td>{{counta.value}}. {{materia.10}}, {{materia.9}}</td>
+     <td>{{countb.value}}. {{materia.10}}, {{materia.9}}</td>
            <td>{{materia.5}}/{{total_p}}</td>
-            <td>{{materia.11}}/{{total_s}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+  </div>
+
+
+<div class="col-sm-6">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Buen rendimiento</h1>
+    </div>
+</div>
+      {% set countd = namespace(value=0) %}
+    <div class="col-sm-12">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje primera etapa</th>
+            <th>Calificación</th>
+		</thead>
+        {% for materia in bien_p %}
+          {% set countd.value = countd.value + 1 %}
+       <tr>
+     <td>{{countd.value}}. {{materia.10}}, {{materia.9}}</td>
+           <td>{{materia.5}}/{{total_p}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+  </div>
+    </div>
+ </div>
+<div class="col-sm-10">
+    <div class="row">
+        <div class="col-sm-6">
+                <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <center><canvas id="critico1" width="700" height="300"></canvas></center>
+        </div>
+      </div>
+   </div></center>
+
+    </div>
+        <div class="col-sm-6">
+          <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <canvas id="bien1" width="700" height="300"></canvas>
+        </div>
+      </div>
+   </div></center>
+        </div>
+</div>
+    </div>
+<div class="col-sm-10">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Segunda Etapa</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Estado critico</h1>
+    </div>
+</div>
+ {% set counte = namespace(value=0) %}
+    <div class="col-sm-12">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje segunda etapa</th>
+            <th>Calificación</th>
+		</thead>
+        {% for materia in criticos_s %}
+          {% set counte.value = counte.value + 1 %}
+       <tr>
+     <td>{{counte.value}}. {{materia.10}}, {{materia.9}}</td>
+           <td>{{materia.11}}/{{total_s}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+
+
+<div class="col-sm-6">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Buen rendimiento</h1>
+    </div>
+</div>
+      {% set countf = namespace(value=0) %}
+    <div class="col-sm-12">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje segunda etapa</th>
+            <th>Calificación</th>
+		</thead>
+        {% for materia in bien_s%}
+          {% set countf.value = countf.value + 1 %}
+       <tr>
+     <td>{{countf.value}}. {{materia.10}}, {{materia.9}}</td>
+           <td>{{materia.11}}/{{total_s}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
        </tr>
         {% endfor %}
     </tbody>
@@ -97,20 +239,36 @@
     </div>
   </div>
     </div>
-
-
-<div class="col-sm-5">
-        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
-    <div class="col-md-7 px-0">
-           <h1 class="display-9 fst-italic">Buen rendimiento</h1>
-    </div>
-</div>
-     Aca van los de buen rendimiento
-    </div>
  </div>
+
+<div class="col-sm-10">
+    <div class="row">
+        <div class="col-sm-6">
+                <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <center><canvas id="critico2" width="700" height="300"></canvas></center>
+        </div>
+      </div>
+   </div></center>
+
+    </div>
+        <div class="col-sm-6">
+          <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <canvas id="bien2" width="700" height="300"></canvas>
+        </div>
+      </div>
+   </div></center>
+        </div>
+</div>
+    </div>
 {% endif %}
 
 {%if filtro == 1%}
+{% set counte = namespace(value=0) %}
+{% set countf = namespace(value=0) %}
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-7 px-0">
            <h1 class="display-9 fst-italic">Primera Etapa</h1>
@@ -141,9 +299,103 @@
 	</table>
     </div>
   </div>
+
+    <div class="col-sm-10">
+<div class="row">
+    <div class="col-sm-6">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Estado critico</h1>
+    </div>
+</div>
+ {% set countb = namespace(value=0) %}
+    <div class="col-sm-12">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje primera etapa</th>
+            <th>Calificación</th>
+		</thead>
+        {% for materia in criticos_p %}
+          {% set countb.value = countb.value + 1 %}
+       <tr>
+     <td>{{countb.value}}. {{materia.10}}, {{materia.9}}</td>
+           <td>{{materia.5}}/{{total_p}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+
+<div class="col-sm-6">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Buen rendimiento</h1>
+    </div>
+</div>
+      {% set countd = namespace(value=0) %}
+    <div class="col-sm-12">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje primera etapa</th>
+            <th>Calificación</th>
+		</thead>
+        {% for materia in bien_p %}
+          {% set countd.value = countd.value + 1 %}
+       <tr>
+     <td>{{countd.value}}. {{materia.10}}, {{materia.9}}</td>
+           <td>{{materia.5}}/{{total_p}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+    </div>
+ </div>
+
+<div class="col-sm-10">
+    <div class="row">
+        <div class="col-sm-6">
+                <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <center><canvas id="critico3" width="700" height="300"></canvas></center>
+        </div>
+      </div>
+   </div></center>
+
+    </div>
+        <div class="col-sm-6">
+          <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <canvas id="bien3" width="700" height="300"></canvas>
+        </div>
+      </div>
+   </div></center>
+        </div>
+</div>
+    </div>
+
+
 {% endif %}
 
 {% if filtro == 2%}
+ {% set countb = namespace(value=0) %}
+ {% set countd = namespace(value=0) %}
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-7 px-0">
            <h1 class="display-9 fst-italic">Segunda Etapa</h1>
@@ -174,9 +426,239 @@
 	</table>
     </div>
   </div>
+
+<div class="col-sm-10">
+<div class="row">
+    <div class="col-sm-6">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Estado critico</h1>
+    </div>
+</div>
+ {% set counte = namespace(value=0) %}
+    <div class="col-sm-12">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje segunda etapa</th>
+            <th>Calificación</th>
+		</thead>
+        {% for materia in criticos_s %}
+          {% set counte.value = counte.value + 1 %}
+       <tr>
+     <td>{{counte.value}}. {{materia.10}}, {{materia.9}}</td>
+           <td>{{materia.11}}/{{total_s}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+
+
+<div class="col-sm-6">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-7 px-0">
+           <h1 class="display-9 fst-italic">Buen rendimiento</h1>
+    </div>
+</div>
+      {% set countf = namespace(value=0) %}
+    <div class="col-sm-12">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje segunda etapa</th>
+            <th>Calificación</th>
+		</thead>
+        {% for materia in bien_s%}
+          {% set countf.value = countf.value + 1 %}
+       <tr>
+     <td>{{countf.value}}. {{materia.10}}, {{materia.9}}</td>
+           <td>{{materia.11}}/{{total_s}}</td>
+      {% if materia.3 == None %}
+           <td>Sin Calificación</td>
+      {% else %}
+           <td>{{materia.3}}</td>
+       {%endif%}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+    </div>
+ </div>
+
+<div class="col-sm-10">
+    <div class="row">
+        <div class="col-sm-6">
+                <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <center><canvas id="critico4" width="700" height="300"></canvas></center>
+        </div>
+      </div>
+   </div></center>
+
+    </div>
+        <div class="col-sm-6">
+          <center><div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <canvas id="bien4" width="700" height="300"></canvas>
+        </div>
+      </div>
+   </div></center>
+        </div>
+</div>
+    </div>
 {% endif %}
 
 <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Atrás</i></a>
+
+        <script>
+  const labels = [
+    'Alumnos criticos',
+    'Alumnos restantes',
+  ];
+
+  const labels2 = [
+    'Alumnos con buen rendimiento',
+    'Alumnos restantes',
+  ];
+
+    const labels3 = [
+    'Alumnos criticos',
+    'Alumnos restantes',
+  ];
+
+    const labels4 = [
+     'Alumnos con buen rendimiento',
+    'Alumnos restantes',
+  ];
+
+  const data = {
+    labels: labels,
+    datasets: [{
+      label: 'Alumnos:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{countb.value}}, {{counta.value - countb.value}}],
+    }]
+  };
+
+  const data2 = {
+    labels: labels2,
+    datasets: [{
+      label: 'Alumnos:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{countd.value}}, {{counta.value - countd.value}}],
+    }]
+  };
+
+  const data3 = {
+    labels: labels3,
+    datasets: [{
+      label: 'Alumnos:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{counte.value}}, {{counta.value - counte.value}}],
+    }]
+  };
+
+ const data4 = {
+    labels: labels4,
+    datasets: [{
+      label: 'Alumnos:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{countf.value}}, {{counta.value - countf.value}}],
+    }]
+  };
+
+
+  const config = {
+    type: 'doughnut',
+    data: data,
+    options: {
+    responsive: false
+    }
+  };
+
+   const config2 = {
+    type: 'doughnut',
+    data: data2,
+    options: {
+    responsive: false
+    }
+  };
+
+   const config3 = {
+    type: 'doughnut',
+    data: data3,
+    options: {
+    responsive: false
+    }
+  };
+
+  const config4 = {
+    type: 'doughnut',
+    data: data4,
+    options: {
+    responsive: false
+    }
+  };
+
+
+  const myChart = new Chart(
+    document.getElementById('critico1'),
+    config
+  );
+  const myChartt = new Chart(
+    document.getElementById('bien1'),
+    config2
+  );
+
+  const myChartt3 = new Chart(
+    document.getElementById('critico2'),
+    config3
+  );
+
+  const myChartt4 = new Chart(
+    document.getElementById('bien2'),
+    config4
+  );
+
+
+</script>
+<script>
+    const myChart5 = new Chart(
+    document.getElementById('critico3'),
+    config
+  );
+
+   const myChart6 = new Chart(
+    document.getElementById('bien3'),
+    config2
+  );
+</script>
+<script>
+    const myChart7 = new Chart(
+    document.getElementById('critico4'),
+    config3
+  );
+
+   const myChart8 = new Chart(
+    document.getElementById('bien4'),
+    config4
+  );
+</script>
 {% endblock %}
 </body>
 
