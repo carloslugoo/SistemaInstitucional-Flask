@@ -17,7 +17,16 @@
                         <script>
                             Swal.fire({
                                 icon: 'success',
-  								title: 'Puntajes Actualizados!',
+  								title: 'Puntajes actualizados!',
+  								text: 'Se realizaron los cambios...'
+                            })
+                        </script>
+                    {%endif%}
+                     {% if category == 'eliminado' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Trabajo eliminado!',
   								text: 'Se realizaron los cambios...'
                             })
                         </script>
@@ -27,7 +36,7 @@
         {% endwith  %}
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar Trabajos de Proceso</h1>
+       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar trabajos</h1>
     </div>
 </div>
 

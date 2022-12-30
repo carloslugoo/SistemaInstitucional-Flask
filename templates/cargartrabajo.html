@@ -6,6 +6,24 @@
 </head>
 <body>
 {% block content %}
+   <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                        {% if category == 'error' %}
+                         <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Un alumno tiene seleccionado un indicador!',
+  								text: 'No se realizo ningun cambio...'
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
       <div class="col-md-6 px-0">
           <h1  class="display-15 fst-italic"> <i class="bi bi-clipboard-plus"></i> Trabajo: {{trabajo.1}}.   Puntaje Total: {{trabajo.2}}  </h1>

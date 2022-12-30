@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-      <title>{% block title %}Modificar Trabajos de Procesos{% endblock %}</title>
+      <title>{% block title %}Modificar trabajo{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -71,7 +71,7 @@
         {% endwith  %}
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar Trabajos de Proceso</h1>
+       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar trabajo</h1>
     </div>
   </div>
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
@@ -103,7 +103,9 @@
   </div>
      <a href="/modificarproceso" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Atrás</i></a>
    <input type="submit" name="submit" value="Modificar puntajes seleccionados" class="btn btn-success">
+     <a href="/eliminartrabajo/{{trabajos.4}}" class="btn btn-danger" role="button"> Eliminar trabajo </i></a>
  </form>
+
 
 {% endblock %}
 </body>

@@ -1,0 +1,48 @@
+{% extends 'baseprof.html' %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+      <title>{% block title %}Eliminar trabajo{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard-x"></i> Eliminar trabajo</h1>
+    </div>
+  </div>
+  <h3>¿Estas seguro?</h3>
+   <label>El siguiente trabajo será eliminado.</label>
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> Trabajo: {{trabajos.1}}. Puntaje Total: {{trabajos.2}}</h1>
+    </div>
+</div>
+
+{% set counta = namespace(value=0) %}
+  <div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Alumno</th>
+            <th>Puntaje Logrado </th>
+		</thead>
+        {% for data in datas %}
+       {% set counta.value = counta.value + 1 %}
+       <tr>
+     <td>{{counta.value}}. {{data.1}}, {{data.0}}</td>
+    <td>{{data.4}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+<form method="POST" action="/eliminartrabajo/{{id}}">
+    <a href="/modificarproceso/{{id}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+         <input type="submit" name="submit" value="Eliminar trabajo" class="btn btn-danger">
+</form>
+{% endblock %}
+</body>
+</html>

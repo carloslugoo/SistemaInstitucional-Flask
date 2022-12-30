@@ -1343,15 +1343,20 @@ def cerrarsesion():
   if 'username' in session:
     session.pop('username')
   return redirect(url_for('login'))
-@app.route('/modificarproceso', methods = ['GET', 'POST'])
+@app.route('/modificarproceso', methods = ['GET', 'POST']) #Modificar trabajos del docente
 def modproceso():
   global band
+  #Mensaje flash
   if band == 1:
     band = 0
     flash("", "si_c")
+  if band == 3:
+    band = 0
+    flash("", "eliminado")
   datos = session['username']
   mycursor = mydb.cursor()
   print(datos)
+  #Obtiene los trabajos relacionados a la materia
   sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and " \
         "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
   val = [datos[0]]
@@ -1361,6 +1366,7 @@ def modproceso():
   if request.method == 'POST':
     filtro = int(request.form.get(('idfiltro')))
     print(filtro)
+    #Dependiendo del filtro, busca por etapa
     if filtro == 1:
       sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and etapa = %s and " \
             "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
@@ -1548,6 +1554,76 @@ def modificarpuntaje(id):
     else:
       flash("error", "error")
   return render_template('modproceso3.html', datos=datos, trabajos =trabajos, indicadores = indicadores, alumnos=user_datos)
+
+@app.route('/eliminartrabajo/<int:id>', methods = ['GET', 'POST']) #Eliminar el trabajo seleccionado
+def eliminartrabajo(id):
+  print(id)
+  datos = session['username']
+  # Saca el trabajo
+  mycursor = mydb.cursor()
+  sql = "SELECT id_trabajo, des_t, pun_t, id_materia, id_curso, id_profesor, etapa FROM trabajos WHERE id_trabajo = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  trabajos = mycursor.fetchall()
+  trabajos = trabajos[0]
+  print(trabajos)
+  # Saca los indicadores
+  sql = "SELECT * FROM indicadores WHERE id_trabajo = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  indicadores = mycursor.fetchall()
+  print(indicadores)
+  # Saca los alumnos relacionados con el trabajo
+  sql = "SELECT nmb_a, ape_a, id_txa, traxalum.id_alumno, pun_l, fec_t, id_trabajo FROM traxalum, alumnos WHERE id_trabajo = %s and traxalum.id_alumno = alumnos.id_alumno"
+  val = [id]
+  mycursor.execute(sql, val)
+  datas = mycursor.fetchall()
+  datas = sorted(datas, key=lambda datas: datas[1])  # Ordena por orden alfabetico
+  print(datas)
+  if request.method == 'POST':
+    #Borra los indicadores por alumno
+    mycursor = mydb.cursor()
+    sql = "DELETE FROM indxalum WHERE id_trabajo = %s"
+    val = [id]
+    mycursor.execute(sql, val)
+    mydb.commit()
+    # Borra el trabajo del sistema
+    mycursor = mydb.cursor()
+    sql = "DELETE FROM trabajos WHERE id_trabajo = %s"
+    val = [id]
+    mycursor.execute(sql, val)
+    mydb.commit()
+    # Borra el trabajo al alumno
+    mycursor = mydb.cursor()
+    sql = "DELETE FROM traxalum WHERE id_trabajo = %s"
+    val = [id]
+    mycursor.execute(sql, val)
+    mydb.commit()
+    # Updatea al acumulado del alumno en la materia
+    for x in range(0, len(datas)):
+      print(x)
+      aux = datas[x]
+      print(aux)
+      aux2 = aux[4]
+      print(aux2)
+      aux3 = aux[3]
+      print(aux3)
+      if trabajos[6] == 1: #Primera Etapa:
+        sql = "UPDATE matxalum SET pun_ac = (pun_ac - %s) WHERE id_materia = %s and id_profesor = %s and id_curso = %s and id_alumno = %s"
+        val = (aux2, trabajos[3], trabajos[5], trabajos[4], aux3)
+        mycursor.execute(sql, val)
+        mydb.commit()
+      if trabajos[6] == 2:# Segunda Etapa:
+        sql = "UPDATE matxalum SET pun_ac2 = (pun_ac2 - %s) WHERE id_materia = %s and id_profesor = %s and id_curso = %s and id_alumno = %s"
+        val = (aux2, trabajos[3], trabajos[5], trabajos[4])
+        mycursor.execute(sql, val)
+        mydb.commit()
+    #Mensaje flash y redirigir
+    global band
+    band = 3
+    return redirect(url_for('modproceso'))
+  return render_template('modproceso4.html', datos=datos, trabajos=trabajos, indicadores=indicadores,
+                         datas=datas, id = id)
 @app.route('/miscursos') #Listar las materias que tiene por curso el prof
 def miscursos():
   datos = session['username']
