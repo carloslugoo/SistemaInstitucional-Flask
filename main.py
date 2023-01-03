@@ -666,9 +666,9 @@ def verproceso(id):
   val = [id]
   mycursor.execute(sql, val)
   profesor = mycursor.fetchall()
-  profesor = profesor[0]
-  print(profesor)
   if data2:
+    profesor = profesor[0]
+    print(profesor)
     suml2 = 0
     sumt2 = 0
     for x in range(0, len(data2)):
@@ -678,7 +678,7 @@ def verproceso(id):
       suml2 += pl
       # print(suml)
       sumt2 += pt
-  print(suml2)
+    print(suml2)
   if data:
     #print(data)
     suml = 0
