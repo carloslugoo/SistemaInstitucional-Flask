@@ -648,15 +648,39 @@ def verproceso(id):
   #print(id) #Pimer digito materia, segundo id del profe
   x = [int(a) for a in str(id)]
   #print(x)
+  #Trabajos primera etapa
   mycursor = mydb.cursor()
-  sql = "SELECT trabajos.id_trabajo,des_t, trabajos.fec_t, pun_t, pun_l FROM trabajos, traxalum WHERE trabajos.id_trabajo = traxalum.id_trabajo and id_materia = %s and id_alumno = %s"
-  val = [id, datos[0]]
+  sql = "SELECT trabajos.id_trabajo,des_t, trabajos.fec_t, pun_t, pun_l FROM trabajos, traxalum WHERE trabajos.id_trabajo = traxalum.id_trabajo and id_materia = %s and id_alumno = %s and etapa = %s"
+  val = [id, datos[0], 1]
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
   print(data)
-  print(id)
+  #Trabajos segunda etapa
+  sql = "SELECT trabajos.id_trabajo,des_t, trabajos.fec_t, pun_t, pun_l FROM trabajos, traxalum WHERE trabajos.id_trabajo = traxalum.id_trabajo and id_materia = %s and id_alumno = %s and etapa = %s"
+  val = [id, datos[0], 2]
+  mycursor.execute(sql, val)
+  data2 = mycursor.fetchall()
+  print(data2)
+  sql = "SELECT nmb_p, ape_p, des_m FROM profesores, matxalum, materias WHERE matxalum.id_materia = %s and matxalum.id_profesor = profesores.id_profesor " \
+        "and matxalum.id_materia = materias.id_materia"
+  val = [id]
+  mycursor.execute(sql, val)
+  profesor = mycursor.fetchall()
+  profesor = profesor[0]
+  print(profesor)
+  if data2:
+    suml2 = 0
+    sumt2 = 0
+    for x in range(0, len(data2)):
+      aux = data2[x]
+      pl = aux[4]
+      pt = aux[3]
+      suml2 += pl
+      # print(suml)
+      sumt2 += pt
+  print(suml2)
   if data:
-    print(data)
+    #print(data)
     suml = 0
     sumt = 0
     for x in range(0, len(data)):
@@ -664,14 +688,12 @@ def verproceso(id):
       pl=aux[4]
       pt=aux[3]
       suml+= pl
-      print(suml)
+      #print(suml)
       sumt+= pt
-      porcl = int((suml * 100) / sumt)
-      print(porcl)
   else:
     flash("no", "nom")
     return redirect(url_for('vermaterias'))
-  return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, porcl = porcl)
+  return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, data = profesor, data2 = data2, suml2 = suml2, sumt2 = sumt2)
 
 @app.route('/inscribiral', methods = ['GET', 'POST']) #Inscripcion de alumnos. Parte de la Carga
 def inscribirdir():

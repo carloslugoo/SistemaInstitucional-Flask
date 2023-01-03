@@ -7,50 +7,88 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <body>
 {% block content %}
-
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-           <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Proceso </h1>
+           <h1 class="display-9 fst-italic"> {{data.2}} </h1>
     </div>
 </div>
-{% set count = namespace(value=0) %}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Primera Etapa </h1>
+    </div>
+</div>
+<br>
+ <div class="row">
+  <div class="col-sm-6">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Titulo del trabajo</th>
+            <th>Fecha</th>
+            <th>Puntaje</th>
+		</thead>
+		<tbody>
+         {% for proceso in procesos %}
+     <tr>
+      <td>{{proceso.1}}</td>
+     <td>{{proceso.2}}</td>
+     <td>{{proceso.4}}/{{proceso.3}}</td>
+     </tr>
+     {% endfor %}
+    </tbody>
+	</table>
+    </div>
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart" width="500" height="300"></canvas>
+        </div>
+      </div>
+</div>
+<br>
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Segunda Etapa </h1>
+    </div>
+</div>
 
  <div class="row">
-     {% for proceso in procesos %}
-       {% set count.value = count.value + 1 %}
-      <div class="col-md-3">
-        <div class="h-70 p-1 text-bg-dark rounded-3">
-          <h2>{{proceso.1}}</h2>
-          <p>Fecha: {{proceso.2}} Puntos: {{proceso.3}}/{{proceso.4}}</p>
-        </div>
-      </div>
-     {% if count.value == 3%}
-     </div>
-        <br>
-       <div class="row">
-           {% set count.value = count.value - 3 %}
-           {% endif %}
-    {% endfor %}
-</div>
-
-<br>
-
-<div class="row align-items-md-stretch">
-    <div class="col-md-3">
-        <div class="h-70 p-5 text-bg-dark rounded-3">
-        <p>Sumatorias: {{suml}}/{{sumt}}</p>
-            <canvas id="myChart" max-width="50" height="100"></canvas>
-        </div>
-      </div>
+  <div class="col-sm-6">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Titulo del trabajo</th>
+            <th>Fecha</th>
+            <th>Puntaje</th>
+		</thead>
+		<tbody>
+         {% for proceso in data2 %}
+     <tr>
+      <td>{{proceso.1}}</td>
+     <td>{{proceso.2}}</td>
+     <td>{{proceso.4}}/{{proceso.3}}</td>
+     </tr>
+     {% endfor %}
+    </tbody>
+	</table>
     </div>
-</div>
-</div>
+     <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml2}}/{{sumt2}}</p></center>
+            <canvas id="myChart2" width="500" height="300"></canvas>
+        </div>
+      </div>
 
+</div>
+</div>
 
   <script>
   const labels = [
-    'Puntaje Total',
-    'Puntaje Logrado',
+    'Puntaje Obtenido',
+    'Puntaje Faltante',
+  ];
+
+    const labels2 = [
+    'Puntaje Obtenido',
+    'Puntaje Faltante',
   ];
 
   const data = {
@@ -59,18 +97,43 @@
       label: 'Proceso:',
       backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)'],
       borderColor: 'rgba(0, 0, 0, 1)',
-      data: [{{sumt}}, {{suml}}],
+      data: [{{suml}}, {{sumt - suml}}],
+    }]
+  };
+
+    const data2 = {
+    labels: labels,
+    datasets: [{
+      label: 'Proceso:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{suml2}}, {{sumt2 - suml2}}],
     }]
   };
 
   const config = {
     type: 'doughnut',
     data: data,
-    options: {}
+    options: {
+     responsive: false
+    }
+  };
+
+    const config2 = {
+    type: 'doughnut',
+    data: data2,
+    options: {
+     responsive: false
+    }
   };
   const myChart = new Chart(
     document.getElementById('myChart'),
     config
+  );
+
+    const myChart2 = new Chart(
+    document.getElementById('myChart2'),
+    config2
   );
 </script>
 </div>
