@@ -1,0 +1,172 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Horarios{% endblock %}</title>
+</head>
+<body>
+ {% block content %}
+    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> <i class="bi bi-check-all"></i> Mi asistencia </h1>
+    </div>
+  </div>
+
+ <div class="row">
+    <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/vermiasistencia">
+                <label>Filtrar por tiempo:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Una semana</option>
+                    <option value="2">Un mes</option>
+                    <option value="3">Ver todo</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver mi asistencia" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+
+ <br>
+        <div class="col-sm-3">
+                <div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <center><canvas id="idstat1" width="500" height="300"></canvas></center>
+        </div>
+      </div>
+   </div>
+      </div>
+     </div>
+ {%if filtro == 1%}
+     <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Registro de la última semana </h1>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Fecha</th>
+            <th>Hora de Entrada</th>
+            <th>Hora de Salida</th>
+		</thead>
+    {% for asistencia in asistencias %}
+     <tr>
+        <th>{{asistencia.2}}</th>
+          <th>{{asistencia.0}}</th>
+         {% if asistencia.1 == 'None' %}
+          <th>No marcó</th>
+         {%else%}
+         <th>{{asistencia.1}}</th>
+         {%endif%}
+     </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+  </div>
+{%endif%}
+ {%if filtro == 2%}
+    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Registro del último mes </h1>
+    </div>
+  </div>
+
+ <div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Fecha</th>
+            <th>Hora de Entrada</th>
+            <th>Hora de Salida</th>
+		</thead>
+    {% for asistencia in asistencias %}
+     <tr>
+        <th>{{asistencia.2}}</th>
+          <th>{{asistencia.0}}</th>
+         {% if asistencia.1 == 'None' %}
+          <th>No marcó</th>
+         {%else%}
+         <th>{{asistencia.1}}</th>
+         {%endif%}
+     </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+  </div>
+ {%endif%}
+
+  {%if filtro == 3%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Todos los registros </h1>
+    </div>
+  </div>
+
+
+ <div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Fecha</th>
+            <th>Hora de Entrada</th>
+            <th>Hora de Salida</th>
+		</thead>
+    {% for asistencia in asistencias %}
+     <tr>
+        <th>{{asistencia.2}}</th>
+          <th>{{asistencia.0}}</th>
+         {% if asistencia.1 == 'None' %}
+          <th>No marcó</th>
+         {%else%}
+         <th>{{asistencia.1}}</th>
+         {%endif%}
+     </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+  </div>
+
+
+ {%endif%}
+      <script>
+  const labels = [
+    'Días trabajados',
+    'Días no trabajados',
+    'Días sin registro de salida',
+  ];
+
+    const data = {
+    labels: labels,
+    datasets: [{
+      label: 'Días:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)', 'rgba(186,85,211,1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{dt}}, {{dp}}, {{dr}}],
+    }]
+  };
+
+ const config = {
+    type: 'doughnut',
+    data: data,
+    options: {
+    responsive: false
+    }
+  };
+
+  const myChart = new Chart(
+    document.getElementById('idstat1'),
+    config
+  );
+  </script>
+  {% endblock %}
+</body>
+</html>

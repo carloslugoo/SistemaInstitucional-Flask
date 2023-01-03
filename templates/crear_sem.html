@@ -22,6 +22,36 @@
                             })
                         </script>
                     {% endif %}
+                 {% if category == 'eliminado' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Horario eliminado correctamente!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                    {% if category == 'noh' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'El curso aun no tiene un horario!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                    {% if category == 'yae' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'El curso ya tiene un horario cargado!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith  %}

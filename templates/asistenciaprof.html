@@ -67,6 +67,16 @@
                             })
                         </script>
                     {% endif %}
+                     {% if category == 'noesta' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Hubo un error, usted no esta en el sistema...!?',
+  								timer: 6000,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
                  {% endfor %}
             {% endif %}
         {% endwith  %}

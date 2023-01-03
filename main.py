@@ -1728,7 +1728,14 @@ def crearsemana():
   if band == 6:
     flash("","si")
     band =0
-  else:
+  if band == 3:
+    flash("","eliminado")
+    band = 0
+  if band == 4:
+    flash("", "noh")
+    band = 0
+  if band == 5:
+    flash("", "yae")
     band = 0
   if band != 0:
     band = 0
@@ -1870,6 +1877,33 @@ def cargarhora(id):
   global band
   create = True
   print(band)
+  #Comprueba que exista un horario cargado
+  for x in range(1, 7):
+    sql = "SELECT id_horario, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
+    val = [id, x]
+    mycursor.execute(sql, val)
+    if x == 1: #Lunes
+      h_lu = mycursor.fetchall()
+      print(h_lu)
+    if x == 2: #Martes
+      h_ma = mycursor.fetchall()
+      print(h_ma)
+    if x == 3:  # Miercoles
+      h_mi = mycursor.fetchall()
+      print(h_mi)
+    if x == 4:  # Jueves
+      h_ju = mycursor.fetchall()
+      print(h_ju)
+    if x == 5:  # Viernes
+      h_vi = mycursor.fetchall()
+      print(h_vi)
+    if x == 6:  # Sabado
+      h_sa = mycursor.fetchall()
+      print(h_sa)
+  #En caso que exista no permite crear otro horario
+  if h_lu or h_ma or h_mi or h_ju or h_vi or h_sa:
+    band = 5
+    return redirect(url_for('crearsemana'))
   if request.method == 'POST':
     idmat = request.form.getlist(('idmat'))
     hora_i = request.form.getlist(('hora_i'))
@@ -1907,7 +1941,7 @@ def cargarhora(id):
             (id, aux, band + 1, aux2, aux3, 0))
           mydb.commit()
       band += 1
-      if band == 5:
+      if band == 6:
         return redirect(url_for('crearsemana'))
   return render_template('crear_dias.html', datos=datos, cursos=cursos[0], materias=materias, band=band)
 
@@ -1920,6 +1954,7 @@ def eliminarhora(id):
   mycursor.execute(sql, val)
   cursos = mycursor.fetchall()
   mycursor = mydb.cursor()
+  global band
   for x in range(1, 7):
     sql = "SELECT id_horario, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
     val = [id, x]
@@ -1948,6 +1983,7 @@ def eliminarhora(id):
     val = [id]
     mycursor.execute(sql, val)
     mydb.commit()
+    band = 3
     return redirect(url_for('crearsemana'))
   return render_template('eliminarhorario.html', cursos=cursos[0], datos=datos, h_lu=h_lu, h_ma=h_ma, h_mi=h_mi, h_ju=h_ju, h_vi=h_vi, h_sa=h_sa)
 @app.route('/verhorario/<int:id>') #Ver Horarios
@@ -1959,6 +1995,7 @@ def verhorarioadmin(id):
   mycursor.execute(sql, val)
   cursos = mycursor.fetchall()
   mycursor = mydb.cursor()
+  global band
   for x in range(1, 7):
     sql = "SELECT id_horario, id_dia, hora_i, hora_f, des_m FROM horarios, materias WHERE id_curso = %s and id_dia = %s and horarios.id_materia = materias.id_materia ORDER BY horarios.hora_f ASC"
     val = [id, x]
@@ -1988,6 +2025,7 @@ def verhorarioadmin(id):
     if h_lu and h_ma and h_mi and h_ju and h_vi and h_sa:
       return render_template('verhorariosad.html', cursos = cursos[0], datos = datos, h_lu = h_lu, h_ma = h_ma, h_mi = h_mi, h_ju = h_ju, h_vi = h_vi, h_sa= h_sa)
     else: #Si no existe un horario totalmente cargado
+      band = 4
       return redirect(url_for('crearsemana'))
 
 
@@ -2099,78 +2137,122 @@ def asistenciaprof():
   dia = datetime.today().weekday()
   print(fecha)
   print(hora)
-  dia += 1   #Por que yo realize que Lunes = 1
+  dia += 1  #Por que yo realize que Lunes = 1
   #dia += 1
   print(dia)
   profesor = user_datos
+  mycursor = mydb.cursor()
+  #Crea un nuevo dia para asistencia de los profes
+  sql = "SELECT id_asisprof, fec_a FROM asistenciaprof WHERE fec_a = %s"
+  val = [fecha]
+  mycursor.execute(sql, val)
+  compf = mycursor.fetchall()
+  print(compf)
+  compc = []
+  if not compf:
+    #Saca los ids de los profes que deben marcar hoy
+    sql = "SELECT id_horario, id_profesor FROM horarios WHERE id_dia =%s"
+    val = [dia]
+    mycursor.execute(sql, val)
+    idsp = mycursor.fetchall()
+    print(idsp)
+    cont = 0
+    for x in range(0, len(idsp)):
+      aux = idsp[x]
+      if aux[1] != 0:
+        if cont == 0:
+          mycursor = mydb.cursor()
+          mycursor.execute(
+            'INSERT INTO asistenciaprof (id_profesor, fec_a) VALUES (%s, %s)',
+            (aux[1], fecha))
+          mydb.commit()
+          cont = 1
+          compc.append(aux[1])
+        if aux[1] not in compc:
+          print(aux[1])
+          mycursor = mydb.cursor()
+          mycursor.execute(
+            'INSERT INTO asistenciaprof (id_profesor, fec_a) VALUES (%s, %s)',
+            (aux[1], fecha))
+          mydb.commit()
+          compc.append(aux[1])
+          print(compc)
   if request.method == 'POST':
+    #Codigo del input que sale del escaneo de la tarjeta
     codigo = user.username.data
     codigo = codigo.split('P')
     print(codigo)
-    mycursor = mydb.cursor()
+    #Buscamos por cedula del proesor
     sql = "SELECT * FROM profesores WHERE ci_p = %s"
     val = [codigo[1]]
     mycursor.execute(sql, val)
     profesor = mycursor.fetchall()
-    profesor = profesor[0]
-    user_datos = profesor #guardar para las alertas
-    print(profesor)
-    sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s and id_dia =%s  ORDER BY horarios.hora_i ASC"
-    val = [profesor[0], dia]
-    mycursor.execute(sql, val)
-    ent = mycursor.fetchall()
-    if ent:
-      ent = ent[0]
-      ent = ent[4]
-    print("Entrada:")
-    print(ent)
-    sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s and id_dia =%s  ORDER BY horarios.hora_f DESC"
-    val = [profesor[0], dia]
-    mycursor.execute(sql, val)
-    sal = mycursor.fetchall()
-    if sal:
-      sal = sal[0]
-      sal = sal[5]
-    print("Salida:")
-    print(sal)
-    if ent and sal:
-      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s and fec_a = %s"
-      val = [profesor[0], fecha]
+    if profesor:
+      profesor = profesor[0]
+      user_datos = profesor #guardar para las alertas
+      print(profesor)
+      #Comprueba que el profesor tenga clases hoy
+      sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s and id_dia =%s  ORDER BY horarios.hora_i ASC"
+      val = [profesor[0], dia]
       mycursor.execute(sql, val)
-      comp = mycursor.fetchall()
-      print(comp)
-      if comp:
-        print("Ya marco hoy")
-        comp = comp[0]
-        if comp[0] and not comp[1]:
-          print("Ya Marco entrada, marca salida")
-          vector = comp[0]  # entrada
-          sql = "UPDATE asistenciaprof SET hora_s = %s WHERE id_profesor = %s and fec_a = %s"  # Saco mas puntaje
-          val = (hora ,profesor[0], fecha)
-          mycursor.execute(sql, val)
-          mydb.commit()
-          band = 2
-          return redirect(url_for('asistenciaprof'))
-        if comp[1]:
-          vector = comp[0]
-          vector2 = comp[1] #salida
-          print("Marco Salida, ya no puede marcar hoy")
-          band = 3
+      ent = mycursor.fetchall()
+      if ent:
+        ent = ent[0]
+        ent = ent[4]
+      print("Entrada:")
+      print(ent)
+      sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s and id_dia =%s  ORDER BY horarios.hora_f DESC"
+      val = [profesor[0], dia]
+      mycursor.execute(sql, val)
+      sal = mycursor.fetchall()
+      if sal:
+        sal = sal[0]
+        sal = sal[5]
+      print("Salida:")
+      print(sal)
+      if ent and sal:
+        sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s and fec_a = %s"
+        val = [profesor[0], fecha]
+        mycursor.execute(sql, val)
+        comp = mycursor.fetchall()
+        print(comp)
+        if comp:
+          comp = comp[0]
+          if comp[0] and not comp[1]:
+            print("Ya Marco entrada, marca salida")
+            vector = comp[0]  # entrada
+            sql = "UPDATE asistenciaprof SET hora_s = %s WHERE id_profesor = %s and fec_a = %s"
+            val = (hora, profesor[0], fecha)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            band = 2
+            return redirect(url_for('asistenciaprof'))
+          if comp[1]:
+            vector = comp[0]
+            vector2 = comp[1]  # salida
+            print("Marco Salida, ya no puede marcar hoy")
+            band = 3
+            return redirect(url_for('asistenciaprof'))
+          if not comp[0] and not comp[1]:
+            print("No marco hoy, marca entrada")
+            mycursor = mydb.cursor()
+            sql = "UPDATE asistenciaprof SET hora_e = %s WHERE id_profesor = %s and fec_a = %s"
+            val = (hora, profesor[0], fecha)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            band = 1
+            return redirect(url_for('asistenciaprof'))
+        else:
+          print("No es su dia, no puede marcar")
+          print(user_datos)
+          band = 4
           return redirect(url_for('asistenciaprof'))
       else:
-        print("No marco hoy, marca entrada")
-        mycursor = mydb.cursor()
-        mycursor.execute(
-          'INSERT INTO asistenciaprof (id_profesor, fec_a, hora_e) VALUES (%s, %s ,%s)',
-          (profesor[0], fecha, hora))
-        mydb.commit()
-        band = 1
+        band = 4
         return redirect(url_for('asistenciaprof'))
     else:
-      print("No es su dia, no puede marcar")
-      print(user_datos)
-      band = 4
-      return redirect(url_for('asistenciaprof'))
+      print("Error no esta en el sistema")
+      flash("","noesta")
 
   return render_template('asistenciaprof.html', user = user, profesor = profesor, vector= vector, vector2= vector2, hora = hora)
 
@@ -2673,6 +2755,70 @@ def eliminarmatxpro(id):
       mydb.commit()
   return redirect(url_for('asignarmaterias', id = user_datos))
 
+
+@app.route('/vermiasistencia', methods = ['POST', 'GET'])
+def verasistenciaprofe():
+  datos = session['username']
+  print(datos)
+  # Extraemos la fecha
+  inf = datetime.now()
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  #Sacamos las veces que marco asistencia
+  mycursor = mydb.cursor()
+  sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC LIMIT 7"
+  val = [datos[0]]
+  mycursor.execute(sql, val)
+  asistencias = mycursor.fetchall()
+  print(asistencias)
+  dt = 0  # Dias trabajados
+  dp = 0  # Dias no trabajados
+  dr = 0  # Dias que no marco salida
+  for x in range(0, len(asistencias)):
+    aux = asistencias[x]
+    if aux[0] or aux[1]:
+      dt += 1
+    if not aux[0] and not aux[1]:
+      dp += 1
+    if aux[0] and not aux[1]:
+      dr += 1
+  print(dt, dp, dr)
+  if request.method == "POST":
+    dt = 0
+    dp = 0
+    dr = 0
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 2:
+      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC LIMIT 31"
+      val = [datos[0]]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      for x in range(0 , len(asistencias)):
+        aux = asistencias[x]
+        if aux[0] or aux[1]:
+          dt += 1
+        if not aux[0] and not aux[1]:
+          dp += 1
+        if aux[0] and not aux[1]:
+          dr += 1
+      return render_template('verasistenciaprofe.html', datos=datos, asistencias=asistencias, filtro=filtro, dt = dt, dp = dp, dr = dr)
+    if filtro == 3:
+      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC"
+      val = [datos[0]]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      for x in range(0 , len(asistencias)):
+        aux = asistencias[x]
+        if aux[0] or aux[1]:
+          dt += 1
+        if not aux[0] and not aux[1]:
+          dp += 1
+        if aux[0] and not aux[1]:
+          dr += 1
+      return render_template('verasistenciaprofe.html', datos=datos, asistencias=asistencias, filtro=filtro, dt = dt, dp = dp, dr = dr)
+    if filtro == 1:
+      return redirect(url_for('verasistenciaprofe'))
+  return render_template('verasistenciaprofe.html', datos=datos, asistencias=asistencias, filtro = 1, dt = dt, dp = dp, dr = dr)
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
