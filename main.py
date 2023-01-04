@@ -91,7 +91,7 @@ def before_request(): #antes de cargar la pag
 def bienvenidoprofe():
   datos = session['username']
   print(datos)
-  return render_template('profesorview.html', datos = datos)
+  return redirect(url_for('miscursos'))
 
 #Parte de vista de alumnos materias
 @app.route('/bienvenidoalumno')
@@ -666,6 +666,8 @@ def verproceso(id):
   val = [id]
   mycursor.execute(sql, val)
   profesor = mycursor.fetchall()
+  #Sumatoria de el puntaje del alumno
+  #Segunda Etapa
   if data2:
     profesor = profesor[0]
     print(profesor)
@@ -679,6 +681,7 @@ def verproceso(id):
       # print(suml)
       sumt2 += pt
     print(suml2)
+  #Primera etapa
   if data:
     #print(data)
     suml = 0
@@ -690,6 +693,7 @@ def verproceso(id):
       suml+= pl
       #print(suml)
       sumt+= pt
+  #En caso de no tener proceso tira una alerta y redirige
   else:
     flash("no", "nom")
     return redirect(url_for('vermaterias'))
@@ -1658,6 +1662,16 @@ def miscursos():
   mycursor.execute(sql, val)
   mat = mycursor.fetchall()
   print(mat)
+  global band
+  if band == 7:
+    flash("","noclases")
+    band = 0
+  if band == 6:
+    flash("","si")
+    band = 0
+  if band == 5:
+    flash("", "ya")
+    band = 0
   return render_template('miscursos.html', datos = datos, materias = mat)
 
 @app.route('/veralum/<int:id>', methods = ['GET', 'POST']) #Ver los alumnos matriculados con sus cal y puntajes
@@ -2841,6 +2855,125 @@ def verasistenciaprofe():
     if filtro == 1:
       return redirect(url_for('verasistenciaprofe'))
   return render_template('verasistenciaprofe.html', datos=datos, asistencias=asistencias, filtro = 1, dt = dt, dp = dp, dr = dr)
+
+@app.route('/llamarlista/<int:id>', methods = ['POST', 'GET'])
+def asistenciaalumnos(id):
+  datos = session['username']
+  #print(id)
+  #Saca el curso relacionado
+  mycursor = mydb.cursor()
+  sql = "SELECT des_m, des_c, des_e, cursos.id_curso FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s and matxpro.id_materia = %s and matxpro.id_materia = materias.id_materia " \
+        "and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [datos[0], id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  cursos = cursos[0]
+  print(cursos)
+  #Saca los alumnos matriculados
+  sql = "SELECT matxalum.id_alumno, matxalum.id_materia, matxalum.id_curso, nmb_a, ape_a FROM matxalum, alumnos WHERE id_profesor = %s and matxalum.id_materia = %s and matxalum.id_alumno = alumnos.id_alumno"
+  val = [datos[0], id]
+  mycursor.execute(sql, val)
+  mat = mycursor.fetchall()
+  print(mat)
+  # Ordena alfabetaicamente los alumnos del vector...
+  mat = sorted(mat, key=lambda mat: mat[4])
+  #Estados posibles
+  lista = ["P", "A"]
+  # Extraemos la fecha
+  inf = datetime.now()
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  #Dia
+  dia = datetime.today().weekday()
+  dia += 1
+  print(dia)
+  # Comprueba que el profesor tenga clases hoy
+  sql = "SELECT id_horario, id_curso, id_materia, id_dia, hora_i, hora_f FROM horarios WHERE id_profesor = %s and id_dia =%s and id_materia = %s and id_curso = %s ORDER BY horarios.hora_i ASC"
+  val = [datos[0], dia, id, cursos[3]]
+  mycursor.execute(sql, val)
+  comp = mycursor.fetchall()
+  print(comp)
+  # Comprueba que aun no halla llamado lista hoy
+  sql = "SELECT DISTINCT fecha FROM asistenciaalum WHERE fecha = %s"
+  val = [fecha]
+  mycursor.execute(sql, val)
+  comp2 = mycursor.fetchall()
+  print(comp2)
+  #Alertas
+  global band
+  #Si no tiene clases hoy redirige
+  if not comp:
+    band = 7
+    return redirect(url_for('miscursos'))
+  #Si ya llamo clases redirige
+  if comp2:
+    band = 5
+    return redirect(url_for('miscursos'))
+  #Comprobar que cargo bien
+  create = True
+  if request.method == "POST":
+    for x in range(0, len(mat)):
+      aux = request.form.getlist(('{a}'.format(a=x + 1)))
+      if not aux:
+        create = False
+    if create == True:
+      for x in range(0, len(mat)):
+        aux = request.form.getlist(('{a}'.format(a=x + 1)))
+        aux2 = mat[x]
+        #Guarda por alumno si estuvo presente o ausente
+        mycursor.execute(
+          'INSERT INTO asistenciaalum (id_alumno, id_materia, fecha, asistio, id_curso) VALUES (%s, %s, %s, %s, %s)',
+          (aux2[0], id, fecha, aux[0], aux2[2]))
+        mydb.commit()
+      band = 6
+      return redirect(url_for('miscursos'))
+    else:
+      flash("","ec")
+  return render_template('llamarlista.html', datos=datos, cursos = cursos, alumnos = mat, listas = lista, fecha = fecha, id = id)
+
+@app.route('/verasistencias/<int:id>', methods = ['POST', 'GET'])
+def verasistencias(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  #Saca el curso y el nombre de la materia
+  sql = "SELECT des_m, des_c, des_e, cursos.id_curso FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s and matxpro.id_materia = %s and matxpro.id_materia = materias.id_materia " \
+        "and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [datos[0], id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  cursos = cursos[0]
+  print(cursos)
+  #Saca los datos de la asistencia
+  sql = "SELECT DISTINCT fecha FROM asistenciaalum WHERE id_materia = %s and id_curso = %s  ORDER BY asistenciaalum.fecha DESC"
+  val = [id, cursos[3]]
+  mycursor.execute(sql, val)
+  asis = mycursor.fetchall()
+  print(asis)
+  #ID MATERIA
+  global user_datos
+  user_datos = id
+  global vector
+  vector = cursos[3]
+  return render_template('verlista.html', datos=datos, cursos = cursos, listas = asis)
+
+@app.route('/verificarlista/<string:id>', methods = ['POST', 'GET'])
+def verificarlista(id):
+  print(id)
+  #idmateria
+  global user_datos
+  #idcurso
+  global vector
+  print(vector)
+  print(user_datos)
+  datos = session['username']
+  mycursor = mydb.cursor()
+  # Saca los datos de la asistencia
+  sql = "SELECT id_asisalum, asistenciaalum.id_alumno, asistio, nmb_a, ape_a FROM asistenciaalum, alumnos WHERE id_materia = %s and asistenciaalum.id_curso = %s and fecha = %s " \
+        "and asistenciaalum.id_alumno = alumnos.id_alumno"
+  val = [user_datos, vector, id]
+  mycursor.execute(sql, val)
+  asis = mycursor.fetchall()
+  print(asis)
+  return render_template('verificarlista.html', datos=datos, listas = asis, id = id)
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.

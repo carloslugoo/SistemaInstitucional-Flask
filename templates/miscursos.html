@@ -7,6 +7,43 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <body>
 {% block content %}
+ <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+               {% if category == 'noclases' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'No puede llamar la asistencia!',
+  								text: 'Usted hoy no tiene clases con el curso...',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% if category == 'si' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Asistencia guardada!',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% if category == 'ya' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Usted ya llamo la asistencia!',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
 
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
@@ -25,6 +62,8 @@
           <p>Curso: {{materia.5}} Enfasis: {{materia.6}} </p>
           <p>Año: {{materia.7}}</p>
          <a href="/veralum/{{materia.1}}" class="btn btn-outline-light" role="button">Ver Alumnos</a>
+         <a href="/llamarlista/{{materia.1}}" class="btn btn-outline-light" role="button">Llamar asistencia</a>
+         <a href="/verasistencias/{{materia.1}}" class="btn btn-outline-light" role="button">Registro de asistencias</a>
         </div>
           </div>
     {% if count.value == 2%}

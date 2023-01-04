@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Materias</title>
+    <title>{% block title %}Mis disciplinas{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -26,9 +26,9 @@
             {% endif %}
         {% endwith  %}
 
-<div class="p-3 p-md-3 mb-3 rounded text-bg-dark">
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-book"></i> Mis materias </h1>
+       <h1 class="display-9 fst-italic"> <i class="bi bi-book"></i> Mis disciplinas </h1>
       <p class="lead my-3"> Aqui puedes encontrar tus materias</p>
     </div>
   </div>
@@ -43,9 +43,9 @@
           <div class="col-sm-4">
         <div class="h-70 p-1 text-bg-dark rounded-3">
           <h3>{{materia.1}}</h3>
-          <p>Curso: {{materia.2}} Seccion: {{materia.3}}</p>
+          <p>Curso: {{materia.2}} Sección: {{materia.3}}</p>
           <p>Enfasis: {{materia.5}}          Año: {{materia.4}}</p>
-         <a href="/vermateria/{{materia.0}}" class="btn btn-outline-light" role="button">Ver Materia</a>
+         <a href="/vermateria/{{materia.0}}" class="btn btn-outline-light" role="button">Ver disciplina</a>
         </div>
           </div>
     {% if count.value == 2%}

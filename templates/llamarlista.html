@@ -1,0 +1,72 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Llamar lista{% endblock %}</title>
+
+</head>
+<body>
+{% block content %}
+ <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+               {% if category == 'ec' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'La lista quedo incompleta!',
+  								text: 'Algun alumno quedo sin seleccionarse...',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+      <div class="col-md-6 px-0">
+          <h1  class="display-15 fst-italic"> <i class="bi bi-list-check"></i> Llamar asistencia en {{cursos.0}}- Fecha: {{fecha}}</h1>
+          <p>Curso: {{cursos.1}}, {{cursos.2}}</p>
+      </div>
+    </div>
+{% set counta = namespace(value=0) %}
+{% set count = namespace(value=0) %}
+{% set countf = namespace(value=0) %}
+<form method="POST" action="/llamarlista/{{id}}">
+ <div class="row">
+    <div class="col-sm-5">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Alumno</th>
+            <th><center>P</center></th>
+            <th><center>A</center></th>
+		</thead>
+    {% for alumno in alumnos %}
+     {% set counta.value = counta.value + 1 %}
+     <tr>
+        <td>{{counta.value}}. {{alumno.4}}, {{alumno.3}}</td>
+         {% for lista in listas %}
+         {%if countf.value == 0%}
+          <th><center><input type="radio" name="{{counta.value}}" id="option1" value="P"></input></center></th>
+          <th><center><input type="radio" name="{{counta.value}}" id="option2" value="A"></input></center></th>
+         {% set countf.value = countf.value + 1 %}
+         {%endif%}
+         {%endfor%}
+            {% set countf.value = countf.value - 1%}
+     </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+
+  </div>
+     <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+    <input type="submit" name="submit" value="Guardar lista" class="btn btn-success">
+</form>
+{% endblock %}
+</body>
+</html>

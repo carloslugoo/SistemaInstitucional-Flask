@@ -1,0 +1,39 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mis cursos{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+ <div class="col-sm-10">
+  <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+      <div class="col-md-6 px-0">
+          <h1  class="display-15 fst-italic"> <i class="bi bi-list-check"></i> Registros de asistencia en {{cursos.0}}</h1>
+          <p>Curso: {{cursos.1}}, {{cursos.2}}</p>
+      </div>
+    </div>
+    </div>
+<div class="row">
+    <div class="col-sm-5">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Fecha</th>
+            <th>Ver la lista de asistencias</th>
+            <th>Modificar</th>
+		</thead>
+    {% for lista in listas %}
+          <tr>
+              <td>{{lista.0}}</td>
+              <td><center><a class="btn btn-secondary" role="button" href="/verificarlista/{{lista.0}}"><i class="bi bi-eye-fill"></i></a></center></td>
+              <td><center><a class="btn btn-secondary" role="button" href="/modificarlista/{{lista.0}}"><i class="bi bi-clipboard2-data-fill"></i></a></center></td>
+          </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+
+  </div>
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,81 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mis cursos{% endblock %}</title>
+</head>
+<body>
+  {% block content %}
+   <div class="col-sm-10">
+    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+      <div class="col-md-6 px-0">
+          <h1  class="display-15 fst-italic"> <i class="bi bi-list-check"></i> Asistencia en la fecha: {{id}}</h1>
+      </div>
+    </div>
+    </div>
+    {% set counta = namespace(value=0) %}
+    {% set countp = namespace(value=0) %}
+    {% set count = namespace(value=0) %}
+  <div class="row">
+    <div class="col-sm-6">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Alumno</th>
+            <th></th>
+		</thead>
+    {% for lista in listas %}
+       {% set counta.value = counta.value + 1 %}
+          <tr>
+              <td>{{counta.value}}. {{lista.4}}, {{lista.4}}</td>
+              {%if lista.2 == 'P'%}
+               {% set countp.value = countp.value + 1 %}
+              <td>Presente</td>
+              {%else%}
+               {% set count.value = count.value + 1 %}
+              <td>Ausente</td>
+              {%endif%}
+          </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+
+        <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+            <canvas id="myChart" width="500" height="400"></canvas>
+        </div>
+      </div>
+
+  </div>
+  <script>
+        const labels = [
+    'Presentes',
+    'Ausencias',
+  ];
+
+    const data = {
+    labels: labels,
+    datasets: [{
+      label: 'Datos:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{countp.value}}, {{count.value}}],
+    }]
+  };
+
+    const config = {
+    type: 'doughnut',
+    data: data,
+    options: {
+     responsive: false
+    }
+  };
+
+   const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );
+  </script>
+{% endblock %}
+</body>
+</html>
