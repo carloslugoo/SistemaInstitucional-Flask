@@ -14,6 +14,46 @@
       </div>
     </div>
     </div>
+
+    <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/verasistencias/{{id}}">
+                <label>Filtrar por tiempo:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Una semana</option>
+                    <option value="2">Un mes</option>
+                    <option value="3">Ver todo</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver registros" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+<br>
+{%if filtro == 1%}
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Registros de la última semana </h1>
+    </div>
+  </div>
+{%endif%}
+
+{%if filtro == 2%}
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Registros de la último mes </h1>
+    </div>
+  </div>
+{%endif%}
+
+{%if filtro == 3%}
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Todos los registros </h1>
+    </div>
+  </div>
+{%endif%}
+
 <div class="row">
     <div class="col-sm-5">
 <table class="table table-hover table-striped table-bordered">

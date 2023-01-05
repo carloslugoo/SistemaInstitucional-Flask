@@ -6,6 +6,25 @@
 </head>
 <body>
   {% block content %}
+       <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+               {% if category == 'si' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Se actualizo la lista correctamente!',
+  								text: 'Se realizaron los cambios...',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
    <div class="col-sm-10">
     <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
       <div class="col-md-6 px-0">
@@ -39,9 +58,12 @@
 	</table>
     </div>
    </div>
-  <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Atrás</i></a>
+ {%if vector > 0%}
+  <a href="/verasistencias/{{vector}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+  {%else%}
+  <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+  {%endif%}
    <input type="submit" name="submit" value="Modificar alumnos seleccionados" class="btn btn-success">
-     <a href="/eliminarlista/{{id}}" class="btn btn-danger" role="button"> Eliminar toda la lista</i></a>
   </form>
     {% endblock %}
 </body>

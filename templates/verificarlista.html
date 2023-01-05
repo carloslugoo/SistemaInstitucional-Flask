@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Mis cursos{% endblock %}</title>
+    <title>{% block title %}Ver asistencia{% endblock %}</title>
 </head>
 <body>
   {% block content %}
@@ -42,11 +42,16 @@
 
         <div class="col-md-3">
         <div class="h-80 p-1 text-bg-dark rounded-3">
-            <canvas id="myChart" width="500" height="400"></canvas>
+            <canvas id="myChart" width="450" height="400"></canvas>
         </div>
       </div>
 
   </div>
+  {%if vector > 0%}
+  <a href="/verasistencias/{{vector}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+  {%else%}
+  <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+  {%endif%}
   <script>
         const labels = [
     'Presentes',

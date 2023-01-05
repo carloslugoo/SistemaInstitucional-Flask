@@ -39,13 +39,13 @@
   <div class="row">
  {% for materia in materias %}
   {% set count.value = count.value + 1 %}
-
           <div class="col-sm-4">
         <div class="h-70 p-1 text-bg-dark rounded-3">
           <h3>{{materia.1}}</h3>
           <p>Curso: {{materia.2}} Sección: {{materia.3}}</p>
           <p>Enfasis: {{materia.5}}          Año: {{materia.4}}</p>
-         <a href="/vermateria/{{materia.0}}" class="btn btn-outline-light" role="button">Ver disciplina</a>
+         <a href="/vermateria/{{materia.0}}" class="btn btn-outline-light" role="button">Ver trabajos</a>
+         <a href="/verasistencia/{{materia.0}}" class="btn btn-outline-light" role="button">Ver asistencia</a>
         </div>
           </div>
     {% if count.value == 2%}

@@ -699,6 +699,28 @@ def verproceso(id):
     return redirect(url_for('vermaterias'))
   return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, data = profesor, data2 = data2, suml2 = suml2, sumt2 = sumt2)
 
+@app.route('/vermitrabajo/<int:id>')
+def vermitrabajo(id):
+  datos = session['username']
+  #print(datos)
+  print(id)
+  #Saca el trabajo
+  mycursor = mydb.cursor()
+  sql = "SELECT des_t, pun_t, fec_t, id_materia FROM trabajos WHERE trabajos.id_trabajo = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  data = data[0]
+  print(data)
+  #Saca los indicadores
+  mycursor = mydb.cursor()
+  sql = "SELECT indxalum.id_indicador, des_i, indxalum.id_trabajo, pun_l, pun_i FROM indxalum, indicadores WHERE indxalum.id_trabajo = %s and id_alumno = %s and " \
+        "indxalum.id_indicador = indicadores.id_indicador"
+  val = [id, datos[0]]
+  mycursor.execute(sql, val)
+  indi = mycursor.fetchall()
+  print(indi)
+  return render_template('vermitrabajo.html', datos=datos, data=data, indicadores = indi)
 @app.route('/inscribiral', methods = ['GET', 'POST']) #Inscripcion de alumnos. Parte de la Carga
 def inscribirdir():
   alumno = userform.Alumno(request.form)
@@ -2943,7 +2965,7 @@ def verasistencias(id):
   cursos = cursos[0]
   print(cursos)
   #Saca los datos de la asistencia
-  sql = "SELECT DISTINCT fecha FROM asistenciaalum WHERE id_materia = %s and id_curso = %s  ORDER BY asistenciaalum.fecha DESC"
+  sql = "SELECT DISTINCT fecha FROM asistenciaalum WHERE id_materia = %s and id_curso = %s  ORDER BY asistenciaalum.fecha DESC LIMIT 7"
   val = [id, cursos[3]]
   mycursor.execute(sql, val)
   asis = mycursor.fetchall()
@@ -2953,7 +2975,26 @@ def verasistencias(id):
   user_datos = id
   global vector
   vector = cursos[3]
-  return render_template('verlista.html', datos=datos, cursos = cursos, listas = asis)
+  if request.method == "POST":
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 1:
+      return redirect(url_for('verasistencias', id = id))
+    if filtro == 2:
+      sql = "SELECT DISTINCT fecha FROM asistenciaalum WHERE id_materia = %s and id_curso = %s  ORDER BY asistenciaalum.fecha DESC LIMIT 31"
+      val = [id, cursos[3]]
+      mycursor.execute(sql, val)
+      asis = mycursor.fetchall()
+      print(asis)
+      return render_template('verlista.html', datos=datos, cursos=cursos, listas=asis, filtro=filtro, id=id)
+    if filtro == 3:
+      sql = "SELECT DISTINCT fecha FROM asistenciaalum WHERE id_materia = %s and id_curso = %s  ORDER BY asistenciaalum.fecha DESC"
+      val = [id, cursos[3]]
+      mycursor.execute(sql, val)
+      asis = mycursor.fetchall()
+      print(asis)
+      return render_template('verlista.html', datos=datos, cursos=cursos, listas=asis, filtro=filtro, id=id)
+  return render_template('verlista.html', datos=datos, cursos = cursos, listas = asis, filtro = 1, id = id)
 
 @app.route('/verificarlista/<string:id>', methods = ['POST', 'GET'])
 def verificarlista(id):
@@ -2977,8 +3018,7 @@ def verificarlista(id):
   print(asis)
   # Ordena alfabetaicamente los alumnos del vector...
   asis = sorted(asis, key=lambda asis: asis[4])
-
-  return render_template('verificarlista.html', datos=datos, listas = asis, id = id)
+  return render_template('verificarlista.html', datos=datos, listas = asis, id = id, vector = user_datos)
 
 @app.route('/modificarlista/<string:id>', methods = ['POST', 'GET'])
 def modlista(id):
@@ -2989,6 +3029,11 @@ def modlista(id):
   global vector
   if not user_datos or not vector:
     return redirect(url_for('miscursos'))
+  #alertas
+  global band
+  if band == 6:
+    flash("","si")
+    band = 0
   datos = session['username']
   mycursor = mydb.cursor()
   # Saca los datos de la asistencia
@@ -3023,7 +3068,7 @@ def modlista(id):
     global vector2
     vector2 = alumnos
     return redirect(url_for('carmodlista', id=id))
-  return render_template('modlista.html', datos=datos, listas=asis, id=id)
+  return render_template('modlista.html', datos=datos, listas=asis, id=id, vector = user_datos)
 
 @app.route('/cargarmodificacion/<string:id>', methods = ['POST', 'GET'])
 def carmodlista(id):
@@ -3038,9 +3083,33 @@ def carmodlista(id):
   print(vector2)
   if not user_datos or not vector or not vector2:
     return redirect(url_for('miscursos'))
+  mycursor = mydb.cursor()
   # Estados posibles
   lista = ["P", "A"]
-  return render_template('modlista2.html', datos=datos, alumnos = vector2, listas = lista)
+  # Comprobar que cargo bien
+  create = True
+  #alertas
+  global band
+  if request.method == "POST":
+    for x in range(0, len(vector2)):
+      aux = request.form.getlist(('{a}'.format(a=x + 1)))
+      if not aux:
+        create = False
+    if create == True:
+      for x in range(0, len(vector2)):
+        aux = request.form.getlist(('{a}'.format(a=x + 1)))
+        aux2 = vector2[x]
+        # Actualiza por alumno si estuvo presente o ausente
+        sql = "UPDATE asistenciaalum SET asistio = %s WHERE id_alumno = %s and id_materia = %s and id_curso = %s and fecha = %s"
+        val = (aux[0], aux2[0], user_datos, vector, id)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        mydb.commit()
+      band = 6
+      return redirect(url_for('modlista', id=id))
+    else:
+      flash("", "ec")
+  return render_template('modlista2.html', datos=datos, alumnos = vector2, listas = lista, id = id, vector = id)
 
 def createpassword(password):
   return generate_password_hash(password)

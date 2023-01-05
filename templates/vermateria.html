@@ -9,7 +9,7 @@
 {% block content %}
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-           <h1 class="display-9 fst-italic"> {{data.2}} </h1>
+           <h1 class="display-9 fst-italic">Trabajos en {{data.2}} </h1>
     </div>
 </div>
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
@@ -17,7 +17,7 @@
            <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Primera Etapa </h1>
     </div>
 </div>
-<br>
+{% set count = namespace(value=0) %}
  <div class="row">
   <div class="col-sm-6">
 <table class="table table-hover table-striped table-bordered">
@@ -25,24 +25,77 @@
 			<th>Titulo del trabajo</th>
             <th>Fecha</th>
             <th>Puntaje</th>
+            <th>Ver trabajo</th>
 		</thead>
 		<tbody>
          {% for proceso in procesos %}
+         {% set count.value = count.value + 1 %}
      <tr>
       <td>{{proceso.1}}</td>
      <td>{{proceso.2}}</td>
      <td>{{proceso.4}}/{{proceso.3}}</td>
+      <td><center><a class="btn btn-secondary" role="button" href="/vermitrabajo/{{proceso.0}}"><i class="bi bi-eye-fill"></i></a></center></td>
      </tr>
      {% endfor %}
     </tbody>
 	</table>
     </div>
+  {%if count.value <= 2%}
          <div class="col-md-3">
         <div class="h-80 p-1 text-bg-dark rounded-3">
         <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
-            <canvas id="myChart" width="500" height="300"></canvas>
+            <canvas id="myChart" width="500" height="110"></canvas>
         </div>
       </div>
+ {%endif%}
+ {%if count.value == 3%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart" width="500" height="160"></canvas>
+        </div>
+      </div>
+ {%endif%}
+   {%if count.value == 4%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart" width="500" height="210"></canvas>
+        </div>
+      </div>
+ {%endif%}
+  {%if count.value == 5%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart" width="500" height="260"></canvas>
+        </div>
+      </div>
+ {%endif%}
+    {%if count.value == 6%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart" width="500" height="310"></canvas>
+        </div>
+      </div>
+ {%endif%}
+   {%if count.value == 7%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart" width="500" height="360"></canvas>
+        </div>
+      </div>
+ {%endif%}
+      {%if count.value == 8%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart" width="500" height="410"></canvas>
+        </div>
+      </div>
+ {%endif%}
 </div>
 <br>
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
@@ -51,6 +104,7 @@
     </div>
 </div>
 
+{% set counta = namespace(value=0) %}
  <div class="row">
   <div class="col-sm-6">
 <table class="table table-hover table-striped table-bordered">
@@ -58,25 +112,77 @@
 			<th>Titulo del trabajo</th>
             <th>Fecha</th>
             <th>Puntaje</th>
+            <th>Ver trabajo</th>
 		</thead>
 		<tbody>
          {% for proceso in data2 %}
+         {% set counta.value = counta.value + 1 %}
      <tr>
       <td>{{proceso.1}}</td>
      <td>{{proceso.2}}</td>
      <td>{{proceso.4}}/{{proceso.3}}</td>
+    <td><center><a class="btn btn-secondary" role="button" href="/vermitrabajo/{{proceso.0}}"><i class="bi bi-eye-fill"></i></a></center></td>
      </tr>
      {% endfor %}
     </tbody>
 	</table>
     </div>
-     <div class="col-md-3">
+     {%if counta.value <= 2%}
+         <div class="col-md-3">
         <div class="h-80 p-1 text-bg-dark rounded-3">
-        <center><p>Puntaje: {{suml2}}/{{sumt2}}</p></center>
-            <canvas id="myChart2" width="500" height="300"></canvas>
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart2" width="500" height="110"></canvas>
         </div>
       </div>
-
+ {%endif%}
+ {%if counta.value == 3%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart2" width="500" height="160"></canvas>
+        </div>
+      </div>
+ {%endif%}
+   {%if counta.value == 4%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart2" width="500" height="210"></canvas>
+        </div>
+      </div>
+ {%endif%}
+  {%if counta.value == 5%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart2" width="500" height="260"></canvas>
+        </div>
+      </div>
+ {%endif%}
+    {%if counta.value == 6%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart2" width="500" height="310"></canvas>
+        </div>
+      </div>
+ {%endif%}
+   {%if counta.value == 7%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart2" width="500" height="360"></canvas>
+        </div>
+      </div>
+ {%endif%}
+      {%if counta.value == 8%}
+         <div class="col-md-3">
+        <div class="h-80 p-1 text-bg-dark rounded-3">
+        <center><p>Puntaje: {{suml}}/{{sumt}}</p></center>
+            <canvas id="myChart2" width="500" height="410"></canvas>
+        </div>
+      </div>
+ {%endif%}
 </div>
 </div>
 

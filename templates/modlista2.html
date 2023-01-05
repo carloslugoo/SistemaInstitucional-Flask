@@ -6,6 +6,26 @@
 </head>
 <body>
   {% block content %}
+   <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+               {% if category == 'ec' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'La lista quedo incompleta!',
+  								text: 'Algun alumno quedo sin seleccionarse...',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                {% endfor %}
+            {% endif %}
+        {% endwith  %}
+
    <div class="col-sm-10">
     <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
       <div class="col-md-6 px-0">
@@ -17,7 +37,7 @@
 {% set counta = namespace(value=0) %}
 {% set count = namespace(value=0) %}
 {% set countf = namespace(value=0) %}
-<form method="POST" action="/llamarlista/{{id}}">
+<form method="POST" action="/cargarmodificacion/{{id}}">
  <div class="row">
     <div class="col-sm-5">
 <table class="table table-hover table-striped table-bordered">
@@ -45,7 +65,11 @@
     </div>
 
   </div>
-     <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+    {%if vector%}
+  <a href="/modificarlista/{{vector}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+  {%else%}
+  <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+  {%endif%}
     <input type="submit" name="submit" value="Guardar lista" class="btn btn-success">
 </form>
 {% endblock %}
