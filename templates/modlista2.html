@@ -1,0 +1,53 @@
+{% extends 'baseprof.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mis cursos{% endblock %}</title>
+</head>
+<body>
+  {% block content %}
+   <div class="col-sm-10">
+    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+      <div class="col-md-6 px-0">
+          <h1  class="display-15 fst-italic"> <i class="bi bi-list-task"></i> Modificar asistencia en la fecha: {{id}}</h1>
+      </div>
+    </div>
+    </div>
+
+{% set counta = namespace(value=0) %}
+{% set count = namespace(value=0) %}
+{% set countf = namespace(value=0) %}
+<form method="POST" action="/llamarlista/{{id}}">
+ <div class="row">
+    <div class="col-sm-5">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Alumno</th>
+            <th><center>P</center></th>
+            <th><center>A</center></th>
+		</thead>
+    {% for alumno in alumnos %}
+     {% set counta.value = counta.value + 1 %}
+     <tr>
+        <td>{{counta.value}}. {{alumno.2}}, {{alumno.1}}</td>
+         {% for lista in listas %}
+         {%if countf.value == 0%}
+          <th><center><input type="radio" name="{{counta.value}}" id="option1" value="P"></input></center></th>
+          <th><center><input type="radio" name="{{counta.value}}" id="option2" value="A"></input></center></th>
+         {% set countf.value = countf.value + 1 %}
+         {%endif%}
+         {%endfor%}
+            {% set countf.value = countf.value - 1%}
+     </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+
+  </div>
+     <a href="/miscursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+    <input type="submit" name="submit" value="Guardar lista" class="btn btn-success">
+</form>
+{% endblock %}
+</body>
+</html>

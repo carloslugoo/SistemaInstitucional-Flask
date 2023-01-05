@@ -2964,6 +2964,8 @@ def verificarlista(id):
   global vector
   print(vector)
   print(user_datos)
+  if not user_datos or not vector:
+    return redirect(url_for('miscursos'))
   datos = session['username']
   mycursor = mydb.cursor()
   # Saca los datos de la asistencia
@@ -2973,7 +2975,73 @@ def verificarlista(id):
   mycursor.execute(sql, val)
   asis = mycursor.fetchall()
   print(asis)
+  # Ordena alfabetaicamente los alumnos del vector...
+  asis = sorted(asis, key=lambda asis: asis[4])
+
   return render_template('verificarlista.html', datos=datos, listas = asis, id = id)
+
+@app.route('/modificarlista/<string:id>', methods = ['POST', 'GET'])
+def modlista(id):
+  print(id)
+  # idmateria
+  global user_datos
+  # idcurso
+  global vector
+  if not user_datos or not vector:
+    return redirect(url_for('miscursos'))
+  datos = session['username']
+  mycursor = mydb.cursor()
+  # Saca los datos de la asistencia
+  sql = "SELECT id_asisalum, asistenciaalum.id_alumno, asistio, nmb_a, ape_a FROM asistenciaalum, alumnos WHERE id_materia = %s and asistenciaalum.id_curso = %s and fecha = %s " \
+        "and asistenciaalum.id_alumno = alumnos.id_alumno"
+  val = [user_datos, vector, id]
+  mycursor.execute(sql, val)
+  asis = mycursor.fetchall()
+  # Ordena alfabetaicamente los alumnos del vector...
+  asis = sorted(asis, key=lambda asis: asis[4])
+  print(asis)
+  alumnos = []
+  if request.method == 'POST':
+    # Saca los ids de los alumnos
+    idalum = request.form.getlist(('idalum'))
+    print(idalum)
+    # Saca los alumnos seleccionados por el docente
+    for x in range(0, len(idalum)):
+      aux = int(idalum[x])
+      print(aux)
+      mycursor = mydb.cursor()
+      sql = "SELECT id_alumno,nmb_a, ape_a FROM alumnos WHERE id_alumno = %s"
+      val = [aux]
+      mycursor.execute(sql, val)
+      aux2 = mycursor.fetchall()
+      aux2 = aux2[0]
+      # print(aux2)
+      alumnos.append(aux2)
+    print(alumnos)
+    # Ordena alfabetaicamente los alumnos del vector...
+    alumnos = sorted(alumnos, key=lambda alumnos: alumnos[2])
+    global vector2
+    vector2 = alumnos
+    return redirect(url_for('carmodlista', id=id))
+  return render_template('modlista.html', datos=datos, listas=asis, id=id)
+
+@app.route('/cargarmodificacion/<string:id>', methods = ['POST', 'GET'])
+def carmodlista(id):
+  datos = session['username']
+  print(id)
+  # idmateria
+  global user_datos
+  # idcurso
+  global vector
+  #alumnos
+  global vector2
+  print(vector2)
+  if not user_datos or not vector or not vector2:
+    return redirect(url_for('miscursos'))
+  # Estados posibles
+  lista = ["P", "A"]
+  return render_template('modlista2.html', datos=datos, alumnos = vector2, listas = lista)
+
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
