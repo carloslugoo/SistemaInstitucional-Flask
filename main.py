@@ -96,17 +96,22 @@ def bienvenidoprofe():
 #Parte de vista de alumnos materias
 @app.route('/bienvenidoalumno')
 def vermaterias():
+  #Alertas
+  global band
+  if band == 6:
+    flash("","noa")
+    band = 0
   datos = session['username']
   print(datos)
+  #Materias el cual esta matriculado el alumno
   mycursor = mydb.cursor()
   sql = "SELECT matxalum.id_materia,des_m, des_c, sec_c, ano_m, des_e, id_profesor FROM matxalum, materias, cursos, enfasis" \
         " WHERE id_alumno = %s and cursos.id_curso =%s and matxalum.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis"
   val = [datos[0], datos[4]]
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
-  cont = [1,2,3,4,5,6,7,8,9,10,11,12]
   print(data)
-  return render_template('materias.html', datos=datos, materias=data, cont = cont)
+  return render_template('materias.html', datos=datos, materias=data)
 
 @app.route('/bienvenidoadmin')
 def bienvenidoadmin():
@@ -666,6 +671,7 @@ def verproceso(id):
   val = [id]
   mycursor.execute(sql, val)
   profesor = mycursor.fetchall()
+  print(profesor)
   #Sumatoria de el puntaje del alumno
   #Segunda Etapa
   if data2:
@@ -721,6 +727,51 @@ def vermitrabajo(id):
   indi = mycursor.fetchall()
   print(indi)
   return render_template('vermitrabajo.html', datos=datos, data=data, indicadores = indi)
+
+@app.route('/verasistenciaal/<int:id>', methods =  ['GET', 'POST'])
+def verasistenciaal(id):
+  datos = session['username']
+  print(datos)
+  mycursor = mydb.cursor()
+  #Datos de la disciplina
+  sql = "SELECT DISTINCT nmb_p, ape_p, des_m FROM profesores, matxalum, materias WHERE matxalum.id_materia = %s and matxalum.id_profesor = profesores.id_profesor " \
+        "and matxalum.id_materia = materias.id_materia"
+  val = [id]
+  mycursor.execute(sql, val)
+  profesor = mycursor.fetchall()
+  print(profesor)
+  #Datos de su asistencia
+  sql = "SELECT id_asisalum, fecha, asistio FROM asistenciaalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s ORDER BY asistenciaalum.fecha DESC LIMIT 7"
+  val = [datos[0], id, datos[4]]
+  mycursor.execute(sql, val)
+  asistencias = mycursor.fetchall()
+  print(asistencias)
+  #Si no tienes asistencias tira alerta y redirige
+  if not asistencias:
+    global band
+    band = 6
+    return redirect(url_for('vermaterias'))
+  if request.method == "POST":
+    #Filtro de tiempo..
+    filtro = int(request.form.get("idfiltro"))
+    if filtro == 1:
+      return redirect(url_for('verasistenciaal', id= id))
+    if filtro == 2:
+      sql = "SELECT id_asisalum, fecha, asistio FROM asistenciaalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s ORDER BY asistenciaalum.fecha DESC LIMIT 31"
+      val = [datos[0], id, datos[4]]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      print(asistencias)
+      return render_template('verasistenciaal.html', datos=datos, data=profesor[0], asistencias=asistencias, filtro=filtro, id=id)
+    if filtro == 3:
+      sql = "SELECT id_asisalum, fecha, asistio FROM asistenciaalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s ORDER BY asistenciaalum.fecha DESC"
+      val = [datos[0], id, datos[4]]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      print(asistencias)
+      return render_template('verasistenciaal.html', datos=datos, data=profesor[0], asistencias=asistencias, filtro=filtro, id=id)
+  return render_template('verasistenciaal.html', datos=datos, data = profesor[0], asistencias=asistencias, filtro = 1, id = id)
+
 @app.route('/inscribiral', methods = ['GET', 'POST']) #Inscripcion de alumnos. Parte de la Carga
 def inscribirdir():
   alumno = userform.Alumno(request.form)
@@ -2818,9 +2869,6 @@ def eliminarmatxpro(id):
 def verasistenciaprofe():
   datos = session['username']
   print(datos)
-  # Extraemos la fecha
-  inf = datetime.now()
-  fecha = datetime.strftime(inf, '%Y/%m/%d')
   #Sacamos las veces que marco asistencia
   mycursor = mydb.cursor()
   sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC LIMIT 7"

@@ -17,7 +17,16 @@
                         <script>
                             Swal.fire({
                                 icon: 'error',
-  								title: 'En esta materia aun no tienes proceso!',
+  								title: 'En esta materia aun no tienes trabajos!',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                    {% if category == 'noa' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'error',
+  								title: 'En esta materia aun no tienes asistencias!',
   								timer: 3500
                             })
                         </script>
@@ -45,7 +54,7 @@
           <p>Curso: {{materia.2}} Sección: {{materia.3}}</p>
           <p>Enfasis: {{materia.5}}          Año: {{materia.4}}</p>
          <a href="/vermateria/{{materia.0}}" class="btn btn-outline-light" role="button">Ver trabajos</a>
-         <a href="/verasistencia/{{materia.0}}" class="btn btn-outline-light" role="button">Ver asistencia</a>
+         <a href="/verasistenciaal/{{materia.0}}" class="btn btn-outline-light" role="button">Ver asistencia</a>
         </div>
           </div>
     {% if count.value == 2%}

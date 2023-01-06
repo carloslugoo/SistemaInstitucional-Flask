@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{{data.2}}{% endblock %}</title>
+</head>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<body>
+{% block content %}
+<div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic">Asistencia en {{data.2}} </h1>
+            <p>Profesor: {{data.0}}, {{data.1}}</p>
+    </div>
+   </div>
+ </div>
+<div class="row">
+    <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/verasistenciaal/{{id}}">
+                <label>Filtrar por tiempo:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Una semana</option>
+                    <option value="2">Un mes</option>
+                    <option value="3">Ver todo</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver mi asistencia" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+          <div class="col-sm-3">
+                <div class="col-sm-12">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-12 px-0">
+            <center><canvas id="idstat1" width="500" height="300"></canvas></center>
+        </div>
+      </div>
+   </div>
+      </div>
+</div>
+  <br>
+ {%if filtro == 1%}
+     <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Registro de la última semana </h1>
+    </div>
+  </div>
+ {%endif%}
+     {%if filtro == 2%}
+    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Registro del último mes </h1>
+    </div>
+  </div>
+ {%endif%}
+    {%if filtro == 3%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic"> Todos los registros </h1>
+    </div>
+  </div>
+     {%endif%}
+{% set count = namespace(value=0) %}
+{% set counta = namespace(value=0) %}
+{% set countp = namespace(value=0) %}
+ <div class="row">
+  <div class="col-sm-6">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Fecha</th>
+            <th>Presente/Ausente</th>
+		</thead>
+		<tbody>
+           {% for asistencia in asistencias %}
+           {% set count.value = count.value + 1 %}
+      <tr>
+      <td>{{count.value}}. {{asistencia.1}}</td>
+          {%if asistencia.2 == 'P'%}
+                {% set countp.value = countp.value + 1 %}
+            <td>Presente</td>
+              {%endif%}
+       {%if asistencia.2 == 'A'%}
+          {% set counta.value = counta.value + 1 %}
+    <td>Ausente</td>
+
+          {%endif%}
+     </tr>
+     {% endfor %}
+     </tbody>
+	</table>
+    </div>
+
+ </div>
+<script>
+    const labels = [
+    'Presentes',
+    'Ausentes',
+  ];
+
+   const data = {
+    labels: labels,
+    datasets: [{
+      label: 'Días:',
+      backgroundColor: ['rgba(81, 6, 126, 0.8)', 'rgba(154, 32, 228, 1)', 'rgba(186,85,211,1)'],
+      borderColor: 'rgba(0, 0, 0, 1)',
+      data: [{{countp.value}}, {{counta.value}}],
+    }]
+  };
+
+   const config = {
+    type: 'doughnut',
+    data: data,
+    options: {
+    responsive: false
+    }
+  };
+
+   const myChart = new Chart(
+    document.getElementById('idstat1'),
+    config
+  );
+</script>
+{% endblock %}
+</body>
+
+</html>
