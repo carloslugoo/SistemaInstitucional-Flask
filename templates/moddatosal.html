@@ -140,8 +140,8 @@
     <a href="/listadocursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
     {% endif %}
 {% else %}
-     {% if band != 0%}
-    <a href="/listadodocentes/{{band}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
+     {% if id %}
+    <a href="/listadodocentes/{{id}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
     {%else%}
     <a href="/listadocursos" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
     {% endif %}

@@ -2001,7 +2001,7 @@ def exportaralumnos(id):
     # Declaramamos que la tabla recibira como dato los datos anteriores y le damos la dimensiones a cada uno de nuestros campos
     table = Table(
       data,
-      colWidths=[20, 120, 80, 60, 80, 60]
+      colWidths=[20, 140, 80, 60, 80, 60]
     )
     table.setStyle(
       TableStyle([
@@ -2566,7 +2566,9 @@ def listadocursos():
   val = [2]
   mycursor.execute(sql, val)
   cursos_s = mycursor.fetchall()
+  print(cursos_s)
   return render_template('listadocursos.html', datos=datos, cursos_c = cursos_c, cursos_s= cursos_s)
+
 
 @app.route('/listadoalumnos/<int:id>', methods = ['POST', 'GET']) #Ver todos los alumnos del curso
 def listadoalumnos(id):
@@ -2631,6 +2633,7 @@ def listadoalumnos(id):
 def moddatos(id):
   global band
   global tipoins
+  global idcurso
   if band == 3:
     flash("", "ok")
     band = 0
@@ -2643,14 +2646,17 @@ def moddatos(id):
   data = mycursor.fetchall()
   if data:
     data = data[0]
-  print(data)
-  if tipoins == 2 and not data:
+    print(data)
+    idcurso = 0
+  if not data:
     sql = "SELECT * FROM profesores WHERE id_profesor = %s"
     val = [id]
     mycursor.execute(sql, val)
     data = mycursor.fetchall()
     data = data[0]
     print(data)
+    if not data:
+      return redirect(url_for('listadocursos'))
   if request.method == 'POST':
     edad = request.form.get("edad")
     loca = request.form.get("loc")
@@ -2683,7 +2689,7 @@ def moddatos(id):
       mydb.commit()
       band = 3
       return redirect(url_for('moddatos', id=id))
-  return render_template('moddatosal.html', datos=datos, data = data, band=band, user = user, tipo = tipoins)
+  return render_template('moddatosal.html', datos=datos, data = data, band=band, user = user, tipo = tipoins, id = idcurso)
 
 @app.route('/estado/<int:id>')
 def verestado(id):
@@ -2744,6 +2750,9 @@ def listadodocentes(id):
   global tipoins
   tipoins = 2
   datos = session['username']
+  global idcurso
+  idcurso = id
+  #Datos del curso
   mycursor = mydb.cursor()
   sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
   val = [id]
@@ -2751,32 +2760,128 @@ def listadodocentes(id):
   cursos = mycursor.fetchall()
   cursos = cursos[0]
   print(cursos)
+  #Saca las materias del curso
   sql = "SELECT id_matxcur, matxcur.id_curso, matxcur.id_materia, des_m, car_h FROM matxcur, materias WHERE matxcur.id_curso = %s and matxcur.id_materia = materias.id_materia "
   val = [id]
   mycursor.execute(sql, val)
   materias = mycursor.fetchall()
   materias = sorted(materias, key=lambda materias: materias[3])
   print(materias)
-  sql = "SELECT DISTINCT matxpro.id_profesor, nmb_p, ape_p FROM matxpro, profesores WHERE matxpro.id_curso = %s and matxpro.id_profesor = profesores.id_profesor"
+  #Saca los profesores
+  sql = "SELECT DISTINCT matxpro.id_profesor, nmb_p, ape_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_curso = %s " \
+        "and matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia"
   val = [id]
   mycursor.execute(sql, val)
   profe_t = mycursor.fetchall()
   profe_t = sorted(profe_t, key=lambda profe_t: profe_t[2])
   print(profe_t)
-  band = id
+  materia = []
+  filtro = 0
   if request.method == 'POST':
     idmat = request.form.get("idmat")
     print(idmat)
     idmat = int(idmat)
-    if idmat > 6: #Comprueba que no marque todos los alumnos
-      sql = "SELECT DISTINCT  matxpro.id_profesor, nmb_p, ape_p FROM matxpro, profesores WHERE matxpro.id_curso = %s and matxpro.id_materia = %s and matxpro.id_profesor = profesores.id_profesor"
+    filtro = 1
+    if idmat > 6: #Comprueba que no marque todos los docentes
+      sql = "SELECT DISTINCT matxpro.id_profesor, nmb_p, ape_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_curso = %s and matxpro.id_materia = %s " \
+            "and matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia "
       val = [id, idmat]
       mycursor.execute(sql, val)
       profe_t = mycursor.fetchall()
       profe_t = sorted(profe_t, key=lambda profe_t: profe_t[2])
       print(profe_t)
-  return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias, profesores = profe_t)
+      if profe_t:
+        materia = profe_t[0]
+      else:
+        flash("","nop")
+        return redirect(url_for('listadodocentes', id=id))
+  return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias, profesores = profe_t, materia = materia, filtro = filtro)
 
+
+@app.route('/exportardocentesad/<int:id>', methods = ['GET', 'POST'])
+def exportardocentesad(id):
+  datos = session['username']
+  #Datos del curso
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  cursos = cursos[0]
+  print(cursos)
+  # Saca los profesores
+  sql = "SELECT DISTINCT matxpro.id_profesor, nmb_p, ape_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_curso = %s " \
+        "and matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia"
+  val = [id]
+  mycursor.execute(sql, val)
+  profe_t = mycursor.fetchall()
+  profe_t = sorted(profe_t, key=lambda profe_t: profe_t[2])
+  print(profe_t)
+  if request.method == 'POST':
+    pdf = SimpleDocTemplate(
+      "{a}{b}_docentes.pdf".format(a=cursos[1], b = cursos[3]),
+      pagesize=A4,
+      rightMargin=inch,
+      leftMargin=inch,
+      topMargin=inch,
+      bottomMargin=inch / 2
+    )
+    Story = []
+    # Estilos
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
+    # Cabecera
+    text = ''' <strong><font size=14>Docentes </font></strong>
+       '''
+    text2 = '''
+           <strong><font size=10>Diretora: {a}, {b}</font></strong>
+       '''.format(a=datos[1], b=datos[2])
+    text3 = '''
+           <strong><font size=10>Curso: {a}, {b}</font></strong>
+       '''.format(a=cursos[1], b=cursos[3])
+    # Adjuntamos los titulos declarados mas arriba, osea las cabeceras
+    Story.append(Paragraph(text2))
+    Story.append(Paragraph(text3))
+    Story.append(Paragraph(text, styles['Center']))
+    Story.append(Spacer(1, 20))
+    data = [(
+      Paragraph('<strong><font size=6>#</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Nombre y Apellido</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Disciplina a su cargo</font></strong>', styles['Center'])
+    )]
+    # Aqui acomplamos los registros o datos a nuestra tabla data, estos seran los datos mostrados de bajo de los headers
+    for x in range(0, len(profe_t)):
+      aux = profe_t[x]
+      count = str(x + 1)
+      docente = aux[1] + "," + aux[2]
+      materia = aux[3]
+      data.append((
+        Paragraph('<font size=6>%s</font>' % count, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % docente, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % materia, styles['Normal'])
+      ))
+    # Declaramamos que la tabla recibira como dato los datos anteriores y le damos la dimensiones a cada uno de nuestros campos
+    table = Table(
+       data,
+      colWidths=[20, 140, 140]
+    )
+    table.setStyle(
+      TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+      ])
+    )
+    Story.append(table)
+    pdf.build(Story)
+    # Comprueba si existe el archivo y lo descarga para el usuario
+    ruta = pathlib.Path('.')
+    filename = "{a}{b}_docentes.pdf".format(a=cursos[1], b = cursos[3])
+    archivo = ruta / filename  # Si existe un pdf con su nombre
+    print(archivo)
+    if archivo.exists():
+      return send_file(archivo, as_attachment=True)
+  return redirect(url_for('listadodocentes', id=id))
 @app.route('/asignarprofe', methods = ['POST', 'GET']) #Listado de Alumnos admin  #falta swa
 def asignarprofe():
   datos = session['username']
