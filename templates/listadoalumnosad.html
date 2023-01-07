@@ -47,19 +47,26 @@
   </div>
 
 <br>
-<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+{%if filtro == 0%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-person-lines-fill"></i> Todos los alumnos</h1>
     </div>
 </div>
-
+{%else%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-person-lines-fill"></i> Alumnos en {{materia.0}}</h1>
+    </div>
+</div>
+{%endif%}
 <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Apellido</th>
-            <th>Nombre</th>
-            <th>Acciones</th>
+			<th><center>Apellido</center></th>
+            <th><center>Nombre</center></th>
+            <th><center>Acciones</center></th>
 		</thead>
         {% for alumnos in alum_t %}
        <tr>

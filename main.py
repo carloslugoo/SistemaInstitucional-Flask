@@ -2595,24 +2595,13 @@ def listadoalumnos(id):
   alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
   print(alum_t)
   band = id
+  filtro = 0
+  materia = []
   if request.method == 'POST':
-    nmb_a = request.form.get("nmb_a")
-    print(nmb_a)
+    filtro = 1
     idmat = request.form.get("idmat")
     print(idmat)
     idmat = int(idmat)
-    if nmb_a:
-      sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and ape_a LIKE = %s and matxalum.id_alumno = alumnos.id_alumno "
-      val = [id, nmb_a]
-      mycursor.execute(sql, val)
-      alum_b = mycursor.fetchall()
-      print(alum_b)
-      if not alum_b:
-        sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and nmb_a LIKE = %s and matxalum.id_alumno = alumnos.id_alumno "
-        val = [id, nmb_a]
-        mycursor.execute(sql, val)
-        alum_b = mycursor.fetchall()
-        print(alum_b)
     if idmat > 6: #Comprueba que no marque todos los alumnos
       sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and matxalum.id_materia = %s and matxalum.id_alumno = alumnos.id_alumno "
       val = [id, idmat]
@@ -2620,6 +2609,11 @@ def listadoalumnos(id):
       alum_t = mycursor.fetchall()
       alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
       print(alum_t)
+      sql = "SELECT des_m FROM materias WHERE id_materia = %s"
+      val = [idmat]
+      mycursor.execute(sql, val)
+      materia = mycursor.fetchall()
+      materia = materia[0]
     else:
       sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and matxalum.id_alumno = alumnos.id_alumno"
       val = [id]
@@ -2627,7 +2621,95 @@ def listadoalumnos(id):
       alum_t = mycursor.fetchall()
       alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
       print(alum_t)
-  return render_template('listadoalumnosad.html', datos=datos, cursos = cursos[0], materias = materias, alum_t = alum_t)
+      filtro = 0
+  return render_template('listadoalumnosad.html', datos=datos, cursos = cursos[0], materias = materias, alum_t = alum_t, filtro = filtro, materia = materia)
+
+
+@app.route('/exportaralumnosad/<int:id>', methods = ['GET', 'POST'])
+def exportaralumnosad(id):
+  datos = session['username']
+  # Datos del curso
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  cursos = cursos[0]
+  print(cursos)
+  #Saca los alumnos
+  sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a, ci_a, edad FROM matxalum, alumnos WHERE matxalum.id_curso = %s and matxalum.id_alumno = alumnos.id_alumno"
+  val = [id]
+  mycursor.execute(sql, val)
+  alum_t = mycursor.fetchall()
+  alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
+  if request.method == 'POST':
+    pdf = SimpleDocTemplate(
+      "{a}{b}_alumnos.pdf".format(a=cursos[1], b=cursos[3]),
+      pagesize=A4,
+      rightMargin=inch,
+      leftMargin=inch,
+      topMargin=inch,
+      bottomMargin=inch / 2
+    )
+    Story = []
+    # Estilos
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
+    # Cabecera
+    text = ''' <strong><font size=14>Alumnos matriculados</font></strong>
+          '''
+    text2 = '''
+              <strong><font size=10>Diretor: {a}, {b}</font></strong>
+          '''.format(a=datos[1], b=datos[2])
+    text3 = '''
+              <strong><font size=10>Curso: {a}, {b}</font></strong>
+          '''.format(a=cursos[1], b=cursos[3])
+    # Adjuntamos los titulos declarados mas arriba, osea las cabeceras
+    Story.append(Paragraph(text2))
+    Story.append(Paragraph(text3))
+    Story.append(Paragraph(text, styles['Center']))
+    Story.append(Spacer(1, 20))
+    data = [(
+      Paragraph('<strong><font size=6>#</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Nombre y Apellido</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Numero de Cedula</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Edad</font></strong>', styles['Center'])
+    )]
+    # Aqui acomplamos los registros o datos a nuestra tabla data, estos seran los datos mostrados de bajo de los headers
+    for x in range(0, len(alum_t)):
+      aux = alum_t[x]
+      count = str(x + 1)
+      alumno = aux[1] + ", " + aux[2]
+      ci = aux[3]
+      edad = aux[4]
+      data.append((
+        Paragraph('<font size=6>%s</font>' % count, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % alumno, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % ci, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % edad, styles['Normal']),
+      ))
+    # Declaramamos que la tabla recibira como dato los datos anteriores y le damos la dimensiones a cada uno de nuestros campos
+    table = Table(
+      data,
+      colWidths=[20, 140, 80, 80]
+    )
+    table.setStyle(
+      TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+      ])
+    )
+    Story.append(table)
+    pdf.build(Story)
+    # Comprueba si existe el archivo y lo descarga para el usuario
+    ruta = pathlib.Path('.')
+    filename = "{a}{b}_alumnos.pdf".format(a=cursos[1], b=cursos[3])
+    archivo = ruta / filename  # Si existe un pdf con su nombre
+    print(archivo)
+    if archivo.exists():
+      return send_file(archivo, as_attachment=True)
+  return redirect(url_for('listadoalumnos', id=id))
 
 @app.route('/moddatos/<int:id>', methods = ['POST', 'GET']) #Ver o modificar datos del alumno, listo
 def moddatos(id):
