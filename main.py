@@ -1,3 +1,5 @@
+import pathlib
+
 from flask import Flask, url_for, redirect, render_template, request, session, send_file
 import mysql.connector
 from flask import flash
@@ -11,6 +13,15 @@ import random
 from werkzeug.utils import secure_filename
 import os
 import time
+#Reporte en pdf
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import Spacer
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, Table, TableStyle, SimpleDocTemplate
+from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER
+from reportlab.lib import colors
 
 app = Flask(__name__)
 
@@ -1762,22 +1773,22 @@ def misalumnos(id):
   for x in range(0, 1):
     aux = mat[x]
     data = aux
-    print(data)
+    #print(data)
   #Ordena alfabetaicamente los alumnos del vector...
   mat = sorted(mat, key=lambda mat: mat[10])
-  print(mat)
+  #print(mat)
   #Saca el total de puntos en la primera etapa
   sql = "SELECT id_trabajo, pun_t FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s and etapa = %s"
   val = [datos[0], id, data[4], 1]
   mycursor.execute(sql, val)
   trabajosp = mycursor.fetchall()
   total_p = 0
-  print(trabajosp)
+  #print(trabajosp)
   for x in range(0, len(trabajosp)):
     aux = trabajosp[x]
     aux = aux[1]
     total_p += aux
-  print(total_p)
+  #print(total_p)
   # Saca el total de puntos en la segunda etapa
   sql = "SELECT id_trabajo, pun_t FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s and etapa = %s"
   val = [datos[0], id, data[4], 2]
@@ -1794,7 +1805,7 @@ def misalumnos(id):
   criticos_p = []
   bien_p = []
   estado = (70 * total_p) / 100  # Calcula el 70% del total
-  print(estado)
+  #print(estado)
   for x in range(0, len(mat)):
     aux = mat[x]
     aux2 = aux[5] #Puntaje primera etapa
@@ -1802,13 +1813,13 @@ def misalumnos(id):
       bien_p.append(aux)
     else:
       criticos_p.append(aux)
-  print(criticos_p)
-  print(bien_p)
+  #print(criticos_p)
+  #print(bien_p)
   # Alumnos criticos y buenos en segunda etapa
   criticos_s = []
   bien_s = []
   estado2 = (70 * total_s) / 100  # Calcula el 70% del total
-  print(estado2)
+  #print(estado2)
   for x in range(0, len(mat)):
     aux3 = mat[x]
     aux4 = aux3[11]  # Puntaje primera etapa
@@ -1816,8 +1827,8 @@ def misalumnos(id):
       bien_s.append(aux3)
     else:
       criticos_s.append(aux3)
-  print(criticos_s)
-  print(bien_s)
+  #print(criticos_s)
+  #print(bien_s)
   if request.method == 'POST':
     filtro = int(request.form.get(('idfiltro')))
     #print(filtro)
@@ -1831,6 +1842,184 @@ def misalumnos(id):
                              criticos_s = criticos_s, bien_s = bien_s, total_s = total_s, total_p = total_p)
 
 
+@app.route('/exportaralumnos/<int:id>', methods = ['GET', 'POST'])
+def exportaralumnos(id):
+  datos = session['username']
+  #print(datos)
+  mycursor = mydb.cursor()
+  # Saca los datos del alumno, los nombres y puntajes obtenidos en la materia
+  sql = "SELECT id_mxa, matxalum.id_alumno, matxalum.id_materia, cal, matxalum.id_curso, pun_ac, des_m, des_c, des_e , nmb_a, ape_a, pun_ac2, cal2" \
+        " FROM matxalum, materias, cursos, enfasis, alumnos WHERE id_profesor = %s and matxalum.id_materia = %s and matxalum.id_materia = materias.id_materia " \
+        "and matxalum.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis and matxalum.id_alumno = alumnos.id_alumno"
+  val = [datos[0], id]
+  mycursor.execute(sql, val)
+  mat = mycursor.fetchall()
+  print(mat)
+  # Saco los datos de la materia del vector...
+  for x in range(0, 1):
+    aux = mat[x]
+    data = aux
+    print(data)
+  #Ordena alfabetaicamente los alumnos del vector...
+  mat = sorted(mat, key=lambda mat: mat[10])
+  # Saca el total de puntos en la primera etapa
+  sql = "SELECT id_trabajo, pun_t FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s and etapa = %s"
+  val = [datos[0], id, data[4], 1]
+  mycursor.execute(sql, val)
+  trabajosp = mycursor.fetchall()
+  total_p = 0
+  # print(trabajosp)
+  for x in range(0, len(trabajosp)):
+    aux = trabajosp[x]
+    aux = aux[1]
+    total_p += aux
+  # print(total_p)
+  # Saca el total de puntos en la segunda etapa
+  sql = "SELECT id_trabajo, pun_t FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s and etapa = %s"
+  val = [datos[0], id, data[4], 2]
+  mycursor.execute(sql, val)
+  trabajoss = mycursor.fetchall()
+  total_s = 0
+  # print(trabajoss)
+  for x in range(0, len(trabajoss)):
+    aux = trabajoss[x]
+    aux = aux[1]
+    total_s += aux
+
+  if request.method == 'POST':
+    filtro = int(request.form.get(('idfiltro')))
+    print(filtro)
+    #Dando formato al pdf
+    pdf = SimpleDocTemplate(
+      "{a}_alumnos.pdf".format(a = datos[2]),
+      pagesize=A4,
+      rightMargin=inch,
+      leftMargin=inch,
+      topMargin=inch,
+      bottomMargin=inch / 2
+    )
+    Story = []
+    # Estilos
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
+    # Cabecera
+    text = ''' <strong><font size=14>Alumnos matriculados en {a}.</font></strong>
+    '''.format(a=data[6])
+    text2 = '''
+        <strong><font size=10>Docente: {a}, {b}</font></strong>
+    '''.format(a=datos[1], b= datos[2])
+    text3 = '''
+        <strong><font size=10>Curso: {a}, {b}</font></strong>
+    '''.format(a= data[7], b= data[8])
+    # Adjuntamos los titulos declarados mas arriba, osea las cabeceras
+    Story.append(Paragraph(text2))
+    Story.append(Paragraph(text3))
+    Story.append(Paragraph(text, styles['Center']))
+    Story.append(Spacer(1, 20))
+    # Declaramos los datos de la cabecera de la tabla, los titulos y tambien sus estilos
+    if filtro == 1: #Primera etapa
+      data = [(
+        Paragraph('<strong><font size=6>#</font></strong>', styles['Center']),
+        Paragraph('<strong><font size=6>Nombre y Apellido</font></strong>', styles['Center']),
+        Paragraph('<strong><font size=6>Primera Etapa PT:{a}</font></strong>'.format(a = total_p), styles['Center']),
+        Paragraph('<strong><font size=6>Calificación</font></strong>', styles['Center'])
+      )]
+      # Aqui acomplamos los registros o datos a nuestra tabla data, estos seran los datos mostrados de bajo de los headers
+      for x in range(0, len(mat)):
+        aux = mat[x]
+        count = str(x + 1)
+        print(count)
+        alumno = aux[9] + "," + aux[10]  # nombre y apellido
+        pp = aux[5]  # puntaje primera etapa
+        if aux[3]:  # Calificacion primera etapa
+          cal = aux[3]
+        else:
+          cal = "Sin calificación"
+        data.append((
+          Paragraph('<font size=6>%s</font>' % count, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % alumno, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % pp, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % cal, styles['Normal'])
+        ))
+    if filtro == 2: #Segunda
+      data = [(
+        Paragraph('<strong><font size=6>#</font></strong>', styles['Center']),
+        Paragraph('<strong><font size=6>Nombre y Apellido</font></strong>', styles['Center']),
+        Paragraph('<strong><font size=6>Segunda Etapa. PT:{a}</font></strong>'.format(a = total_s), styles['Center']),
+        Paragraph('<strong><font size=6>Calificación</font></strong>', styles['Center'])
+      )]
+      # Aqui acomplamos los registros o datos a nuestra tabla data, estos seran los datos mostrados de bajo de los headers
+      for x in range(0, len(mat)):
+        aux = mat[x]
+        count = str(x + 1)
+        print(count)
+        alumno = aux[9] + "," + aux[10]  # nombre y apellido
+        ps = aux[11]  # puntaje segunda etapa
+        if aux[12]:
+          cal2 = aux[12]
+        else:
+          cal2 = "Sin calificación"
+        data.append((
+          Paragraph('<font size=6>%s</font>' % count, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % alumno, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % ps, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % cal2, styles['Normal'])
+        ))
+    if filtro == 3: #Todas las etapas
+      data = [(
+        Paragraph('<strong><font size=6>#</font></strong>', styles['Center']),
+        Paragraph('<strong><font size=6>Nombre y Apellido</font></strong>', styles['Center']),
+        Paragraph('<strong><font size=6>Primera Etapa. PT:{a}</font></strong>'.format(a = total_p), styles['Center']),
+        Paragraph('<strong><font size=6>Calificación</font></strong>', styles['Center']),
+        Paragraph('<strong><font size=6>Segunda Etapa. PT:{a}</font></strong>'.format(a = total_s), styles['Center']),
+        Paragraph('<strong><font size=6>Calificación</font></strong>', styles['Center'])
+      )]
+      # Aqui acomplamos los registros o datos a nuestra tabla data, estos seran los datos mostrados de bajo de los headers
+      for x in range(0, len(mat)):
+        aux = mat[x]
+        count = str(x + 1)
+        print(count)
+        alumno = aux[9] + "," + aux[10]  # nombre y apellido
+        pp = aux[5]  # puntaje primera etapa
+        if aux[3]:  # Calificacion primera etapa
+          cal = aux[3]
+        else:
+          cal = "Sin calificación"
+        ps = aux[11]  # puntaje segunda etapa
+        if aux[12]:
+          cal2 = aux[12]
+        else:
+          cal2 = "Sin calificación"
+        data.append((
+          Paragraph('<font size=6>%s</font>' % count, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % alumno, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % pp, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % cal, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % ps, styles['Normal']),
+          Paragraph('<font size=6>%s</font>' % cal2, styles['Normal'])
+        ))
+    # Declaramamos que la tabla recibira como dato los datos anteriores y le damos la dimensiones a cada uno de nuestros campos
+    table = Table(
+      data,
+      colWidths=[20, 120, 80, 60, 80, 60]
+    )
+    table.setStyle(
+      TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+      ])
+    )
+    Story.append(table)
+    pdf.build(Story)
+    #Comprueba si existe el archivo y lo descarga para el usuario
+    ruta = pathlib.Path('.')
+    filename = "{a}_alumnos.pdf".format(a=datos[2])
+    archivo = ruta / filename  # Si existe un pdf con su nombre
+    print(archivo)
+    if archivo.exists():
+      return send_file(archivo, as_attachment=True)
+  return redirect(url_for('misalumnos', id=id))
 @app.route('/crearseman') #Creacion de Semana de Clases
 def crearsemana():
   global band

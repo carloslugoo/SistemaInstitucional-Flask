@@ -30,6 +30,21 @@
              </form>
             </div>
         </div>
+
+    <div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/exportaralumnos/{{id}}">
+                <label>Exportar alumnos:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Primera Etapa</option>
+                    <option value="2">Segunda Etapa</option>
+                    <option value="3">Ambas Etapas</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Generar pdf" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
   </div>
 <br>
 {%if filtro == 0%}
