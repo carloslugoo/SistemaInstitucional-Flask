@@ -7,28 +7,59 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <body>
 {% block content %}
-
+    <div class="col-sm-10">
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Estado Académico </h1>
+            <p>Alumno: {{data.2}}, {{data.3}}</p>
     </div>
 </div>
 
+        <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/estado/{{data.0}}">
+                <label>Filtrar sección:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Puntajes primera etapa</option>
+                    <option value="2">Puntajes segunda etapa</option>
+                    <option value="3">Asistencia del alumno</option>
+                    <option value="4">Ver todo</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver estado del alumno" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+ <br>
+{%if filtro == 4%}
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"> Primera Etapa </h1>
     </div>
 </div>
+</div>
 <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-3">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Materia</th>
-            <th>Puntaje Logrado</th>
 		</thead>
         {% for materia in materias %}
        <tr>
      <td>{{materia.2}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+        <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>P. Logrado</th>
+		</thead>
+        {% for materia in materias %}
+       <tr>
            {%if materia.5 == 0 %}
      <td> Sin puntaje</td>
            {% else %}
@@ -39,10 +70,11 @@
     </tbody>
 	</table>
     </div>
-    <div class="col-sm-2">
+
+    <div class="col-sm-1">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Puntaje Total</th>
+			<th>P. Total</th>
 		</thead>
         {% for puntaje in puntos_t %}
        <tr>
@@ -56,7 +88,7 @@
     </tbody>
 	</table>
     </div>
-<div class="col-sm-2">
+<div class="col-sm-1">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Estado</th>
@@ -74,11 +106,380 @@
 	</table>
     </div>
   </div>
+    <div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"> Segunda Etapa </h1>
     </div>
 </div>
+    </div>
+<div class="row">
+    <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+
+		</thead>
+        {% for materia in materias2 %}
+       <tr>
+     <td>{{materia.2}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+        <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>P. Logrado</th>
+		</thead>
+        {% for materia in materias2 %}
+       <tr>
+           {%if materia.5 == 0 %}
+     <td> Sin puntaje</td>
+           {% else %}
+             <td>{{materia.5}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+    <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>P. Total</th>
+		</thead>
+        {% for puntaje in puntos_t2 %}
+       <tr>
+           {%if puntaje == [] %}
+     <td> Sin puntaje</td>
+           {% else %}
+     <td>{{puntaje}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+<div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Estado</th>
+		</thead>
+        {% for estado in estado_a2 %}
+       <tr>
+           {%if estado == "mal" %}
+     <td><center><i class="bi bi-exclamation-circle-fill text-danger"></i></center></td>
+           {% else %}
+     <td><center><i class="bi bi-check-circle-fill text-success"></i></center></td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+    <div class="col-sm-10">
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"> Asistencia del alumno </h1>
+    </div>
+</div>
+ </div>
+{% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+		</thead>
+        {% for materia in materias2 %}
+      {% set counta.value = counta.value + 1 %}
+       <tr>
+     <td>{{materia.2}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+   <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Presentes</th>
+		</thead>
+        {% for presente in presentes %}
+       <tr>
+     <td>{{presente}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+     <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Ausentes</th>
+		</thead>
+        {% for ausente in ausencias %}
+       <tr>
+     <td>{{ausente}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+    <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Estado</th>
+		</thead>
+        {% for estado in estado_a3 %}
+       <tr>
+           {%if estado == "mal" %}
+     <td><center><i class="bi bi-exclamation-circle-fill text-danger"></i></center></td>
+           {% else %}
+     <td><center><i class="bi bi-check-circle-fill text-success"></i></center></td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+  </div>
+{%endif%}
+
+{%if filtro == 1%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"> Primera Etapa </h1>
+    </div>
+</div>
+</div>
+<div class="row">
+    <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+		</thead>
+        {% for materia in materias %}
+       <tr>
+     <td>{{materia.2}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+        <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>P. Logrado</th>
+		</thead>
+        {% for materia in materias %}
+       <tr>
+           {%if materia.5 == 0 %}
+     <td> Sin puntaje</td>
+           {% else %}
+             <td>{{materia.5}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+    <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>P. Total</th>
+		</thead>
+        {% for puntaje in puntos_t %}
+       <tr>
+           {%if puntaje == [] %}
+     <td> Sin puntaje</td>
+           {% else %}
+     <td>{{puntaje}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+<div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Estado</th>
+		</thead>
+        {% for estado in estado_a %}
+       <tr>
+           {%if estado == "mal" %}
+     <td><center><i class="bi bi-exclamation-circle-fill text-danger"></i></center></td>
+           {% else %}
+     <td><center><i class="bi bi-check-circle-fill text-success"></i></center></td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+{%endif%}
+{%if filtro == 2%}
+ <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"> Segunda Etapa </h1>
+    </div>
+</div>
+    </div>
+<div class="row">
+    <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+
+		</thead>
+        {% for materia in materias2 %}
+       <tr>
+     <td>{{materia.2}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+        <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>P. Logrado</th>
+		</thead>
+        {% for materia in materias2 %}
+       <tr>
+           {%if materia.5 == 0 %}
+     <td> Sin puntaje</td>
+           {% else %}
+             <td>{{materia.5}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+    <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>P. Total</th>
+		</thead>
+        {% for puntaje in puntos_t2 %}
+       <tr>
+           {%if puntaje == [] %}
+     <td> Sin puntaje</td>
+           {% else %}
+     <td>{{puntaje}}</td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+<div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Estado</th>
+		</thead>
+        {% for estado in estado_a2 %}
+       <tr>
+           {%if estado == "mal" %}
+     <td><center><i class="bi bi-exclamation-circle-fill text-danger"></i></center></td>
+           {% else %}
+     <td><center><i class="bi bi-check-circle-fill text-success"></i></center></td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+{%endif%}
+{%if filtro == 3%}
+ <div class="col-sm-10">
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"> Asistencia del alumno </h1>
+    </div>
+</div>
+ </div>
+{% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Materia</th>
+		</thead>
+        {% for materia in materias2 %}
+      {% set counta.value = counta.value + 1 %}
+       <tr>
+     <td>{{materia.2}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+   <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Presentes</th>
+		</thead>
+        {% for presente in presentes %}
+       <tr>
+     <td>{{presente}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+     <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Ausentes</th>
+		</thead>
+        {% for ausente in ausencias %}
+       <tr>
+     <td>{{ausente}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+    <div class="col-sm-1">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th>Estado</th>
+		</thead>
+        {% for estado in estado_a3 %}
+       <tr>
+           {%if estado == "mal" %}
+     <td><center><i class="bi bi-exclamation-circle-fill text-danger"></i></center></td>
+           {% else %}
+     <td><center><i class="bi bi-check-circle-fill text-success"></i></center></td>
+            {% endif %}
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+  </div>
+  </div>
+{%endif%}
 {% endblock %}
 </body>
 

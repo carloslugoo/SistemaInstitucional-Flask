@@ -21,10 +21,10 @@
              <form method="POST" action="/listadoalumnos/{{cursos.0}}">
                 <label>Filtrar por materia:</label>
                 <select class="form-control" name="idmat">
+                    <option value="{{cursos.0}}">Todos los alumnos</option>
                      {% for materia in materias %}
                     <option value="{{materia.2}}">{{materia.3}}</option>
                      {% endfor %}
-                    <option value="{{cursos.0}}">Todos los alumnos</option>
                     </select>
              <br>
                 <input type="submit" name="submit" value="Ver Alumnos" class="btn btn-secondary">

@@ -2773,27 +2773,33 @@ def moddatos(id):
       return redirect(url_for('moddatos', id=id))
   return render_template('moddatosal.html', datos=datos, data = data, band=band, user = user, tipo = tipoins, id = idcurso)
 
-@app.route('/estado/<int:id>')
+@app.route('/estado/<int:id>', methods = ['POST', 'GET'])
 def verestado(id):
   datos = session['username']
-  global band
-  mycursor = mydb.cursor()
-  print(band)
   print(id)
+  #Saca el idcurso
   mycursor = mydb.cursor()
+  sql = "SELECT id_alumno, id_curso, nmb_a, ape_a FROM alumnos WHERE id_alumno = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  idcurso = mycursor.fetchall()
+
+  idcurso = idcurso[0]
+  print(idcurso[1])
+  #Puntaje total en primera etapa
   sql = "SELECT id_alumno, matxalum.id_materia, des_m, cal, id_curso, pun_ac, ano_m, id_profesor FROM matxalum, materias WHERE id_alumno = %s and id_curso = %s and matxalum.id_materia = materias.id_materia"
-  val = [id, band]
+  val = [id, idcurso[1]]
   mycursor.execute(sql, val)
   materias = mycursor.fetchall()
   print(materias)
   puntos_t = []
   estado_a = []
   total = 0
-  for x in range(0, len(materias)): #Busca trabajos asociados a la materia
+  for x in range(0, len(materias)): #Busca trabajos asociados a la materia en segunda etapa
     aux = materias[x]
     #print(aux)
-    sql = "SELECT id_materia, pun_t FROM trabajos WHERE id_materia = %s and id_curso = %s"
-    val = [aux[1], band]
+    sql = "SELECT id_materia, pun_t FROM trabajos WHERE id_materia = %s and id_curso = %s and etapa = %s"
+    val = [aux[1], idcurso[1], 1]
     mycursor.execute(sql, val)
     trabajos = mycursor.fetchall()
     if trabajos:
@@ -2814,19 +2820,129 @@ def verestado(id):
       estado = (70 * aux2) / 100 #Calcula el 70% del total
       if aux[5] >= estado:
         estado = "bien"
-        print(estado)
+        #print(estado)
         estado_a.append(estado)
       else:
         estado = "mal"
-        print(estado)
+        #print(estado)
         estado_a.append(estado)
     else:
       estado = "bien"
       estado_a.append(estado)
   print(estado_a)
-  if band == 0:
-    return redirect(url_for('listadocursos'))
-  return render_template('verestadoadmin.html', datos=datos, materias = materias, puntos_t = puntos_t, estado_a=estado_a)
+  # Puntaje total en segunda etapa
+  sql = "SELECT id_alumno, matxalum.id_materia, des_m, cal2, id_curso, pun_ac2, ano_m, id_profesor FROM matxalum, materias WHERE id_alumno = %s and id_curso = %s and matxalum.id_materia = materias.id_materia"
+  val = [id, idcurso[1]]
+  mycursor.execute(sql, val)
+  materias2 = mycursor.fetchall()
+  print(materias2)
+  puntos_t2 = []
+  estado_a2 = []
+  total2 = 0
+  pre = [] #presentes
+  aus = [] #ausentes
+  for x in range(0, len(materias2)): #Busca trabajos asociados a la materia en segunda etapa
+    aux = materias2[x]
+    #print(aux)
+    sql = "SELECT id_materia, pun_t FROM trabajos WHERE id_materia = %s and id_curso = %s and etapa = %s"
+    val = [aux[1], idcurso[1], 2]
+    mycursor.execute(sql, val)
+    trabajos2 = mycursor.fetchall()
+    # Asistencias
+    sql = "SELECT id_alumno, asistio FROM asistenciaalum WHERE id_alumno = %s and id_curso = %s and id_materia = %s"
+    val = [id, idcurso[1], aux[1]]
+    mycursor.execute(sql, val)
+    compa = mycursor.fetchall()
+    #print(compa)
+    countp = 0
+    counta = 0
+    if compa:
+      for x in range(0, len(compa)):
+        a = compa[x]
+        print(compa)
+        if a[1] == 'P':
+          countp += 1
+        else:
+          counta += 1
+        if x == len(compa) - 1:
+          pre.append(countp)
+          aus.append(counta)
+          print(countp, counta)
+    else:
+      pre.append(countp)
+      aus.append(counta)
+    if trabajos2:
+      #print(trabajos)
+      for x in range(0, len(trabajos2)): #puntaje total por materia
+        aux2 = trabajos2[x]
+        aux3 = int(aux2[1])
+        total2 = total2 + aux3
+      puntos_t2.append(total2)
+      total2 = 0
+    else:
+      puntos_t2.append(trabajos2)
+  print(puntos_t2)
+  print(pre, aus)
+  for x in range(0, len(materias2)): #Calcula el estado en la materia
+    aux = materias2[x]
+    aux2 = puntos_t2[x]
+    if aux2:
+      estado = (70 * aux2) / 100 #Calcula el 70% del total
+
+      if aux[5] >= estado:
+        estado = "bien"
+        #print(estado)
+        estado_a2.append(estado)
+      else:
+        estado = "mal"
+        #print(estado)
+        estado_a2.append(estado)
+    else:
+      estado = "bien"
+      estado_a2.append(estado)
+  print(estado_a2)
+  estado_a3 = []
+  #Calcula el estado del alumno en su asistencia por materia
+  for x in range(0, len(materias2)):
+    aux = aus[x]
+    aux2 = pre[x]
+    total = aux + aux2
+    if total > 0:
+      print(total)
+      estado = (60 * total) / 100
+      print(estado)
+      if aux2 >= estado:
+        estado = "bien"
+        estado_a3.append(estado)
+      else:
+        estado = "mal"
+        estado_a3.append(estado)
+    else:
+      estado = "bien"
+      estado_a3.append(estado)
+  print(estado_a3)
+  if request.method == 'POST':
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 1:
+      return render_template('verestadoadmin.html', datos=datos, materias=materias, puntos_t=puntos_t,
+                             estado_a=estado_a, materias2=materias2, puntos_t2=puntos_t2, estado_a2=estado_a2, presentes=pre,
+                             ausencias=aus, estado_a3=estado_a3, data=idcurso, filtro=1)
+    if filtro == 2:
+      return render_template('verestadoadmin.html', datos=datos, materias=materias, puntos_t=puntos_t,
+                             estado_a=estado_a, materias2=materias2, puntos_t2=puntos_t2, estado_a2=estado_a2,
+                             presentes=pre,
+                             ausencias=aus, estado_a3=estado_a3, data=idcurso, filtro=2)
+    if filtro == 3:
+      return render_template('verestadoadmin.html', datos=datos, materias=materias, puntos_t=puntos_t,
+                             estado_a=estado_a, materias2=materias2, puntos_t2=puntos_t2, estado_a2=estado_a2,
+                             presentes=pre,
+                             ausencias=aus, estado_a3=estado_a3, data=idcurso, filtro=3)
+    if filtro == 4:
+      return redirect(url_for('verestado', id=id))
+  return render_template('verestadoadmin.html', datos=datos, materias = materias, puntos_t = puntos_t, estado_a=estado_a,
+                         materias2 = materias2, puntos_t2 = puntos_t2, estado_a2 = estado_a2, presentes = pre, ausencias = aus,
+                         estado_a3 = estado_a3, data = idcurso, filtro = 4)
 @app.route('/listadodocentes/<int:id>', methods = ['POST', 'GET']) #Ver todos los docentes del curso
 def listadodocentes(id):
   global tipoins
