@@ -30,6 +30,7 @@ app.config.from_object(DevConfig)
 
 folder = os.path.abspath("./media/")
 ext_p = set(["doc", "docx", "pdf"])
+ext_c = set(["xls", "xlsx", "xlsm", "xlsb", "xltx"])
 app.config['folder'] = folder
 
 mydb = mysql.connector.connect(
@@ -3651,6 +3652,141 @@ def carmodlista(id):
       flash("", "ec")
   return render_template('modlista2.html', datos=datos, alumnos = vector2, listas = lista, id = id, vector = id)
 
+@app.route('/enviarplanilla', methods = ['POST', 'GET'])
+def enviarplanilla():
+  datos = session['username']
+  #Si el profesor mando planillas
+  mycursor = mydb.cursor()
+  sql = "SELECT estado, fecha_m, fecha_r, des_p, cp FROM planillas WHERE id_profesor = %s LIMIT 45"
+  val = [datos[0]]
+  mycursor.execute(sql, val)
+  planillas = mycursor.fetchall()
+  print(planillas)
+  if planillas:
+    print("ya tiene")
+    cp = planillas[len(planillas) - 1]
+    cp = int(cp[4]) + 1
+  else:
+    cp = 1
+  if request.method == "POST":
+    planilla = request.files["planilla"]
+    desc = request.form.get("desc")
+    if "planilla" not in request.files:
+      print("No envio nada")
+      pass
+    elif planilla.filename == "":
+      print("No mando nada")
+      pass
+    elif planilla and archpermi2(planilla.filename):
+      filename = planilla.filename.split('.')
+      ext = filename[len(filename) - 1]
+      print(ext)
+      print(filename)
+      filename = "planillapendiente_" + str(datos[0]) + str(cp) + "." + ext
+      print(filename)
+      print(desc)
+      planilla.save(os.path.join(app.config["folder"], filename))
+      flash("", "")  # Ya guarda el archivo
+      estado = 0
+      inf = datetime.now()
+      # Extraemos la fecha
+      fecha = datetime.strftime(inf, '%Y/%m/%d')
+      mycursor = mydb.cursor()
+      if planillas:
+        print("ya tiene")
+        mycursor.execute(
+          'INSERT INTO planillas (filename, estado, id_profesor, fecha_m, des_p, cp) VALUES (%s, %s, %s, %s, %s, %s)',
+          (filename, estado, datos[0], fecha, desc, cp))
+        mydb.commit()
+      else:
+        print("no tiene")
+        mycursor.execute(
+          'INSERT INTO planillas (filename, estado, id_profesor, fecha_m, des_p, cp) VALUES (%s, %s, %s, %s, %s, %s)',
+          (filename, estado, datos[0], fecha, desc, 1))
+        mydb.commit()
+      print("mandado")
+      return redirect(url_for('enviarplanilla'))
+    else:
+      print("archivo no permitido")
+  return render_template('enviarplanillas.html', datos=datos, planillas = planillas)
+
+@app.route('/controlplanillas', methods = ['POST', 'GET'])
+def controldeplanilla():
+  datos = session['username']
+  #Planillas pendientes
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM planillas WHERE estado = %s LIMIT 45"
+  val = [0]
+  mycursor.execute(sql, val)
+  pp = mycursor.fetchall()
+  print(pp)
+  # Planillas aprobadas
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM planillas WHERE estado = %s LIMIT 45"
+  val = [1]
+  mycursor.execute(sql, val)
+  pa = mycursor.fetchall()
+  # Planillas desaprobadas
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM planillas WHERE estado = %s LIMIT 45"
+  val = [2]
+  mycursor.execute(sql, val)
+  pd = mycursor.fetchall()
+  if request.method == "POST":
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 1:
+      return redirect(url_for('controldeplanilla'))
+    else:
+      return render_template('controlplanillas.html', datos=datos, planillas_a=pa, planillas=pp, planillas_d=pd,
+                             filtro=filtro)
+  return render_template('controlplanillas.html', datos=datos, planillas_a = pa, planillas = pp, planillas_d = pd, filtro = 1)
+
+@app.route('/descargarplanilla/<int:id>')
+def descargarplanilla(id):
+  print(id)
+  ruta = pathlib.Path('./media/')
+  mycursor = mydb.cursor()
+  sql = "SELECT id_planillas, filename FROM planillas WHERE id_planillas = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  p = mycursor.fetchall()
+  planilla = p[0]
+  print(planilla)
+  filename = planilla[1]
+  archivo = ruta / filename  # Si existe un docx con su nombre
+  print(archivo)
+  if archivo.exists():
+    print("El arhivo existe")
+    return send_file(archivo, as_attachment=True)
+  else:
+    print("No existe")
+  return redirect(url_for('controldeplanilla'))
+
+@app.route('/aprobarplanilla/<int:id>')
+def aprobarplanilla(id):
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  sql = "UPDATE planillas SET estado = %s, fecha_r = %s WHERE id_planillas = %s"
+  val = (1,fecha, id)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  print("aprobado")
+  return redirect(url_for('controldeplanilla'))
+@app.route('/desaprobarplanilla/<int:id>')
+def desaprobarplanilla(id):
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  sql = "UPDATE planillas SET estado = %s, fecha_r = %s WHERE id_planillas = %s"
+  val = (2,fecha, id)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  print("desaprobado")
+  return redirect(url_for('controldeplanilla'))
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
@@ -3665,13 +3801,18 @@ def conv_b(foto):
 def guar_f(id_u,foto):
   with open('media/foto_{}.png'.format(id_u), 'wb') as f:
     f.write(foto)
+#Para documentos de inscripcion de alumnos o docentes
 def archpermi(filename):
   filename = filename.split('.')
-  print(filename)
-  if filename[1] in ext_p:
+  if filename[len(filename) - 1] in ext_p:
     return True
   return False
-
+#Para planillas
+def archpermi2(filename):
+  filename = filename.split('.')
+  if filename[len(filename) - 1] in ext_c:
+      return True
+  return False
 def guardararchivo():
 
   return

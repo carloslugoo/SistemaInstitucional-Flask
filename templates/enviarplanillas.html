@@ -1,0 +1,86 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Enviar planillas{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+    <div class="col-sm-10">
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-file-earmark-arrow-up"></i> Envio de planillas </h1>
+    </div>
+</div>
+    </div>
+
+
+     <form method="POST" action="/enviarplanilla"  enctype="multipart/form-data">
+   <div class="row">
+        <div class="col-sm-3">
+         <div class="form-group">
+              <label>Seleciona tu planilla:</label>
+            <br>
+            <input type="file" name="planilla" class="btn btn-secondary">
+             <br><br>
+             <input type="submit" name="submit" value="Enviar planilla" class="btn btn-secondary">
+
+           </div>
+          </div>
+        <br>
+        <div class="col-sm-4">
+            <label>Descripción del archivo:</label>
+              <input type="text" name="desc" class="form-control" value="" maxlength="70">
+                    <br>
+          </div>
+    </div>
+</form>
+ <br>
+    <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-file-earmark-arrow-up"></i> Últimas planillas mandadas </h1>
+    </div>
+</div>
+    </div>
+{% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th></th>
+            <th>Fecha enviado</th>
+            <th>Fecha de respuesta</th>
+            <th>Estado</th>
+            <th>Descripción</th>
+		</thead>
+        {% for planilla in planillas %}
+        {% set counta.value = counta.value + 1 %}
+       <tr>
+     <td>{{counta.value}}</td>
+     <td>{{planilla.1}}</td>
+   {%if planillas.2 == 'None'%}
+           <td>Aún sin respuesta</td>
+      {%else%}
+       <td>{{planilla.2}}</td>
+      {%endif%}
+       {%if planilla.0 == 0%}
+     <td>Pendiente</td>
+        {%endif%}
+       {%if planilla.0 == 1%}
+     <td>Aprobado</td>
+        {%endif%}
+       {%if planilla.0 == 2%}
+         <td>Desaprobado</td>
+       {%endif%}
+     <td>{{planilla.3}}</td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+</div>
+ </div>
+{% endblock %}
+</body>
+</html>

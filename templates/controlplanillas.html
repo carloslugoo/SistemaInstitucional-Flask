@@ -1,0 +1,220 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+     <title>{% block title %}Control de planillas{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+    <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                {% if category == 'dias' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Esta asignando muchas materias a un solo dia!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+               {% endfor %}
+            {% endif %}
+        {% endwith  %}
+
+    <div class="col-sm-10">
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-clipboard-data-fill"></i> Control de planillas </h1>
+    </div>
+</div>
+    </div>
+
+        <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/controlplanillas">
+                <label>Filtrar sección:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Planillas pendientes</option>
+                    <option value="2">Planillas aprobadas</option>
+                    <option value="3">Planillas desaprobadas</option>
+                    <option value="4">Ver todo</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver planillas" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+ <br>
+{%if filtro == 1%}
+  <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic">Planillas en pendiente </h1>
+    </div>
+</div>
+
+    {% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th></th>
+            <th>Fecha enviado</th>
+            <th>Fecha de respuesta</th>
+            <th>Estado</th>
+            <th>Descripción</th>
+            <th>Descargar</th>
+            <th>Aprobar</th>
+            <th>Desaprobar</th>
+		</thead>
+        {% for planilla in planillas %}
+        {% set counta.value = counta.value + 1 %}
+       <tr>
+     <td>{{counta.value}}</td>
+     <td>{{planilla.4}}</td>
+       {%if planillas.5 == 'None'%}
+           <td>Aún sin respuesta</td>
+      {%else%}
+       <td>{{planilla.5}}</td>
+      {%endif%}
+       {%if planilla.2 == 0%}
+     <td>Pendiente</td>
+        {%endif%}
+       {%if planilla.2 == 1%}
+     <td>Aprobado</td>
+        {%endif%}
+       {%if planilla.2 == 2%}
+         <td>Desaprobado</td>
+       {%endif%}
+     <td>{{planilla.6}}</td>
+     <td><center><a href="/descargarplanilla/{{planilla.0}}" class="btn btn-secondary" role="button"><i class="bi bi-file-earmark-arrow-down"></i></a></center>
+     </td>
+
+    <td><center><a href="/aprobarplanilla/{{planilla.0}}" class="btn btn-secondary" role="button"><i class="bi bi-file-earmark-check"></i></a></center>
+     </td>
+     <td><center><a href="/desaprobarplanilla/{{planilla.0}}" class="btn btn-secondary" role="button"><i class="bi bi-file-earmark-excel"></i></a></center>
+     </td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+</div>
+ </div>
+{%endif%}
+{%if filtro == 2%}
+  <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic">Planillas aprobadas</h1>
+    </div>
+</div>
+
+    {% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th></th>
+            <th>Fecha enviado</th>
+            <th>Fecha de respuesta</th>
+            <th>Estado</th>
+            <th>Descripción</th>
+            <th>Descargar</th>
+            <th>Desaprobar</th>
+		</thead>
+        {% for planilla in planillas_a %}
+        {% set counta.value = counta.value + 1 %}
+       <tr>
+     <td>{{counta.value}}</td>
+     <td>{{planilla.4}}</td>
+      {%if planillas.5 == 'None'%}
+           <td>Aún sin respuesta</td>
+      {%else%}
+     <td>{{planilla.5}}</td>
+      {%endif%}
+       {%if planilla.2 == 0%}
+     <td>Pendiente</td>
+        {%endif%}
+       {%if planilla.2 == 1%}
+     <td>Aprobado</td>
+        {%endif%}
+       {%if planilla.2 == 2%}
+         <td>Desaprobado</td>
+       {%endif%}
+     <td>{{planilla.6}}</td>
+     <td><center><a href="/descargarplanilla/{{planilla.0}}" class="btn btn-secondary" role="button"><i class="bi bi-file-earmark-arrow-down"></i></a></center>
+     </td>
+     <td><center><a href="/desaprobarplanilla/{{planilla.0}}" class="btn btn-secondary" role="button"><i class="bi bi-file-earmark-excel"></i></a></center>
+     </td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+</div>
+ </div>
+{%endif%}
+
+{%if filtro == 3%}
+  <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic">Planillas desaprobadas </h1>
+    </div>
+</div>
+
+    {% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th></th>
+            <th>Fecha enviado</th>
+            <th>Fecha de respuesta</th>
+            <th>Estado</th>
+            <th>Descripción</th>
+            <th>Descargar</th>
+            <th>Aprobar</th>
+		</thead>
+        {% for planilla in planillas_d %}
+        {% set counta.value = counta.value + 1 %}
+       <tr>
+     <td>{{counta.value}}</td>
+     <td>{{planilla.4}}</td>
+     {%if planillas.5 == 'None'%}
+           <td>Aún sin respuesta</td>
+      {%else%}
+       <td>{{planilla.5}}</td>
+      {%endif%}
+       {%if planilla.2 == 0%}
+     <td>Pendiente</td>
+        {%endif%}
+       {%if planilla.2 == 1%}
+     <td>Aprobado</td>
+        {%endif%}
+       {%if planilla.2 == 2%}
+         <td>Desaprobado</td>
+       {%endif%}
+     <td>{{planilla.6}}</td>
+     <td><center><a href="/descargarplanilla/{{planilla.0}}" class="btn btn-secondary" role="button"><i class="bi bi-file-earmark-arrow-down"></i></a></center>
+     </td>
+    <td><center><a href="/aprobarplanilla/{{planilla.0}}" class="btn btn-secondary" role="button"><i class="bi bi-file-earmark-check"></i></a></center>
+     </td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+</div>
+ </div>
+{%endif%}
+{% endblock %}
+
+</body>
+</html>
