@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Modificar Trabajos de Procesos{% endblock %}</title>
+    <title>{% block title %}Trabajos{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -36,7 +36,7 @@
         {% endwith  %}
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Modificar trabajos</h1>
+       <h1 class="display-9 fst-italic"> <i class="bi bi-clipboard2-data"></i> Trabajos</h1>
     </div>
 </div>
 
@@ -117,7 +117,7 @@
      {%endif%}
      <td>{{trabajo.3}}</td>
      <td>{{trabajo.1}}</td>
-           <td> <center><a class="btn btn-secondary" role="button" href="/modificarproceso/{{trabajo.0}}"><i class="bi bi-clipboard2-check"></i></a></center></td>
+           <td> <center><a class="btn btn-secondary" role="button" href="/modificarproceso2/{{trabajo.0}}"><i class="bi bi-clipboard2-check"></i></a></center></td>
        </tr>
         {% endfor %}
     </tbody>
