@@ -43,7 +43,7 @@
 <div class="row">
     <div class="col-md-3">
   <div class="form-group">
-             <form method="POST" action="/modificarproceso">
+             <form method="POST" action="/modificarproceso/{{id}}">
                 <label>Filtrar por etapa:</label>
                 <select class="form-control" name="idfiltro">
                     <option value="1">Primera Etapa</option>
@@ -55,7 +55,22 @@
              </form>
             </div>
         </div>
-  </div>
+
+
+     <div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/exportarexcelproceso/{{id}}">
+                <label>Exportar trabajos:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Primera Etapa</option>
+                    <option value="2">Segunda Etapa</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Generar excel" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+    </div>
 <br>
 {%if filtro == 0%}
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
