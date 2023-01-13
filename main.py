@@ -804,6 +804,7 @@ def inscribirdir():
     cedu = request.files["cedu"]
     ante = request.files["ante"]
     auto = request.files["auto"]
+    ficha = request.files["ficha"]
     fecha = (request.form['fec_n'])
     print(fecha)
     if fecha:
@@ -861,6 +862,25 @@ def inscribirdir():
         filename = "autorizacion_" + alumno.num_c.data + "." + extc[1]
         print(filename)
         auto.save(os.path.join(app.config["folder"], filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      # Parte de ficha medica
+      if "ficha" not in request.files:
+        # print("No envio nada")
+        pass
+      elif ficha.filename == "":
+        # print("No mando nada")
+        pass
+      elif ficha and archpermi(ficha.filename):
+        filename = secure_filename(ficha.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "ficha_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        ficha.save(os.path.join(app.config["folder"], filename))
         flash("", "")  # Ya guarda el archivo
       else:
         print("archivo no permitido")

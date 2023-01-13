@@ -1,7 +1,7 @@
 {% extends 'basedir.html' %}
 <html lang="en">
 <head>
-     <title>{% block title %}Inscribir Alumno{% endblock %}</title>
+     <title>{% block title %}Inscribir alumno{% endblock %}</title>
 </head>
 <body>
     {% block content %}
@@ -47,29 +47,28 @@
         {% endwith  %}
     <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-person-plus-fill"></i> Nuevo Alumno </h1>
+       <h1 class="display-9 fst-italic"> <i class="bi bi-person-plus-fill"></i> Inscribir alumno </h1>
       <p class="lead my-3"> Completa los campos para matricularlo</p>
     </div>
      </div>
-       <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+       <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic">Ficha personal</h1>
     </div>
   </div>
     <form method="POST" action="/inscribiral"  enctype="multipart/form-data">
     <div class="">
-        <br>
         <div class="row">
         <div class="col-sm-3">
          <div class="form-group">
-           <label>Nombre Completo:</label>
+           <label>Nombre completo:</label>
             {{show_form(alumno.nombre, class="form-control")}}
          </div>
         </div>
     <br>
         <div class="col-sm-3">
         <div class="form-group">
-             <label>Apellido Completo:</label>
+             <label>Apellido completo:</label>
              {{show_form(alumno.apellido, class="form-control")}}
         </div>
          </div>
@@ -80,11 +79,12 @@
              {{show_form(alumno.edad, class="form-control")}}
         </div>
         </div>
-      <div class="row">
+  </div>
+   <div class="row">
         <div class="col-sm-3">
         <div class="form-group">
             <br>
-             <label>Fecha de Nacimiento:</label>
+             <label>Fecha de nacimiento:</label>
             <div class="md-form md-outline input-with-post-icon datepicker">
                 <input placeholder="Select date" type="date" name="fec_n" class="form-control" >
             </div>
@@ -94,7 +94,7 @@
         <div class="col-sm-3">
         <div class="form-group">
               <br>
-             <label>Número de Cedula:</label>
+             <label>Número de cédula:</label>
              {{show_form(alumno.num_c, class="form-control")}}
         </div>
         </div>
@@ -102,16 +102,16 @@
        <div class="col-sm-3">
        <div class="form-group">
            <br>
-           <label>Número de Telefono:</label>
+           <label>Número de teléfono:</label>
              {{show_form(alumno.num_t, class="form-control")}}
         </div>
         </div>
-        </div>
-      <div class="row">
+   </div>
+    <div class="row">
         <div class="col-sm-3">
         <div class="form-group">
             <br>
-             <label>Correo Electronico:</label>
+             <label>Correo electronico:</label>
              {{show_form(alumno.email, class="form-control")}}
         </div>
         </div>
@@ -129,7 +129,8 @@
                {{show_form(alumno.barrio, class="form-control")}}
         </div>
         </div>
-          <div class="row">
+      </div>
+   <div class="row">
            <div class="col-sm-3">
         <div class="form-group">
             <br>
@@ -141,52 +142,56 @@
             <div class="col-sm-3">
            <div class="form-group">
                <br>
-               <label>Telefono del Tutor:</label>
+               <label>Teléfono del tutor:</label>
              {{show_form(alumno.num_pa, class="form-control")}}
         </div>
         </div>
     </div>
         </div>
-        </div>
-        </div>
-
-
                  <br>
-       <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+       <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic">Documentos</h1>
     </div>
   </div>
-         <div class="row">
-        <div class="col-sm-4">
+     <div class="row">
+        <div class="col-sm-3">
         <div class="form-group">
-             <br>
-              <label>Antecedentes Academicos:</label>
+              <label>Antecedentes academicos:</label>
+                        <br>
             <input type="file" name="ante" class="btn btn-secondary">
             <br>
         </div>
         </div>
-             <div class="col-sm-4">
+             <div class="col-sm-3">
        <div class="form-group">
-           <br>
-        <label>Adjuntar .PDF con fotos de la cedula (Atras y Delante):</label>
+
+        <label>Cédula de identidad:</label>
+                      <br>
             <input type="file" name="cedu" class="btn btn-secondary">
         </div>
         </div>
-         </div>
-         <div class="row">
-           <div class="col-sm-4">
+           <div class="col-sm-3">
           <div class="form-group">
-            <br>
-              <label>Autorizacion de Padres:</label>
+              <label>Autorizacion de padres:</label>
+                 <br>
             <input type="file" name="auto" class="btn btn-secondary">
         </div>
         </div>
-         </div>
+   </div>
+        <div class="col-sm-3">
+          <div class="form-group">
+              <label>Ficha medica:</label>
+                 <br>
+            <input type="file" name="ficha" class="btn btn-secondary">
+        </div>
+        </div>
+    <div class="row">
+     </div>
         <br>
-        <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+        <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
         <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic">Curso y Materia</h1>
+       <h1 class="display-9 fst-italic">Curso y materias</h1>
         </div>
      </div>
         <div class="row">
