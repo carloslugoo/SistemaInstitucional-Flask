@@ -1088,7 +1088,7 @@ def inscribirprof():
         print(extc)
         print(filename)
         print(alumno.num_c.data)
-        filename = "constancia_cargos" + alumno.num_c.data + "." + extc[1]
+        filename = "constancia_cargos_" + alumno.num_c.data + "." + extc[1]
         print(filename)
         co_c.save(os.path.join(app.config["folder"], filename))
         flash("", "")  # Ya guarda el archivo
@@ -2893,9 +2893,14 @@ def exportaralumnosad(id):
 def moddatos(id):
   global band
   global tipoins
+  if not tipoins:
+    return redirect(url_for('listadocursos'))
   global idcurso
   if band == 3:
     flash("", "ok")
+    band = 0
+  if band == 8:
+    flash("", "nod")
     band = 0
   user = userform.User(request.form)
   datos = session['username']
@@ -2904,6 +2909,7 @@ def moddatos(id):
   val = [id]
   mycursor.execute(sql, val)
   data = mycursor.fetchall()
+  #print(tipoins)
   if data:
     data = data[0]
     print(data)
@@ -2949,7 +2955,68 @@ def moddatos(id):
       mydb.commit()
       band = 3
       return redirect(url_for('moddatos', id=id))
-  return render_template('moddatosal.html', datos=datos, data = data, band=band, user = user, tipo = tipoins, id = idcurso)
+  return render_template('moddatosal.html', datos=datos, data = data, band=band, user = user, tipo = tipoins, id = idcurso, id2 = id)
+
+
+@app.route('/verdocumento/<int:id>', methods=['GET', 'POST'])
+def verdocumento(id):
+  ruta = pathlib.Path('./media/')
+  global band
+  if request.method == "POST":
+    filtro = int(request.form.get(('idfiltro')))
+    if filtro <= 4:
+      mycursor = mydb.cursor()
+      sql = "SELECT id_alumno, ci_a FROM alumnos WHERE id_alumno = %s"
+      val = [id]
+      mycursor.execute(sql, val)
+      data = mycursor.fetchall()
+      print(data)
+      if data:
+        data = data[0]
+        data = str(data[1])
+        if filtro == 1:
+          filename = "cedula_" + data + ".pdf"
+        if filtro == 2:
+          filename = "antecedente_" + data + ".pdf"
+        if filtro == 3:
+          filename = "autorizacion_" + data + ".pdf"
+        if filtro == 4:
+          filename = "ficha_" + data + ".pdf"
+        archivo = ruta / filename
+        print(archivo)
+        if archivo.exists():
+          print("El arhivo existe")
+          return send_file(archivo, as_attachment=True)
+        else:
+          band = 8
+        return redirect(url_for('moddatos', id=id))
+      return redirect(url_for('moddatos', id=id))
+    else:
+      mycursor = mydb.cursor()
+      sql = "SELECT id_profesor, ci_p FROM profesores WHERE id_profesor = %s"
+      val = [id]
+      mycursor.execute(sql, val)
+      data = mycursor.fetchall()
+      print(data)
+      print("profe")
+      if data:
+        data = data[0]
+        data = str(data[1])
+        if filtro == 5:
+          filename = "cedulaprof_" + data + ".pdf"
+        if filtro == 6:
+          filename = "constancia_ingresos_" + data + ".pdf"
+        if filtro == 7:
+          filename = "constancia_cargos_" + data + ".pdf"
+        archivo = ruta / filename
+        print(archivo)
+        if archivo.exists():
+          print("El arhivo existe")
+          return send_file(archivo, as_attachment=True)
+        else:
+          band = 8
+        return redirect(url_for('moddatos', id=id))
+      return redirect(url_for('moddatos', id=id))
 
 @app.route('/estado/<int:id>', methods = ['POST', 'GET'])
 def verestado(id):
@@ -2961,7 +3028,6 @@ def verestado(id):
   val = [id]
   mycursor.execute(sql, val)
   idcurso = mycursor.fetchall()
-
   idcurso = idcurso[0]
   print(idcurso[1])
   #Puntaje total en primera etapa

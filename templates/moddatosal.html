@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Modificar Datos{% endblock %}</title>
+    <title>{% block title %}Modificar datos{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -17,7 +17,16 @@
                         <script>
                             Swal.fire({
                                 icon: 'success',
-  								title: 'Datos Actualizados!',
+  								title: 'Datos actualizados!',
+  								timer: 3500
+                            })
+                        </script>
+                    {%endif%}
+                       {% if category == 'nod' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'No tiene documentos asociados!',
   								timer: 3500
                             })
                         </script>
@@ -26,16 +35,54 @@
             {% endif %}
         {% endwith  %}
 {% from "macro.html" import show_form %}
-<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"> {{data.1}} {{data.2}} </h1>
     </div>
 </div>
-<div class="p-3 p-md-3 mb-3 rounded text-bg-dark">
+</div>
+   {%if tipo == 1%}
+     <div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/verdocumento/{{id2}}">
+                <label>Ver documentos:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Cedula de Identidad</option>
+                    <option value="2">Antecedente Acadaemico</option>
+                    <option value="3">Autorizacion de Padres</option>
+                    <option value="4">Ficha Medica</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Descargar" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+<br>
+{% else%}
+ <div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/verdocumento/{{id2}}">
+                <label>Ver documentos:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="5">Cedula de Identidad</option>
+                    <option value="6">Constancia de Ingreso</option>
+                    <option value="7">Constancia de Cargos</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Descargar" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+<br>
+{% endif %}
+    <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-person-lines-fill"></i> Datos Personales</h1>
     </div>
   </div>
+   </div>
    {%if tipo == 1%}
   <div class="row">
     <div class="col-sm-10">
@@ -89,11 +136,13 @@
     <br>
 </div>
 {% endif %}
-<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-sm-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-telephone-forward-fill"></i> Datos de Contacto</h1>
     </div>
 </div>
+        </div>
   {%if tipo == 1%}
   <div class="row">
     <div class="col-sm-10">
@@ -119,6 +168,7 @@
   <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
+
 		<thead style="background-color: grey; color: white;">
 			<th>Numero de Telefono</th>
             <th>Email</th>
@@ -133,6 +183,8 @@
     <br>
 </div>
 {% endif %}
+
+
 {%if tipo == 1%}
     {% if band != 0%}
     <a href="/listadoalumnos/{{band}}" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square"> Volver al menú</i></a>
