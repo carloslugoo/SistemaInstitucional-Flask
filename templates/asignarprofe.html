@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Asignar Materias{% endblock %}</title>
+    <title>{% block title %}Asignar materias{% endblock %}</title>
 </head>
 <body>
   {% block content %}
 
   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic">Asignar Materias a Docentes</h1>
+       <h1 class="display-9 fst-italic">Asignar materias a docentes</h1>
     </div>
   </div>
   <div class="row">
@@ -50,7 +50,7 @@
 		<thead style="background-color: grey; color: white;">
             <th>Apellido</th>
 			<th>Nombre</th>
-            <th>Cedula de Identidad</th>
+            <th>Cedula de identidad</th>
             <th>Acciones</th>
 		</thead>
     {% for profesores in data %}
@@ -59,7 +59,7 @@
      <td>{{profesores.1}}</td>
      <td>{{profesores.2}}</td>
      <td>{{profesores.3}}</td>
-         <td> <center><a class="btn btn-secondary" role="button" href="/asignarmaterias/{{profesores.0}}">Asignar Materias</a>
+         <td> <center><a class="btn btn-secondary" role="button" href="/asignarmaterias/{{profesores.0}}">Asignar materias</a>
           <a class="btn btn-danger" role="button" href="/dardebajaprofe/{{profesores.0}}">Dar de baja</a></center></td>
        </tr>
   {%endfor%}

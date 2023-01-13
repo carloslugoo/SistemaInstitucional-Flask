@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-     <title>{% block title %}Crear Semana{% endblock %}</title>
+     <title>{% block title %}Crear horario{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -96,8 +96,8 @@
     <div class="col-sm-4">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-            <th>Horario de Inicio</th>
-            <th>Horario de Final</th>
+            <th>Horario de inicio</th>
+            <th>Horario final</th>
 		</thead>
          {%if count.value == 0 %}
            {% set count.value = count.value + 1 %}

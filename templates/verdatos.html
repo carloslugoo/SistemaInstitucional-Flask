@@ -3,14 +3,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mis Datos</title>
+    <title>{% block title %}Mis datos{% endblock %}</title>
 </head>
 <body>
 {% block content %}
 
-<div class="p-3 p-md-3 mb-3 rounded text-bg-dark">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-person-lines-fill"></i> Datos Personales</h1>
+       <h1 class="display-9 fst-italic"> <i class="bi bi-person-lines-fill"></i> Datos personales</h1>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
 			<th>Nombre</th>
             <th>Apellido</th>
             <th>Edad</th>
-            <th>Cedula de Identidad</th>
+            <th>Cedula de identidad</th>
             <th>Localidad</th>
             <th>Barrio</th>
 
@@ -39,9 +39,9 @@
     </div>
     <br>
 </div>
-<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-telephone-forward-fill"></i> Datos de Contacto</h1>
+       <h1 class="display-9 fst-italic"> <i class="bi bi-telephone-forward-fill"></i> Datos de contacto</h1>
     </div>
 </div>
 
@@ -49,10 +49,10 @@
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
-			<th>Numero de Telefono</th>
+			<th>Número de teléfono</th>
             <th>Email</th>
-            <th>Nombre del Tutor</th>
-            <th>Numero de Telefono del Tutor</th>
+            <th>Nombre del tutor</th>
+            <th>Numero de teléfono del utor</th>
 		</thead>
        <tr>
      <td>0{{datos.3}}</td>
