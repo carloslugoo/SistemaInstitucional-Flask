@@ -4007,6 +4007,7 @@ def controldeplanilla():
 
 @app.route('/descargarplanilla/<int:id>')
 def descargarplanilla(id):
+  datos = session['username']
   print(id)
   ruta = pathlib.Path('./media/')
   mycursor = mydb.cursor()
@@ -4028,6 +4029,7 @@ def descargarplanilla(id):
 
 @app.route('/aprobarplanilla/<int:id>')
 def aprobarplanilla(id):
+  datos = session['username']
   inf = datetime.now()
   # Extraemos la fecha
   fecha = datetime.strftime(inf, '%Y/%m/%d')
@@ -4038,8 +4040,10 @@ def aprobarplanilla(id):
   mydb.commit()
   print("aprobado")
   return redirect(url_for('controldeplanilla'))
+
 @app.route('/desaprobarplanilla/<int:id>')
 def desaprobarplanilla(id):
+  datos = session['username']
   inf = datetime.now()
   # Extraemos la fecha
   fecha = datetime.strftime(inf, '%Y/%m/%d')
@@ -4050,6 +4054,90 @@ def desaprobarplanilla(id):
   mydb.commit()
   print("desaprobado")
   return redirect(url_for('controldeplanilla'))
+
+@app.route('/generarcuotas', methods = ['POST', 'GET'])
+def generarcuotas():
+  #Alertas
+  global band
+  if band == 2:
+    flash("","nod")
+    band = 0
+  if band == 3:
+    flash("","ya")
+    band = 0
+  if band == 4:
+    flash("", "ya2")
+    band = 0
+  if band == 1:
+    flash("","ok")
+    band = 0
+  datos = session['username']
+  #El mes
+  mes = datetime.today().month
+  print(mes)
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  #Cuotas existentes
+  mycursor = mydb.cursor()
+  sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c FROM cuotas ORDER BY cuotas.id_cuota DESC"
+  val = []
+  mycursor.execute(sql, val)
+  cuotas = mycursor.fetchall()
+  print(cuotas)
+  if request.method == "POST":
+    idcuota = int(request.form.get("idcuota"))
+    if idcuota == 2:
+      desc = request.form.get("desc")
+      # Comprueba que no halla generado una cuota de instituto aun
+      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c FROM cuotas WHERE mes = %s and id_tipoc = %s and des_c = %s"
+      val = [mes, idcuota,desc]
+      mycursor.execute(sql, val)
+      compc = mycursor.fetchall()
+      if not desc:
+        band = 2
+        return redirect(url_for('generarcuotas'))
+      if compc:
+        band = 4
+        return redirect(url_for('generarcuotas'))
+    else:
+      desc = ""
+      # Comprueba que no halla generado una cuota de instituto aun
+      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c FROM cuotas WHERE mes = %s and id_tipoc = %s"
+      val = [mes, idcuota]
+      mycursor.execute(sql, val)
+      compc = mycursor.fetchall()
+      if compc:
+        band = 3
+        print("ya generaste una cuota de instituto este mes")
+        return redirect(url_for('generarcuotas'))
+    print(idcuota, desc)
+    #Quitamos los cursos existentes
+    mycursor = mydb.cursor()
+    sql = "SELECT id_curso, id_enfasis FROM cursos"
+    val = []
+    mycursor.execute(sql, val)
+    cursos = mycursor.fetchall()
+    for x in range(0, len(cursos)):
+      aux = cursos[x]
+      print(aux)
+      mycursor = mydb.cursor()
+      sql = "SELECT DISTINCT id_alumno, id_curso FROM matxalum WHERE id_curso = %s"
+      val = [aux[0]]
+      mycursor.execute(sql, val)
+      alumnos = mycursor.fetchall()
+      print(alumnos)
+      if alumnos:
+        for i in range(0, len(alumnos)):
+          alumno = alumnos[i]
+          print(alumno)
+          mycursor.execute(
+            'INSERT INTO cuotas (estado, fecha, id_tipoc, id_alumno, mes, des_c) VALUES (%s, %s, %s, %s, %s, %s)',
+            (0, fecha, idcuota, alumno[0], mes, desc))
+          mydb.commit()
+    band = 1
+  return render_template('generarcuotas.html', datos=datos, cuotas = cuotas)
+
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.

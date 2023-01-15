@@ -1,0 +1,163 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Generar cuotas{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+ {% from "macro.html" import show_form %}
+      <!-- sweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <!-- Generamos una nueva variable de messages con sweetalert2 -->
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'ok' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Cuota generada con exito!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                    {% if category == 'nod' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'La cuota extraordinaria debe llevar descripcion!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                     {% if category == 'ya' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Ya existe una cuota del instituto este mes!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                         {% if category == 'ya2' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'warning',
+  								title: 'Ya existe esta cuota este mes!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
+                 {% endfor %}
+            {% endif %}
+        {% endwith  %}
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi bi-list-check"></i> Generar cuotas</h1>
+    </div>
+</div>
+       <form method="POST" action="/generarcuotas">
+<div class="row">
+     <div class="col-md-3">
+  <div class="form-group">
+                <label>Selecciona el tipo de cuota:</label>
+                <select class="form-control" name="idcuota">
+                    <option value="1">Cuota del instituto</option>
+                    <option value="2">Cuota extraordinarias</option>
+                    </select>
+             <br>
+                 <input type="submit" name="submit" value="Generar cuota" class="btn btn-secondary">
+
+            </div>
+        </div>
+       <br>
+     <div class="col-sm-3">
+            <label>Descripción (en caso de ser cuota extraordinaria):</label>
+              <input type="text" name="desc" class="form-control" value="" maxlength="60">
+                    <br>
+          </div>
+    </div>
+    </form>
+   <br>
+<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic">Cuotas generadas</h1>
+    </div>
+</div>
+{% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-7">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th></th>
+            <th>Fecha generada</th>
+            <th>Tipo de cuota</th>
+            <th>Mes</th>
+            <th>Descripción</th>
+		</thead>
+        {% for cuota in cuotas %}
+    {% set counta.value = counta.value + 1 %}
+    <tr>
+     <td>{{counta.value}}</td>
+     <td>{{cuota.0}}</td>
+        {%if cuota.1 == 2%}
+     <td>Cuota extraordinaria</td>
+        {%else%}
+     <td>Cuota del instituto</td>
+        {%endif%}
+        {%if cuota.2 == 1%}
+     <td>Enero</td>
+        {%endif%}
+       {%if cuota.2 == 2%}
+     <td>Febrero</td>
+        {%endif%}
+        {%if cuota.2 == 3%}
+     <td>Marzo</td>
+        {%endif%}
+        {%if cuota.2 == 4%}
+     <td>Abril</td>
+        {%endif%}
+        {%if cuota.2 == 5%}
+     <td>Mayo</td>
+        {%endif%}
+        {%if cuota.2 == 6%}
+     <td>Junio</td>
+        {%endif%}
+        {%if cuota.2 == 7%}
+     <td>Julio</td>
+        {%endif%}
+        {%if cuota.2 == 8%}
+     <td>Agosto</td>
+        {%endif%}
+        {%if cuota.2 == 9%}
+     <td>Septiembre</td>
+        {%endif%}
+        {%if cuota.2 == 10%}
+     <td>Octubre</td>
+        {%endif%}
+      {%if cuota.2 == 11%}
+     <td>Noviembre</td>
+        {%endif%}
+       {%if cuota.2 == 12%}
+     <td>Diciembre</td>
+        {%endif%}
+      {%if cuota.3%}
+     <td>{{cuota.3}}</td>
+      {%else%}
+      <td>-----------</td>
+        {%endif%}
+    </tr>
+    {%endfor%}
+      </tbody>
+	</table>
+    </div>
+     </div>
+
+{% endblock %}
+</body>
+</html>

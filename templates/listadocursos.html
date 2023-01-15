@@ -13,6 +13,8 @@
            <h1 class="display-9 fst-italic"><i class="bi bi-folder2-open"></i>Cursos</h1>
     </div>
 </div>
+
+
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-15 fst-italic"> Contabilidad</h1>
@@ -28,8 +30,9 @@
         <div class="h-70 p-1 text-bg-dark rounded-3">
           <h3>{{cursos.1}}</h3>
           <p>Seccion: {{cursos.2}}</p>
-           <a href="/listadoalumnos/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver alumnos</a>
+            <a href="/listadoalumnos/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver alumnos</a>
           <a href="/listadodocentes/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver docentes</a>
+          <a href="/generarcuotas/{{cursos.0}}" class="btn btn-outline-light" role="button">Generar coutas</a>
         </div>
           </div>
     {% if count.value == 3%}
@@ -57,7 +60,8 @@
           <h3>{{cursos.1}}</h3>
           <p>Seccion: {{cursos.2}}</p>
          <a href="/listadoalumnos/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver alumnos</a>
-            <a href="/listadodocentes/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver docentes</a>
+         <a href="/listadodocentes/{{cursos.0}}" class="btn btn-outline-light" role="button">Ver docentes</a>
+         <a href="/generarcuotas/{{cursos.0}}" class="btn btn-outline-light" role="button">Generar coutas</a>
         </div>
           </div>
     {% if count.value == 3%}
