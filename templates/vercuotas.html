@@ -1,0 +1,70 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Lista de alumnos{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic">{{cursos.1}}, {{cursos.3}}, {{cursos.2}}</h1>
+    </div>
+</div>
+
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        <h1  class="display-15 fst-italic">Cuotas de alumnos</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-3">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th><center>Apellido</center></th>
+            <th><center>Nombre</center></th>
+		</thead>
+        {% for alumnos in alumnos %}
+       <tr>
+     <td>{{alumnos.2}}</td>
+     <td>{{alumnos.1}}<a class="btn btn-secondary invisible" role="button" href="/moddatos/{{alumnos.0}}"> Ver Cuotas</a></td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+     <div class="col-sm-2">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th><center>Cuotas pendientes</center></th>
+		</thead>
+        {% for pendiente in pendientes %}
+       <tr>
+           <td>{{pendiente}} <a class="btn btn-secondary invisible" role="button" href="/moddatos/{{alumnos.0}}"> Ver Cuotas</a></td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+     <div class="col-sm-2">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+			<th><center>Acciones</center></th>
+		</thead>
+        {% for alumno in alumnos %}
+       <tr>
+           <td><center><a class="btn btn-secondary" role="button" href="/moddatos/{{alumno.0}}"> Ver cuotas</a></center></td>
+       </tr>
+        {% endfor %}
+    </tbody>
+	</table>
+    </div>
+
+  </div>
+
+
+{% endblock %}
+</body>
+</html>

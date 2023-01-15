@@ -4138,6 +4138,40 @@ def generarcuotas():
     band = 1
   return render_template('generarcuotas.html', datos=datos, cuotas = cuotas)
 
+@app.route('/vercuotasad/<int:id>', methods = ['POST', 'GET'])
+def vercuotasad(id):
+  datos = session['username']
+  # Datos del curso
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  print(cursos)
+  #Saca los alumnos
+  pendiente = []
+  sql = "SELECT DISTINCT matxalum.id_alumno, nmb_a, ape_a FROM matxalum, alumnos WHERE matxalum.id_curso = %s and matxalum.id_alumno = alumnos.id_alumno"
+  val = [id]
+  mycursor.execute(sql, val)
+  alum_t = mycursor.fetchall()
+  alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
+  print(alum_t)
+  for x in range(0, len(alum_t)):
+    alumno = alum_t[x]
+    sql = "SELECT id_cuota, mes, id_tipoc FROM cuotas WHERE id_alumno = %s"
+    val = [alumno[0]]
+    mycursor.execute(sql, val)
+    cuotas = mycursor.fetchall()
+    if cuotas:
+      print(cuotas)
+      pendiente.append(len(cuotas))
+    else:
+      p = 0
+      pendiente.append(p)
+  print(pendiente)
+  return render_template('vercuotas.html', datos=datos, cursos= cursos[0], alumnos = alum_t, pendientes = pendiente)
+
+
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
