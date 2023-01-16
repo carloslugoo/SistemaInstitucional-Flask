@@ -27,7 +27,7 @@
         {% for alumnos in alumnos %}
        <tr>
      <td>{{alumnos.2}}</td>
-     <td>{{alumnos.1}}<a class="btn btn-secondary invisible" role="button" href="/moddatos/{{alumnos.0}}"> Ver Cuotas</a></td>
+     <td>{{alumnos.1}}<a class="btn btn-secondary invisible" role="button" href="/vercuotasdelalumno/{{alumnos.0}}"> Ver Cuotas</a></td>
        </tr>
         {% endfor %}
     </tbody>
@@ -41,7 +41,7 @@
 		</thead>
         {% for pendiente in pendientes %}
        <tr>
-           <td>{{pendiente}} <a class="btn btn-secondary invisible" role="button" href="/moddatos/{{alumnos.0}}"> Ver Cuotas</a></td>
+           <td>{{pendiente}} <a class="btn btn-secondary invisible" role="button" href="/vercuotasdelalumno/{{alumnos.0}}"> Ver Cuotas</a></td>
        </tr>
         {% endfor %}
     </tbody>
@@ -55,13 +55,12 @@
 		</thead>
         {% for alumno in alumnos %}
        <tr>
-           <td><center><a class="btn btn-secondary" role="button" href="/moddatos/{{alumno.0}}"> Ver cuotas</a></center></td>
+           <td><center><a class="btn btn-secondary" role="button" href="/vercuotasdelalumno/{{alumno.0}}"> Ver cuotas</a></center></td>
        </tr>
         {% endfor %}
     </tbody>
 	</table>
     </div>
-
   </div>
 
 

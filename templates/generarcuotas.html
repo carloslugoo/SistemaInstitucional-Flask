@@ -81,6 +81,11 @@
               <input type="text" name="desc" class="form-control" value="" maxlength="60">
                     <br>
           </div>
+        <div class="col-sm-3">
+            <label>Monto a abonar:</label>
+              <input type="text" name="monto" class="form-control" value="" maxlength="10">
+                    <br>
+          </div>
     </div>
     </form>
    <br>
@@ -98,6 +103,7 @@
             <th>Fecha generada</th>
             <th>Tipo de cuota</th>
             <th>Mes</th>
+            <td>Monto</td>
             <th>Descripción</th>
 		</thead>
         {% for cuota in cuotas %}
@@ -146,6 +152,7 @@
        {%if cuota.2 == 12%}
      <td>Diciembre</td>
         {%endif%}
+     <td>{{cuota.4}} Gs</td>
       {%if cuota.3%}
      <td>{{cuota.3}}</td>
       {%else%}

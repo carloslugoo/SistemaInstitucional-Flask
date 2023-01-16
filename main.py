@@ -4074,23 +4074,26 @@ def generarcuotas():
   datos = session['username']
   #El mes
   mes = datetime.today().month
+  mes = 2
   print(mes)
   inf = datetime.now()
   # Extraemos la fecha
   fecha = datetime.strftime(inf, '%Y/%m/%d')
   #Cuotas existentes
   mycursor = mydb.cursor()
-  sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c FROM cuotas ORDER BY cuotas.id_cuota DESC"
+  sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c, monto FROM cuotas ORDER BY cuotas.id_cuota DESC"
   val = []
   mycursor.execute(sql, val)
   cuotas = mycursor.fetchall()
   print(cuotas)
   if request.method == "POST":
     idcuota = int(request.form.get("idcuota"))
+    monto = request.form.get("monto")
+    print(monto)
     if idcuota == 2:
       desc = request.form.get("desc")
       # Comprueba que no halla generado una cuota de instituto aun
-      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c FROM cuotas WHERE mes = %s and id_tipoc = %s and des_c = %s"
+      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE mes = %s and id_tipoc = %s and des_c = %s"
       val = [mes, idcuota,desc]
       mycursor.execute(sql, val)
       compc = mycursor.fetchall()
@@ -4103,7 +4106,7 @@ def generarcuotas():
     else:
       desc = ""
       # Comprueba que no halla generado una cuota de instituto aun
-      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c FROM cuotas WHERE mes = %s and id_tipoc = %s"
+      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE mes = %s and id_tipoc = %s"
       val = [mes, idcuota]
       mycursor.execute(sql, val)
       compc = mycursor.fetchall()
@@ -4132,10 +4135,11 @@ def generarcuotas():
           alumno = alumnos[i]
           print(alumno)
           mycursor.execute(
-            'INSERT INTO cuotas (estado, fecha, id_tipoc, id_alumno, mes, des_c) VALUES (%s, %s, %s, %s, %s, %s)',
-            (0, fecha, idcuota, alumno[0], mes, desc))
+            'INSERT INTO cuotas (estado, fecha, id_tipoc, id_alumno, mes, des_c, monto) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+            (0, fecha, idcuota, alumno[0], mes, desc, monto))
           mydb.commit()
     band = 1
+    return redirect(url_for('generarcuotas'))
   return render_template('generarcuotas.html', datos=datos, cuotas = cuotas)
 
 @app.route('/vercuotasad/<int:id>', methods = ['POST', 'GET'])
@@ -4156,10 +4160,11 @@ def vercuotasad(id):
   alum_t = mycursor.fetchall()
   alum_t = sorted(alum_t, key=lambda alum_t: alum_t[2])
   print(alum_t)
+  #Cuotas pendientes de cada alumno
   for x in range(0, len(alum_t)):
     alumno = alum_t[x]
-    sql = "SELECT id_cuota, mes, id_tipoc FROM cuotas WHERE id_alumno = %s"
-    val = [alumno[0]]
+    sql = "SELECT id_cuota, mes, id_tipoc FROM cuotas WHERE id_alumno = %s and estado = %s"
+    val = [alumno[0], 0]
     mycursor.execute(sql, val)
     cuotas = mycursor.fetchall()
     if cuotas:
@@ -4171,7 +4176,67 @@ def vercuotasad(id):
   print(pendiente)
   return render_template('vercuotas.html', datos=datos, cursos= cursos[0], alumnos = alum_t, pendientes = pendiente)
 
+#Ver cuotas de cada alumno
+@app.route('/vercuotasdelalumno/<int:id>', methods = ['POST', 'GET'])
+def vercuotasdelalumno(id):
+  datos = session['username']
+  #alertas
+  global band
+  if band == 1:
+    flash("ok","ok")
+    band = 0
+  #Datos del alumno
+  mycursor = mydb.cursor()
+  sql = "SELECT id_alumno, id_curso, ape_a, nmb_a FROM alumnos WHERE id_alumno = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  alumno = mycursor.fetchall()
+  alumno = alumno[0]
+  #Cuotas del alumno
+  sql = "SELECT DISTINCT id_cuota,fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE id_alumno = %s and estado = %s ORDER BY cuotas.id_cuota DESC"
+  val = [id, 0]
+  mycursor.execute(sql, val)
+  cuotas = mycursor.fetchall()
+  print(cuotas)
+  total = 0
+  for x in range(0, len(cuotas)):
+    aux = cuotas[x]
+    total = total + float(aux[5])
+    print(total)
+  if request.method == "POST":
+    #Cuotas pagadas
+    sql = "SELECT DISTINCT id_cuota,fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE id_alumno = %s and estado = %s ORDER BY cuotas.id_cuota DESC"
+    val = [id, 1]
+    mycursor.execute(sql, val)
+    cuotas = mycursor.fetchall()
+    total = 0
+    for x in range(0, len(cuotas)):
+      aux = cuotas[x]
+      total = total + float(aux[5])
+      print(total)
+    return render_template('vercuotasdelalumno.html', datos=datos, data=alumno, cuotas=cuotas, filtro = 2, total = total)
+  return render_template('vercuotasdelalumno.html', datos=datos, data = alumno, cuotas = cuotas, filtro = 1, total = total)
 
+@app.route('/cuotapagada/<int:id>', methods = ['POST', 'GET'])
+def marcarpagado(id):
+  print(id)
+  global band
+  mycursor = mydb.cursor()
+  sql = "SELECT id_cuota, id_alumno FROM cuotas WHERE id_cuota = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  cuotas = mycursor.fetchall()
+  cuotas = cuotas[0]
+  print(cuotas)
+  #Marca como pagado
+  mycursor = mydb.cursor()
+  sql = "UPDATE cuotas SET estado = %s WHERE id_cuota = %s"
+  val = (1,id)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  print("pagaado")
+  band = 1
+  return redirect(url_for('vercuotasdelalumno', id=cuotas[1]))
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.
