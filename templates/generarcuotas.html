@@ -53,6 +53,16 @@
                             })
                         </script>
                     {% endif %}
+                    {% if category == 'del' %}
+                        <script>
+                            Swal.fire({
+                                icon: 'success',
+  								title: 'Cuota eliminada con exito!..',
+  								timer: 3500,
+  								showConfirmButton: false
+                            })
+                        </script>
+                    {% endif %}
                  {% endfor %}
             {% endif %}
         {% endwith  %}
@@ -96,7 +106,7 @@
 </div>
 {% set counta = namespace(value=0) %}
 <div class="row">
-    <div class="col-sm-7">
+    <div class="col-sm-8">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th></th>
@@ -105,6 +115,7 @@
             <th>Mes</th>
             <td>Monto</td>
             <th>Descripción</th>
+            <th>Acciones</th>
 		</thead>
         {% for cuota in cuotas %}
     {% set counta.value = counta.value + 1 %}
@@ -158,13 +169,13 @@
       {%else%}
       <td>-----------</td>
         {%endif%}
+      <td><a href="/eliminarcuota/{{cuota.0}}I{{cuota.3}}" class="btn btn-danger" role="button">Eliminar cuota</i></a></td>
     </tr>
     {%endfor%}
       </tbody>
 	</table>
     </div>
      </div>
-
 {% endblock %}
 </body>
 </html>

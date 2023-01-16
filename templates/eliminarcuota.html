@@ -1,0 +1,101 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Eliminar cuota{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+  <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-15 fst-italic"><i class="bi bi-calendar2-check"></i> Eliminar cuota</h1>
+    </div>
+  </div>
+
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+        {%if cuota.3 == 1%}
+        <h1  class="display-15 fst-italic">Cuota del instituto</h1>
+        {%else%}
+        <h1  class="display-15 fst-italic">Cuota extraordinaria </h1>
+        {%endif%}
+    </div>
+  </div>
+  <h3>¿Estas seguro?</h3>
+   <label>La siguiente cuota será eliminada a todos los alumnos y deberá crearse uno nueva.</label>
+<br>
+
+{% set counta = namespace(value=0) %}
+<div class="row">
+    <div class="col-sm-8">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Fecha generada</th>
+            <th>Tipo de cuota</th>
+            <th>Mes</th>
+            <td>Monto</td>
+            <th>Descripción</th>
+        </thead>
+    {% set counta.value = counta.value + 1 %}
+    <tr>
+     <td>{{cuota.2}}</td>
+        {%if cuota.3 == 2%}
+     <td>Cuota extraordinaria</td>
+        {%else%}
+     <td>Cuota del instituto</td>
+        {%endif%}
+        {%if cuota.5 == 1%}
+     <td>Enero</td>
+        {%endif%}
+       {%if cuota.5 == 2%}
+     <td>Febrero</td>
+        {%endif%}
+        {%if cuota.5 == 3%}
+     <td>Marzo</td>
+        {%endif%}
+        {%if cuota.5 == 4%}
+     <td>Abril</td>
+        {%endif%}
+        {%if cuota.5 == 5%}
+     <td>Mayo</td>
+        {%endif%}
+        {%if cuota.5 == 6%}
+     <td>Junio</td>
+        {%endif%}
+        {%if cuota.5 == 7%}
+     <td>Julio</td>
+        {%endif%}
+        {%if cuota.5 == 8%}
+     <td>Agosto</td>
+        {%endif%}
+        {%if cuota.5 == 9%}
+     <td>Septiembre</td>
+        {%endif%}
+        {%if cuota.5 == 10%}
+     <td>Octubre</td>
+        {%endif%}
+      {%if cuota.5 == 11%}
+     <td>Noviembre</td>
+        {%endif%}
+       {%if cuota.5 == 12%}
+     <td>Diciembre</td>
+        {%endif%}
+     <td>{{cuota.7}} Gs</td>
+      {%if cuota.6%}
+     <td>{{cuota.6}}</td>
+      {%else%}
+      <td>-----------</td>
+        {%endif%}
+    </tr>
+      </tbody>
+	</table>
+    </div>
+     </div>
+
+ <form method="POST" action="/eliminarcuota/{{cuota.2}}I{{cuota.6}}">
+    <a href="/generarcuotas" class="btn btn-secondary" role="button"> <i class="bi bi-arrow-left-square">Volver al menú</i></a>
+       <input type="submit" name="submit" value="Eliminar cuota" class="btn btn-danger">
+     </form>
+{% endblock %}
+</body>
+</html>

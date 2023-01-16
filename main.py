@@ -4071,10 +4071,12 @@ def generarcuotas():
   if band == 1:
     flash("","ok")
     band = 0
+  if band == 7:
+    flash("", "del")
+    band = 0
   datos = session['username']
   #El mes
   mes = datetime.today().month
-  mes = 2
   print(mes)
   inf = datetime.now()
   # Extraemos la fecha
@@ -4175,6 +4177,32 @@ def vercuotasad(id):
       pendiente.append(p)
   print(pendiente)
   return render_template('vercuotas.html', datos=datos, cursos= cursos[0], alumnos = alum_t, pendientes = pendiente)
+
+#Eliminar cuotas
+@app.route('/eliminarcuota/<string:id>', methods = ['POST', 'GET'])
+def eliminarcuotas(id):
+  global band
+  print(id)
+  x = id.split("I")
+  print(x)
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM cuotas WHERE fecha = %s and des_c = %s LIMIT 1"
+  val = [x[0], x[1]]
+  mycursor.execute(sql, val)
+  cuota = mycursor.fetchall()
+  cuota = cuota[0]
+  print(cuota)
+  if request.method == "POST":
+    print("eliminar")
+    mycursor = mydb.cursor()
+    sql = "DELETE FROM cuotas WHERE fecha = %s and des_c = %s and id_tipoc = %s"
+    val = [x[0], x[1], cuota[3]]
+    mycursor.execute(sql, val)
+    mydb.commit()
+    band = 7
+    return redirect(url_for('generarcuotas'))
+  return render_template('eliminarcuota.html', datos=datos, cuota = cuota)
 
 #Ver cuotas de cada alumno
 @app.route('/vercuotasdelalumno/<int:id>', methods = ['POST', 'GET'])
