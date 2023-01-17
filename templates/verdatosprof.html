@@ -7,6 +7,26 @@
 </head>
 <body>
 {% block content %}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> </i>Mis documentos</h1>
+    </div>
+  </div>
+<div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/verdocumento/{{datos.0}}">
+                <label>Ver documentos:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="5">Cédula de identidad</option>
+                    <option value="6">Constancia de ingreso</option>
+                    <option value="7">Constancia de cargos</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Descargar" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+<br>
 
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">

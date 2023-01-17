@@ -34,7 +34,7 @@ app.config.from_object(DevConfig)
 
 
 folder = os.path.abspath("./media/")
-ext_p = set(["doc", "docx", "pdf"])
+ext_p = set(["pdf"])
 ext_c = set(["xls", "xlsx", "xlsm", "xlsb", "xltx"])
 app.config['folder'] = folder
 
@@ -2980,6 +2980,7 @@ def moddatos(id):
 
 @app.route('/verdocumento/<int:id>', methods=['GET', 'POST'])
 def verdocumento(id):
+  datos = session['username']
   ruta = pathlib.Path('./media/')
   global band
   if request.method == "POST":
@@ -3009,8 +3010,15 @@ def verdocumento(id):
           return send_file(archivo, as_attachment=True)
         else:
           band = 8
+        if datos[7] == 1:  # alumnos
+          return redirect(url_for('misdatos'))
+        if datos[6] == 3:  # Admin
+          return redirect(url_for('moddatos', id=id))
+
+      if datos[7] == 1:  # alumnos
+        redirect(url_for('misdatos'))
+      if datos[6] == 3:  # Admin
         return redirect(url_for('moddatos', id=id))
-      return redirect(url_for('moddatos', id=id))
     else:
       mycursor = mydb.cursor()
       sql = "SELECT id_profesor, ci_p FROM profesores WHERE id_profesor = %s"
@@ -3035,8 +3043,15 @@ def verdocumento(id):
           return send_file(archivo, as_attachment=True)
         else:
           band = 8
+        if datos[6] == 2:  # profesores
+          return redirect(url_for('misdatos'))
+        if datos[6] == 3:  # Admin
+          return redirect(url_for('moddatos', id=id))
+
+      if datos[6] == 2:  # profesores
+        redirect(url_for('misdatos'))
+      if datos[6] == 3:  # Admin
         return redirect(url_for('moddatos', id=id))
-      return redirect(url_for('moddatos', id=id))
 
 @app.route('/estado/<int:id>', methods = ['POST', 'GET'])
 def verestado(id):

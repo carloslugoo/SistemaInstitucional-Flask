@@ -7,13 +7,36 @@
 </head>
 <body>
 {% block content %}
-
+  <div class="col-md-10">
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"> </i>Mis documentos</h1>
+    </div>
+  </div>
+   </div>
+  <div class="col-md-3">
+  <div class="form-group">
+             <form method="POST" action="/verdocumento/{{datos.0}}">
+                <label>Ver documentos:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Cédula de identidad</option>
+                    <option value="2">Antecedente acadaemico</option>
+                    <option value="3">Autorización de padres</option>
+                    <option value="4">Ficha medica</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Descargar" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+ <br>
+  <div class="col-md-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-person-lines-fill"></i> Datos personales</h1>
     </div>
   </div>
-
+  </div>
   <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
@@ -21,7 +44,7 @@
 			<th>Nombre</th>
             <th>Apellido</th>
             <th>Edad</th>
-            <th>Cedula de identidad</th>
+            <th>Cédula de identidad</th>
             <th>Localidad</th>
             <th>Barrio</th>
 
@@ -39,12 +62,13 @@
     </div>
     <br>
 </div>
+  <div class="col-md-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-telephone-forward-fill"></i> Datos de contacto</h1>
     </div>
 </div>
-
+</div>
   <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
