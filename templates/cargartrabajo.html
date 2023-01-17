@@ -24,17 +24,22 @@
                 {% endfor %}
             {% endif %}
         {% endwith  %}
+      <div class="col-sm-10">
    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
       <div class="col-md-6 px-0">
           <h1  class="display-15 fst-italic"> <i class="bi bi-clipboard-plus"></i> Trabajo: {{trabajo.1}}.   Puntaje Total: {{trabajo.2}}  </h1>
           <p>Curso: {{cursos.1}}, {{cursos.2}}, {{cursos.3}}</p>
       </div>
     </div>
+     </div>
+
+ <div class="col-sm-10">
    <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
       <div class="col-md-6 px-0">
           <h1  class="display-15 fst-italic">Lista de alumnos matriculados </h1>
       </div>
     </div>
+     </div>
 <form method="POST" action="/cargarpuntaje/{{trabajo.0}}">
 {% set counti = namespace(value=0) %}
 {% set count = namespace(value=0) %}

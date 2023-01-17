@@ -7,11 +7,13 @@
 </head>
 <body>
 {% block content %}
+    <div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> </i>Mis documentos</h1>
     </div>
   </div>
+   </div>
 <div class="col-md-3">
   <div class="form-group">
              <form method="POST" action="/verdocumento/{{datos.0}}">
@@ -27,13 +29,13 @@
             </div>
         </div>
 <br>
-
+    <div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-person-lines-fill"></i> Datos personales</h1>
     </div>
   </div>
-
+  </div>
   <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
@@ -41,7 +43,7 @@
 			<th>Nombre</th>
             <th>Apellido</th>
             <th>Edad</th>
-            <th>Cedula de identidad</th>
+            <th>Cédula de identidad</th>
             <th>Localidad</th>
             <th>Barrio</th>
 
@@ -59,12 +61,13 @@
     </div>
     <br>
 </div>
+  <div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-telephone-forward-fill"></i> Datos de contacto</h1>
     </div>
 </div>
-
+</div>
   <div class="row">
     <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
