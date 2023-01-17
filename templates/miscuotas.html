@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Cuotas{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic"><i class="bi-credit-card"></i> Cuotas </h1>
+    </div>
+</div>
+   <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/miscuotas">
+                <label>Filtrar por estado:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Cuotas pendientes</option>
+                    <option value="2">Cuotas pagadas</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver mi asistencia" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+<br>
+{%if filtro == 1%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic">Cuotas pendientes </h1>
+    </div>
+</div>
+{%else%}
+<div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+           <h1 class="display-9 fst-italic">Cuotas pagadas </h1>
+    </div>
+</div>
+{%endif%}
+{% set counta = namespace(value=0) %}
+ <div class="row">
+  <div class="col-sm-6">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th></th>
+			<th>Tipo de cuota</th>
+            <th>Mes</th>
+            <th>Monto</th>
+            <th>Descripción</th>
+		</thead>
+		<tbody>
+         {% for cuota in cuotas %}
+    {% set counta.value = counta.value + 1 %}
+          <tr>
+     <td>{{counta.value}}</td>
+      {%if cuota.3 == 2%}
+     <td>Cuota extraordinaria</td>
+        {%else%}
+     <td>Cuota del instituto</td>
+        {%endif%}
+     {%if cuota.3 == 1%}
+     <td>Enero</td>
+        {%endif%}
+       {%if cuota.3 == 2%}
+     <td>Febrero</td>
+        {%endif%}
+        {%if cuota.3 == 3%}
+     <td>Marzo</td>
+        {%endif%}
+        {%if cuota.3 == 4%}
+     <td>Abril</td>
+        {%endif%}
+        {%if cuota.3 == 5%}
+     <td>Mayo</td>
+        {%endif%}
+        {%if cuota.3 == 6%}
+     <td>Junio</td>
+        {%endif%}
+        {%if cuota.3 == 7%}
+     <td>Julio</td>
+        {%endif%}
+        {%if cuota.3 == 8%}
+     <td>Agosto</td>
+        {%endif%}
+        {%if cuota.3 == 9%}
+     <td>Septiembre</td>
+        {%endif%}
+        {%if cuota.3 == 10%}
+     <td>Octubre</td>
+        {%endif%}
+      {%if cuota.3 == 11%}
+     <td>Noviembre</td>
+        {%endif%}
+       {%if cuota.3 == 12%}
+     <td>Diciembre</td>
+        {%endif%}
+      {%if cuota.4%}
+     <td>{{cuota.4}}</td>
+      {%else%}
+      <td>-----------</td>
+        {%endif%}
+       <td>{{cuota.5}} Gs</td>
+                </tr>
+      {%endfor%}
+      </tbody>
+	</table>
+    </div>
+     </div>
+{%if filtro == 1%}
+<p>Total a pagar: {{total}}</p>
+{%else%}
+<p>Total abonado: {{total}}</p>
+{%endif%}
+{% endblock %}
+</body>
+</html>

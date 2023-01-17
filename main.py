@@ -4244,9 +4244,43 @@ def vercuotasdelalumno(id):
       print(total)
     return render_template('vercuotasdelalumno.html', datos=datos, data=alumno, cuotas=cuotas, filtro = 2, total = total)
   return render_template('vercuotasdelalumno.html', datos=datos, data = alumno, cuotas = cuotas, filtro = 1, total = total)
+#Mis cuotas pestaña de alumno
+@app.route('/miscuotas', methods = ['POST', 'GET'])
+def miscuotasal():
+  datos = session['username']
+  mycursor = mydb.cursor()
+  # Cuotas del alumno
+  sql = "SELECT DISTINCT id_cuota,fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE id_alumno = %s and estado = %s ORDER BY cuotas.id_cuota DESC"
+  val = [datos[0], 0]
+  mycursor.execute(sql, val)
+  cuotas = mycursor.fetchall()
+  print(cuotas)
+  total = 0
+  for x in range(0, len(cuotas)):
+    aux = cuotas[x]
+    total = total + float(aux[5])
+    print(total)
+  if request.method == "POST":
+    filtro = int(request.form.get("idfiltro"))
+    if filtro == 1:
+      return redirect(url_for('miscuotasal'))
+    if filtro == 2:
+      sql = "SELECT DISTINCT id_cuota,fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE id_alumno = %s and estado = %s ORDER BY cuotas.id_cuota DESC"
+      val = [datos[0], 1]
+      mycursor.execute(sql, val)
+      cuotas = mycursor.fetchall()
+      print(cuotas)
+      total = 0
+      for x in range(0, len(cuotas)):
+        aux = cuotas[x]
+        total = total + float(aux[5])
+        print(total)
+      return render_template('miscuotas.html', datos=datos, cuotas=cuotas, filtro = filtro, total = total)
+  return render_template('miscuotas.html', datos=datos, cuotas = cuotas, filtro = 1, total = total)
 
 @app.route('/cuotapagada/<int:id>', methods = ['POST', 'GET'])
 def marcarpagado(id):
+  datos = session['username']
   print(id)
   global band
   mycursor = mydb.cursor()
