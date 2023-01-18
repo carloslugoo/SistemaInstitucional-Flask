@@ -911,6 +911,15 @@ def inscribirdir():
           (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
            alumno.email.data, alumno.localidad.data, alumno.nmb_pa.data, alumno.num_pa.data, fecha, alumno.barrio.data))
         mydb.commit()
+        # Auditoria
+        inf = datetime.now()
+        # Extraemos la fecha
+        fecha = datetime.strftime(inf, '%Y/%m/%d')
+        mycursor = mydb.cursor()
+        mycursor.execute(
+          'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+          (datos[0], "Matriculó al alumno {a}, {b} al sistema".format(a=alumno.nombre.data, b=alumno.apellido.data), fecha))
+        mydb.commit()
         return redirect(url_for('sacarmat'))
     else:
       print("no fehca")
@@ -1140,6 +1149,16 @@ def inscribirprof():
           'INSERT INTO profesores (nmb_p, ape_p, tel_p, ci_p, edad, email, loc_p, fec_p, bar_p) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
           (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
            alumno.email.data, alumno.localidad.data, fecha, alumno.barrio.data))
+        mydb.commit()
+        # Auditoria
+        inf = datetime.now()
+        # Extraemos la fecha
+        fecha = datetime.strftime(inf, '%Y/%m/%d')
+        mycursor = mydb.cursor()
+        mycursor.execute(
+          'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+          (datos[0], "Incorporó al docente {a}, {b} al sistema".format(a=alumno.nombre.data, b=alumno.apellido.data),
+           fecha))
         mydb.commit()
         return redirect(url_for('inscmatxprof'))
     else:
@@ -2397,7 +2416,7 @@ def cargarhora(id):
       h_sa = mycursor.fetchall()
       print(h_sa)
   #En caso que exista no permite crear otro horario
-  if h_lu or h_ma or h_mi or h_ju or h_vi or h_sa:
+  if h_lu and h_ma and h_mi and h_ju and h_vi and h_sa:
     band = 5
     return redirect(url_for('crearsemana'))
   if request.method == 'POST':
@@ -2437,6 +2456,17 @@ def cargarhora(id):
             (id, aux, band + 1, aux2, aux3, 0))
           mydb.commit()
       band += 1
+      if band == 1:
+        data = cursos[0]
+        # Auditoria
+        inf = datetime.now()
+        # Extraemos la fecha
+        fecha = datetime.strftime(inf, '%Y/%m/%d')
+        mycursor = mydb.cursor()
+        mycursor.execute(
+          'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+          (datos[0], "Cargó un nuevo horario al {a}, {b}, {c}".format(a=data[1], b=data[3], c = data[2]), fecha))
+        mydb.commit()
       if band == 6:
         return redirect(url_for('crearsemana'))
   return render_template('crear_dias.html', datos=datos, cursos=cursos[0], materias=materias, band=band)
@@ -2480,6 +2510,16 @@ def eliminarhora(id):
     mycursor.execute(sql, val)
     mydb.commit()
     band = 3
+    # Auditoria
+    inf = datetime.now()
+    # Extraemos la fecha
+    fecha = datetime.strftime(inf, '%Y/%m/%d')
+    mycursor = mydb.cursor()
+    data = cursos[0]
+    mycursor.execute(
+      'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+      (datos[0], "Eliminó el horario al {a}, {b}, {c}".format(a=data[1], b=data[3], c=data[2]), fecha))
+    mydb.commit()
     return redirect(url_for('crearsemana'))
   return render_template('eliminarhorario.html', cursos=cursos[0], datos=datos, h_lu=h_lu, h_ma=h_ma, h_mi=h_mi, h_ju=h_ju, h_vi=h_vi, h_sa=h_sa)
 @app.route('/verhorario/<int:id>') #Ver Horarios
@@ -2590,8 +2630,18 @@ def editarhorario(id):
           val = (aux, 0, aux5)
           mycursor.execute(sql, val)
           mydb.commit()
+      # Auditoria
+      inf = datetime.now()
+      # Extraemos la fecha
+      fecha = datetime.strftime(inf, '%Y/%m/%d')
+      mycursor = mydb.cursor()
+      data = cursos[0]
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Editó el horario al {a}, {b}, {c}".format(a=data[1], b=data[3], c=data[2]), fecha))
+      mydb.commit()
       return redirect(url_for('verhorarioadmin', id = id_c))
-  return render_template('editarhorario.html', datos = datos, cursos=cursos[0], horarios = horarios, materias = materias, band = id_d - 1)
+  return render_template('editarhorario.html', datos = datos, cursos=cursos[0], horarios = horarios, materias = materias, band = id_d)
 @app.route('/asistencia',  methods = ['GET', 'POST']) #Marcar Asistencia por Docente
 def asistenciaprof():
   global user_datos #datos del profe para alerta
@@ -2966,6 +3016,15 @@ def moddatos(id):
       mycursor.execute(sql, val)
       mydb.commit()
       band = 3
+      #Auditoria
+      inf = datetime.now()
+      # Extraemos la fecha
+      fecha = datetime.strftime(inf, '%Y/%m/%d')
+      mycursor = mydb.cursor()
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0],"Modificó los datos del alumno {a}, {b}".format(a= data[1], b=data[2]), fecha))
+      mydb.commit()
       return redirect(url_for('moddatos', id = id))
     else:
       print("mod profe")
@@ -2974,6 +3033,15 @@ def moddatos(id):
       mycursor.execute(sql, val)
       mydb.commit()
       band = 3
+      # Auditoria
+      inf = datetime.now()
+      # Extraemos la fecha
+      fecha = datetime.strftime(inf, '%Y/%m/%d')
+      mycursor = mydb.cursor()
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Modificó los datos del docente {a}, {b}".format(a=data[1], b=data[2]), fecha))
+      mydb.commit()
       return redirect(url_for('moddatos', id=id))
   return render_template('moddatosal.html', datos=datos, data = data, band=band, user = user, tipo = tipoins, id = idcurso, id2 = id)
 
@@ -3591,6 +3659,15 @@ def dardebajaprofe(id):
     sql = "UPDATE profesores SET estado = %s WHERE id_profesor = %s"
     val = (0, id)
     mycursor.execute(sql, val)
+    mydb.commit()
+    # Auditoria
+    inf = datetime.now()
+    # Extraemos la fecha
+    fecha = datetime.strftime(inf, '%Y/%m/%d')
+    mycursor = mydb.cursor()
+    mycursor.execute(
+      'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+      (datos[0], "Dió de baja al docente {a}, {b} del sistema".format(a=profesor[1], b=profesor[2]), fecha))
     mydb.commit()
     return redirect(url_for('asignarprofe'))
   return render_template('dardebajaprofe.html', datos=datos, profesor = profesor, materias = materias)
@@ -4222,6 +4299,20 @@ def aprobarplanilla(id):
   mycursor.execute(sql, val)
   mydb.commit()
   print("aprobado")
+  # Auditoria
+  sql = "SELECT id_planillas, des_p FROM planillas WHERE id_planillas = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  p = mycursor.fetchall()
+  planilla = p[0]
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  mycursor.execute(
+    'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+    (datos[0], "Aprobó la planilla: {a}".format(a= planilla[1]), fecha))
+  mydb.commit()
   return redirect(url_for('controldeplanilla'))
 
 @app.route('/desaprobarplanilla/<int:id>')
@@ -4234,6 +4325,20 @@ def desaprobarplanilla(id):
   sql = "UPDATE planillas SET estado = %s, fecha_r = %s WHERE id_planillas = %s"
   val = (2,fecha, id)
   mycursor.execute(sql, val)
+  mydb.commit()
+  # Auditoria
+  sql = "SELECT id_planillas, des_p FROM planillas WHERE id_planillas = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  p = mycursor.fetchall()
+  planilla = p[0]
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  mycursor.execute(
+    'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+    (datos[0], "Desaprobó la planilla: {a}".format(a=planilla[1]), fecha))
   mydb.commit()
   print("desaprobado")
   return redirect(url_for('controldeplanilla'))
@@ -4324,6 +4429,21 @@ def generarcuotas():
             (0, fecha, idcuota, alumno[0], mes, desc, monto))
           mydb.commit()
     band = 1
+    # Auditoria
+    inf = datetime.now()
+    # Extraemos la fecha
+    fecha = datetime.strftime(inf, '%Y/%m/%d')
+    mycursor = mydb.cursor()
+    if idcuota == 1:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Generó una nueva cuota del instituto", fecha))
+      mydb.commit()
+    else:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Generó una nueva cuota extraordinaria", fecha))
+      mydb.commit()
     return redirect(url_for('generarcuotas'))
   return render_template('generarcuotas.html', datos=datos, cuotas = cuotas)
 
@@ -4384,6 +4504,21 @@ def eliminarcuotas(id):
     mycursor.execute(sql, val)
     mydb.commit()
     band = 7
+    # Auditoria
+    inf = datetime.now()
+    # Extraemos la fecha
+    fecha = datetime.strftime(inf, '%Y/%m/%d')
+    mycursor = mydb.cursor()
+    if int(cuota[3]) == 1:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Eliminó una cuota del instituto", fecha))
+      mydb.commit()
+    else:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Eliminó una cuota extraordinaria", fecha))
+      mydb.commit()
     return redirect(url_for('generarcuotas'))
   return render_template('eliminarcuota.html', datos=datos, cuota = cuota)
 
@@ -4467,7 +4602,7 @@ def marcarpagado(id):
   print(id)
   global band
   mycursor = mydb.cursor()
-  sql = "SELECT id_cuota, id_alumno FROM cuotas WHERE id_cuota = %s"
+  sql = "SELECT id_cuota, id_alumno, id_tipoc FROM cuotas WHERE id_cuota = %s"
   val = [id]
   mycursor.execute(sql, val)
   cuotas = mycursor.fetchall()
@@ -4481,6 +4616,26 @@ def marcarpagado(id):
   mydb.commit()
   print("pagaado")
   band = 1
+  # Auditoria
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  sql = "SELECT nmb_a, ape_a FROM alumnos WHERE id_alumno = %s"
+  val = [cuotas[1]]
+  mycursor.execute(sql, val)
+  alumno = mycursor.fetchall()
+  alumno = alumno[0]
+  if int(cuotas[2]) == 1:
+    mycursor.execute(
+      'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+      (datos[0], "Marcó como pagado una cuota del instituto al alumno {a}, {b}".format(a=alumno[0], b=alumno[1]), fecha))
+    mydb.commit()
+  else:
+    mycursor.execute(
+      'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+      (datos[0], "Marcó como pagado una cuota extraordinaria al alumno {a}, {b}".format(a=alumno[0], b=alumno[1]), fecha))
+    mydb.commit()
   return redirect(url_for('vercuotasdelalumno', id=cuotas[1]))
 def createpassword(password):
   return generate_password_hash(password)

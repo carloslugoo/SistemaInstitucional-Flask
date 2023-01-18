@@ -9,22 +9,22 @@
 <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-15 fst-italic"><i class="bi bi-calendar-plus"></i> Horario de
-        {%if band == 0%}
+        {%if band - 1 == 0%}
            Lunes </h1>
         {% endif %}
-        {%if band == 1%}
+        {%if band - 1 == 1%}
            Martes </h1>
         {% endif %}
-         {%if band == 2%}
+         {%if band - 1 == 2%}
            Miercoles </h1>
         {% endif %}
-         {%if band == 3%}
+         {%if band- 1 == 3%}
            Jueves </h1>
         {% endif %}
-         {%if band == 4%}
+         {%if band - 1 == 4%}
            Viernes </h1>
         {% endif %}
-         {%if band == 5%}
+         {%if band - 1 == 5%}
            Sabado</h1>
         {% endif %}
       </div>
@@ -52,7 +52,7 @@
 
 
     </div>
-  {%if band != 5%}
+  {%if band - 1 != 5%}
     {% set count = namespace(value=0) %}
     <div class="col-sm-4">
 <table class="table table-hover table-striped table-bordered">
@@ -118,7 +118,7 @@
 	</table>
     </div>
     {% endif %}
-      {%if band == 5%}
+      {%if band - 1 == 5%}
      {% set count = namespace(value=0) %}
       <div class="col-sm-4">
 <table class="table table-hover table-striped table-bordered">
