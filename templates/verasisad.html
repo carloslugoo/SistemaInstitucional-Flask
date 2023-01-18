@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Mi asistencia{% endblock %}</title>
+    <title>{% block title %}Asistencia del docente{% endblock %}</title>
 </head>
 <body>
 {% block content %}
@@ -18,7 +18,7 @@
  <div class="row">
     <div class="col-sm-3">
   <div class="form-group">
-             <form method="POST" action="/vermiasistencia">
+             <form method="POST" action="/verasisad/{{profe.0}}">
                 <label>Filtrar por tiempo:</label>
                 <select class="form-control" name="idfiltro">
                     <option value="1">Una semana</option>
@@ -31,6 +31,22 @@
             </div>
         </div>
  <br>
+    <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/exportasistenciaad/{{profe.0}}">
+                <label>Exportar asistencia del docente:</label>
+                <select class="form-control" name="idfiltro">
+                   <option value="1">Todos los registros</option>
+                     {% for asistencia in asistencias %}
+                    <option value="{{asistencia.2}}">Fecha: {{asistencia.2}}</option>
+                        {%endfor%}
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver mi asistencia" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+
       <div class="col-sm-3">
                 <div class="col-sm-12">
         <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">

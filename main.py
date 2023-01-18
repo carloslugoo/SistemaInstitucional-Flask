@@ -2857,7 +2857,7 @@ def exportaralumnosad(id):
     text = ''' <strong><font size=14>Alumnos matriculados</font></strong>
           '''
     text2 = '''
-              <strong><font size=10>Diretor: {a}, {b}</font></strong>
+              <strong><font size=10>Director/a: {a}, {b}</font></strong>
           '''.format(a=datos[1], b=datos[2])
     text3 = '''
               <strong><font size=10>Curso: {a}, {b}</font></strong>
@@ -3311,7 +3311,7 @@ def exportardocentesad(id):
     text = ''' <strong><font size=14>Docentes </font></strong>
        '''
     text2 = '''
-           <strong><font size=10>Diretora: {a}, {b}</font></strong>
+           <strong><font size=10>Diretor/a: {a}, {b}</font></strong>
        '''.format(a=datos[1], b=datos[2])
     text3 = '''
            <strong><font size=10>Curso: {a}, {b}</font></strong>
@@ -3699,7 +3699,7 @@ def verasistenciaprofe():
 
 @app.route('/verasisad/<int:id>', methods = ['POST', 'GET'])
 def verasisad(id):
-  print(id)
+  #print(id)
   datos = session['username']
   #datos del profe
   mycursor = mydb.cursor()
@@ -3708,14 +3708,14 @@ def verasisad(id):
   mycursor.execute(sql, val)
   profe = mycursor.fetchall()
   profe = profe[0]
-  print(profe)
+  #print(profe)
   # Sacamos las veces que marco asistencia
   mycursor = mydb.cursor()
   sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC LIMIT 7"
   val = [id]
   mycursor.execute(sql, val)
   asistencias = mycursor.fetchall()
-  print(asistencias)
+  #print(asistencias)
 
   dt = 0  # Dias trabajados
   dp = 0  # Dias no trabajados
@@ -3728,13 +3728,13 @@ def verasisad(id):
       dp += 1
     if aux[0] and not aux[1]:
       dr += 1
-  print(dt, dp, dr)
+  #print(dt, dp, dr)
   if request.method == "POST":
     dt = 0
     dp = 0
     dr = 0
     filtro = int(request.form.get("idfiltro"))
-    print(filtro)
+    #print(filtro)
     if filtro == 2:
       sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC LIMIT 31"
       val = [datos[0]]
@@ -3766,6 +3766,104 @@ def verasisad(id):
     if filtro == 1:
       return redirect(url_for('verasisad', id=id))
   return render_template('verasisad.html', datos=datos, asistencias=asistencias, profe = profe, filtro = 1, dt = dt, dp = dp, dr = dr)
+#Exportar aasistencia del docente
+@app.route('/exportasistenciaad/<string:id>', methods = ['GET', 'POST'])
+def exportarasistenciaad(id):
+  datos = session['username']
+  #datos del profe
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p FROM profesores WHERE id_profesor = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  profe = mycursor.fetchall()
+  profe = profe[0]
+  print(profe)
+  if request.method == 'POST':
+    pdf = SimpleDocTemplate(
+      "{a}{b}_asistencia.pdf".format(a=profe[1], b=profe[2]),
+      pagesize=A4,
+      rightMargin=inch,
+      leftMargin=inch,
+      topMargin=inch,
+      bottomMargin=inch / 2
+    )
+    filtro = request.form.get("idfiltro")
+    print(filtro)
+    if filtro == "1":
+      # Sacamos las veces que marco asistencia
+      mycursor = mydb.cursor()
+      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC"
+      val = [id]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      print(asistencias)
+    else:
+      # Sacamos la asistencia de la fecha
+      mycursor = mydb.cursor()
+      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s and fec_a = %s ORDER BY asistenciaprof.id_asisprof DESC"
+      val = [id, filtro]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      print(asistencias)
+    Story = []
+    # Estilos
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
+    # Cabecera
+    text = ''' <strong><font size=14>Asistencia del Docente</font></strong>
+             '''
+    text2 = '''
+                 <strong><font size=10>Director/a: {a}, {b}</font></strong>
+             '''.format(a=datos[1], b=datos[2])
+    text3 = '''
+                 <strong><font size=10>Docente: {a}, {b}</font></strong>
+             '''.format(a=profe[1], b=profe[2])
+    # Adjuntamos los titulos declarados mas arriba, osea las cabeceras
+    Story.append(Paragraph(text2))
+    Story.append(Paragraph(text3))
+    Story.append(Paragraph(text, styles['Center']))
+    Story.append(Spacer(1, 20))
+    data = [(
+      Paragraph('<strong><font size=6>#</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Fecha</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Hora de entrada</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Hora de salida</font></strong>', styles['Center'])
+    )]
+    # Aqui acomplamos los registros o datos a nuestra tabla data, estos seran los datos mostrados de bajo de los headers
+    for x in range(0, len(asistencias)):
+      aux = asistencias[x]
+      count = str(x + 1)
+      fecha = aux[2]
+      he = aux[0]
+      hs = aux[1]
+      data.append((
+        Paragraph('<font size=6>%s</font>' % count, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % fecha, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % he, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % hs, styles['Normal']),
+      ))
+    # Declaramamos que la tabla recibira como dato los datos anteriores y le damos la dimensiones a cada uno de nuestros campos
+    table = Table(
+      data,
+      colWidths=[20, 140, 80, 80]
+    )
+    table.setStyle(
+      TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+      ])
+    )
+    Story.append(table)
+    pdf.build(Story)
+    # Comprueba si existe el archivo y lo descarga para el usuario
+    ruta = pathlib.Path('.')
+    filename =  "{a}{b}_asistencia.pdf".format(a=profe[1], b=profe[2])
+    archivo = ruta / filename  # Si existe un pdf con su nombre
+    print(archivo)
+    if archivo.exists():
+      return send_file(archivo, as_attachment=True)
+  return redirect(url_for('verasisad', id=id))
 
 @app.route('/llamarlista/<int:id>', methods = ['POST', 'GET'])
 def asistenciaalumnos(id):
