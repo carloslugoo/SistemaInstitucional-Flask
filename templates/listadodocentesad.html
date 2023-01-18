@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Lista de Docentes{% endblock %}</title>
+    <title>{% block title %}Lista de docentes{% endblock %}</title>
 </head>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <body>
@@ -91,7 +91,9 @@
      <td>{{profesor.2}}</td>
      <td>{{profesor.1}}</td>
      <td>{{profesor.3}}</td>
-         <td><center><a class="btn btn-secondary" role="button" href="/moddatos/{{profesor.0}}"> Datos Personales</a></center></td>
+         <td><center><a class="btn btn-secondary" role="button" href="/moddatos/{{profesor.0}}"> Datos Personales</a>
+                     <a class="btn btn-secondary" role="button" href="/verasisad/{{profesor.0}}"> Asistencia </a>
+         </center></td>
        </tr>
         {% endfor %}
     </tbody>

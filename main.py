@@ -3697,6 +3697,76 @@ def verasistenciaprofe():
       return redirect(url_for('verasistenciaprofe'))
   return render_template('verasistenciaprofe.html', datos=datos, asistencias=asistencias, filtro = 1, dt = dt, dp = dp, dr = dr)
 
+@app.route('/verasisad/<int:id>', methods = ['POST', 'GET'])
+def verasisad(id):
+  print(id)
+  datos = session['username']
+  #datos del profe
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p FROM profesores WHERE id_profesor = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  profe = mycursor.fetchall()
+  profe = profe[0]
+  print(profe)
+  # Sacamos las veces que marco asistencia
+  mycursor = mydb.cursor()
+  sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC LIMIT 7"
+  val = [id]
+  mycursor.execute(sql, val)
+  asistencias = mycursor.fetchall()
+  print(asistencias)
+
+  dt = 0  # Dias trabajados
+  dp = 0  # Dias no trabajados
+  dr = 0  # Dias que no marco salida
+  for x in range(0, len(asistencias)):
+    aux = asistencias[x]
+    if aux[0] or aux[1]:
+      dt += 1
+    if not aux[0] and not aux[1]:
+      dp += 1
+    if aux[0] and not aux[1]:
+      dr += 1
+  print(dt, dp, dr)
+  if request.method == "POST":
+    dt = 0
+    dp = 0
+    dr = 0
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 2:
+      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC LIMIT 31"
+      val = [datos[0]]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      for x in range(0, len(asistencias)):
+        aux = asistencias[x]
+        if aux[0] or aux[1]:
+          dt += 1
+        if not aux[0] and not aux[1]:
+          dp += 1
+        if aux[0] and not aux[1]:
+          dr += 1
+      return render_template('verasisad.html', datos=datos, asistencias=asistencias, profe=profe, filtro=filtro, dt=dt, dp=dp, dr=dr)
+    if filtro == 3:
+      sql = "SELECT hora_e, hora_s, fec_a FROM asistenciaprof WHERE id_profesor = %s ORDER BY asistenciaprof.id_asisprof DESC"
+      val = [datos[0]]
+      mycursor.execute(sql, val)
+      asistencias = mycursor.fetchall()
+      for x in range(0 , len(asistencias)):
+        aux = asistencias[x]
+        if aux[0] or aux[1]:
+          dt += 1
+        if not aux[0] and not aux[1]:
+          dp += 1
+        if aux[0] and not aux[1]:
+          dr += 1
+      return render_template('verasisad.html', datos=datos,asistencias=asistencias, profe=profe, filtro=filtro, dt=dt, dp=dp, dr=dr)
+    if filtro == 1:
+      return redirect(url_for('verasisad', id=id))
+  return render_template('verasisad.html', datos=datos, asistencias=asistencias, profe = profe, filtro = 1, dt = dt, dp = dp, dr = dr)
+
 @app.route('/llamarlista/<int:id>', methods = ['POST', 'GET'])
 def asistenciaalumnos(id):
   datos = session['username']
