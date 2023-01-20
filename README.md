@@ -80,7 +80,7 @@ ser exportado para ser utilizado en formato físico.
 visualizará la fecha, el curso y la materia el cual fue emitida la planilla, una vez
 aprobada esta se guardará como “Aprobada” para la entrega en formato físico. <br>
 
-✔️ Tecnologías utilizadas: <br>
+## ✔️ Tecnologías utilizadas: <br>
 • Python
 • MySQL
 • HTML
