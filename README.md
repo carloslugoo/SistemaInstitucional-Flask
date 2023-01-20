@@ -78,14 +78,17 @@ ser exportado para ser utilizado en formato físico.
 - `Control de entrega de proceso o exámenes`:  <br>
 • En esta sección el directivo podrá aprobar o desaprobar la planilla del docente, se
 visualizará la fecha, el curso y la materia el cual fue emitida la planilla, una vez
-aprobada esta se guardará como “Aprobada” para la entrega en formato físico.
+aprobada esta se guardará como “Aprobada” para la entrega en formato físico. <br>
+
+✔️ Tecnologías utilizadas: <br>
+• Python
+• MySQL
+• HTML
+• JavaScript
+• CSS
 
 
 <h4 align="center">
 :construction: Proyecto en construcción :construction:
 </h4><br>
 
-Autor: <br>
-
-| <sub>Carlos Lugo</sub>](https://github.com/https://github.com/Luguitoo)| 
-| :---: | :---: | :---: |
