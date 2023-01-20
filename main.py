@@ -4637,6 +4637,39 @@ def marcarpagado(id):
       (datos[0], "Marcó como pagado una cuota extraordinaria al alumno {a}, {b}".format(a=alumno[0], b=alumno[1]), fecha))
     mydb.commit()
   return redirect(url_for('vercuotasdelalumno', id=cuotas[1]))
+#Ver log
+@app.route('/verlog', methods = ['POST', 'GET'])
+def verlog():
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT log.id_user, nmb_ad, ape_ad, fecha, accion FROM log, admin WHERE admin.id_admin = log.id_user ORDER BY log.id_log DESC LIMIT 60"
+  val = []
+  mycursor.execute(sql, val)
+  registros = mycursor.fetchall()
+  print(registros)
+  if request.method == "POST":
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 2:
+      print("a")
+      mycursor = mydb.cursor()
+      sql = "SELECT log.id_user, nmb_ad, ape_ad, fecha, accion FROM log, admin WHERE admin.id_admin = log.id_user ORDER BY log.id_log DESC LIMIT 10"
+      val = []
+      mycursor.execute(sql, val)
+      registros = mycursor.fetchall()
+      print(registros)
+      return render_template('verlog.html', datos=datos, registros=registros, filtro = filtro)
+    if filtro == 3:
+      mycursor = mydb.cursor()
+      sql = "SELECT log.id_user, nmb_ad, ape_ad, fecha, accion FROM log, admin WHERE admin.id_admin = log.id_user ORDER BY log.id_log DESC LIMIT 20"
+      val = []
+      mycursor.execute(sql, val)
+      registros = mycursor.fetchall()
+      return render_template('verlog.html', datos=datos, registros=registros, filtro = filtro)
+    if filtro == 1:
+      return redirect(url_for('verlog'))
+  return render_template('verlog.html', datos=datos, registros=registros, filtro = 1)
+
 def createpassword(password):
   return generate_password_hash(password)
 def crearclavet(): #Una clave random para el trabajo.

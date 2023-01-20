@@ -1,0 +1,81 @@
+{% extends 'basedir.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Registro de cambios{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+
+    <div class="col-sm-10">
+   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic"><i class="bi bi-journal-text"></i> Registro de cambios</h1>
+    </div>
+  </div>
+          </div>
+    <div class="col-sm-3">
+  <div class="form-group">
+             <form method="POST" action="/verlog">
+                <label>Filtrar por:</label>
+                <select class="form-control" name="idfiltro">
+                    <option value="1">Ver todos</option>
+                    <option value="2">Ultimos 10 registros</option>
+                    <option value="3">Ultimos 25 registros</option>
+                    </select>
+             <br>
+                <input type="submit" name="submit" value="Ver registros" class="btn btn-secondary">
+             </form>
+            </div>
+        </div>
+ <br>
+{%if filtro == 1 %}
+    <div class="col-sm-10">
+   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic">Todos los cambios</h1>
+    </div>
+  </div>
+       </div>
+{%endif%}
+{%if filtro == 2 %}
+    <div class="col-sm-10">
+   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic">Últimos 10 cambios</h1>
+    </div>
+  </div>
+       </div>
+{%endif%}
+{%if filtro == 3 %}
+    <div class="col-sm-10">
+   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+    <div class="col-md-6 px-0">
+       <h1 class="display-9 fst-italic">Últimos 20 cambios</h1>
+    </div>
+  </div>
+       </div>
+{%endif%}
+
+ <div class="row">
+    <div class="col-sm-10">
+<table class="table table-hover table-striped table-bordered">
+		<thead style="background-color: grey; color: white;">
+            <th>Usuario</th>
+            <th>Acción realizada</th>
+            <th>Fecha</th>
+		</thead>
+    {% for registro in registros %}
+     <tr>
+           <th>{{registro.1}}, {{registro.2}}</th>
+           <th>{{registro.4}}</th>
+           <th>{{registro.3}}</th>
+     </tr>
+    {%endfor%}
+     </tbody>
+	</table>
+    </div>
+  </div>
+{% endblock %}
+</body>
+</html>
