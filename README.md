@@ -81,11 +81,11 @@ visualizará la fecha, el curso y la materia el cual fue emitida la planilla, un
 aprobada esta se guardará como “Aprobada” para la entrega en formato físico. <br>
 
 ## ✔️ Tecnologías utilizadas: <br>
-• Python
-• MySQL
-• HTML
-• JavaScript
-• CSS
+• Python <br>
+• MySQL <br>
+• HTML <br>
+• JavaScript <br>
+• CSS <br>
 
 
 <h4 align="center">
