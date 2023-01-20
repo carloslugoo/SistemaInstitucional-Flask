@@ -14,7 +14,7 @@ electrónico, localidad, barrio, nombre del tutor, teléfono del tutor) y los do
 • Permite visualizar al alumno las materias en la cual está matriculado en el año.
 - `Calificación por materia`:  <br>
 • La cantidad de puntaje acumulado por cada materia en la cual este matriculado, a
-través de un gráfico y una interfaz que determine el los puntos logrados de total.
+través de un gráfico y una interfaz que determine el los puntos logrados de total. <br>
 • Se podrá visualizar la calificación final una vez realizado la carga de exámenes ya
 sea en diciembre, febrero o marzo.
 - `Asistencia por materia`:  <br>
@@ -33,8 +33,8 @@ electrónico, localidad, barrio), y sus documentos (constancia de cargos, consta
 ingresos y las fotos de su cedula).
 - ` Carga de proceso o exámenes`: <br>
 • Permitirá a los docentes, la carga de trabajos de proceso (trabajos prácticos o tareas)
-y también exámenes finales.
-• En caso de ser necesario, se podrá modificar el puntaje logrado de cualquier alumno.
+y también exámenes finales. <br>
+• En caso de ser necesario, se podrá modificar el puntaje logrado de cualquier alumno. <br>
 • Se podrá exportar en un Excel, una planilla en cualquier momento con los puntajes y
 ya calificaciones en caso de contener exámenes.
 - `Entrega de proceso o exámenes`:  <br>
