@@ -83,4 +83,9 @@ aprobada esta se guardará como “Aprobada” para la entrega en formato físic
 
 <h4 align="center">
 :construction: Proyecto en construcción :construction:
-</h4>
+</h4><br>
+
+Autor: <br>
+
+| <sub>Carlos Lugo</sub>](https://github.com/https://github.com/Luguitoo)| 
+| :---: | :---: | :---: |
