@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 11-01-2023 a las 23:15:16
+-- Tiempo de generación: 20-01-2023 a las 23:30:53
 -- Versión del servidor: 10.4.25-MariaDB
 -- Versión de PHP: 8.1.10
 
@@ -83,7 +83,7 @@ INSERT INTO `alumnos` (`id_alumno`, `nmb_a`, `ape_a`, `tel_a`, `id_curso`, `ci_a
 (64, 'Carlos Gabriel', 'Lugo Zacarias', 985475222, 1, 4922377, 17, 1, 19, 'ostias@gmail.com', 'Encarnación', 'Lourdes Z', 985110325, '2001-12-31', 'Cuidad Nueva', 1),
 (65, 'Mathias ', 'Ortellado Silva', 985114432, 1, 4851123, NULL, 1, 16, 'test@g.com', 'Encarnación', 'Osvlado', 985110325, '2001-12-31', 'Cuidad Nueva', 1),
 (66, 'Carlos Abel', 'Lugo Z', 985114432, 1, 4922378, NULL, 1, 19, 'ostias@gmail.com', 'Encarnación', 'Lourdes Z', 984752321, '2001-12-31', 'Cuidad Nueva', 1),
-(67, 'Carlos', 'Ibarra', 985115555, 1, 3452348, NULL, 1, 22, 'ibarra@gmail.com', 'Encarnación', 'Ibarra City', 985888887, '2000-10-21', 'Ni idea', 1);
+(67, 'Carlos', 'Ibarra', 985115556, 1, 3452348, NULL, 1, 22, 'ibarra@gmail.com', 'Encarnación', 'Ibarra City', 985888887, '2000-10-21', 'Ni idea', 1);
 
 -- --------------------------------------------------------
 
@@ -143,14 +143,7 @@ INSERT INTO `asistenciaprof` (`id_asisprof`, `id_profesor`, `fec_a`, `hora_e`, `
 (40, 1, '2023-01-02', '22:41:36', NULL),
 (41, 51, '2023-01-02', NULL, NULL),
 (45, 1, '2023-01-03', '04:00:11', '04:00:15'),
-(46, 51, '2023-01-03', NULL, NULL),
-(47, 1, '2023-01-03', '04:00:11', '04:00:15'),
-(48, 1, '2023-01-02', '22:41:36', NULL),
-(49, 1, '2023-01-03', '04:00:11', '04:00:15'),
-(50, 1, '2023-01-03', '04:00:11', '04:00:15'),
-(51, 1, '2023-01-02', '22:41:36', NULL),
-(52, 1, '2023-01-03', '04:00:11', '04:00:15'),
-(53, 1, '2023-01-02', NULL, NULL);
+(46, 51, '2023-01-03', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -163,8 +156,25 @@ CREATE TABLE `cuotas` (
   `estado` int(1) NOT NULL,
   `fecha` date NOT NULL,
   `id_tipoc` int(11) NOT NULL,
-  `id_alumno` int(11) NOT NULL
+  `id_alumno` int(11) NOT NULL,
+  `mes` int(2) NOT NULL,
+  `des_c` varchar(60) DEFAULT NULL,
+  `monto` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `cuotas`
+--
+
+INSERT INTO `cuotas` (`id_cuota`, `estado`, `fecha`, `id_tipoc`, `id_alumno`, `mes`, `des_c`, `monto`) VALUES
+(37, 1, '2023-01-16', 2, 64, 1, 'Limpieza', '35.000'),
+(38, 0, '2023-01-16', 2, 65, 1, 'Limpieza', '35.000'),
+(39, 0, '2023-01-16', 2, 66, 1, 'Limpieza', '35.000'),
+(40, 0, '2023-01-16', 2, 67, 1, 'Limpieza', '35.000'),
+(41, 0, '2023-01-16', 1, 64, 1, '', '650.000'),
+(42, 0, '2023-01-16', 1, 65, 1, '', '650.000'),
+(43, 0, '2023-01-16', 1, 66, 1, '', '650.000'),
+(44, 0, '2023-01-16', 1, 67, 1, '', '650.000');
 
 -- --------------------------------------------------------
 
@@ -269,12 +279,12 @@ INSERT INTO `horarios` (`id_horario`, `id_curso`, `id_materia`, `id_dia`, `hora_
 (191, 1, 20, 2, '21:00:00', '21:40:00', 1),
 (192, 1, 31, 2, '21:40:00', '22:20:00', 52),
 (193, 1, 20, 3, '17:00:00', '17:40:00', 1),
-(194, 1, 29, 3, '17:40:00', '18:20:00', 51),
-(195, 1, 29, 3, '18:20:00', '19:00:00', 51),
-(196, 1, 29, 3, '19:00:00', '19:40:00', 51),
-(197, 1, 27, 3, '20:20:00', '21:00:00', 0),
-(198, 1, 27, 3, '21:00:00', '21:40:00', 0),
-(199, 1, 20, 3, '21:40:00', '22:20:00', 1),
+(194, 1, 20, 3, '17:40:00', '18:20:00', 1),
+(195, 1, 24, 3, '18:20:00', '19:00:00', 0),
+(196, 1, 24, 3, '19:00:00', '19:40:00', 0),
+(197, 1, 37, 3, '20:20:00', '21:00:00', 56),
+(198, 1, 37, 3, '21:00:00', '21:40:00', 56),
+(199, 1, 37, 3, '21:40:00', '22:20:00', 56),
 (200, 1, 19, 4, '17:00:00', '17:40:00', 0),
 (201, 1, 35, 4, '17:40:00', '18:20:00', 0),
 (202, 1, 25, 4, '18:20:00', '19:00:00', 55),
@@ -285,7 +295,7 @@ INSERT INTO `horarios` (`id_horario`, `id_curso`, `id_materia`, `id_dia`, `hora_
 (207, 1, 29, 5, '17:00:00', '17:40:00', 51),
 (208, 1, 18, 5, '17:40:00', '18:20:00', 0),
 (209, 1, 18, 5, '18:20:00', '19:00:00', 0),
-(210, 1, 27, 5, '19:00:00', '19:40:00', 0),
+(210, 1, 18, 5, '19:00:00', '19:40:00', 0),
 (211, 1, 27, 5, '20:20:00', '21:00:00', 0),
 (212, 1, 27, 5, '21:00:00', '21:40:00', 0),
 (213, 1, 27, 5, '21:40:00', '22:20:00', 0),
@@ -294,8 +304,8 @@ INSERT INTO `horarios` (`id_horario`, `id_curso`, `id_materia`, `id_dia`, `hora_
 (216, 1, 18, 6, '14:20:00', '15:00:00', 0),
 (217, 1, 34, 6, '15:00:00', '15:40:00', 0),
 (218, 1, 27, 6, '16:20:00', '17:00:00', 0),
-(219, 1, 34, 6, '17:00:00', '17:40:00', 0),
-(220, 1, 20, 6, '17:40:00', '18:20:00', 1);
+(219, 1, 20, 6, '17:00:00', '17:40:00', 1),
+(220, 1, 34, 6, '17:40:00', '18:20:00', 0);
 
 -- --------------------------------------------------------
 
@@ -429,9 +439,33 @@ INSERT INTO `indxalum` (`id_ixa`, `id_indicador`, `id_trabajo`, `id_alumno`, `pu
 CREATE TABLE `log` (
   `id_log` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
-  `accion` varchar(45) NOT NULL,
+  `accion` varchar(120) NOT NULL,
   `fecha` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `log`
+--
+
+INSERT INTO `log` (`id_log`, `id_user`, `accion`, `fecha`) VALUES
+(1, 1, 'Modificó los datos del alumno Carlos, Ibarra', '2023-01-18'),
+(2, 1, 'Modificó los datos del docente Carlos Gabriel, Lugo Z', '2023-01-18'),
+(3, 1, 'Marcó como pagado una cuota del instituto al alumno Carlos, Ibarra', '2023-01-18'),
+(4, 1, 'Marcó como pagado una cuota extraordinaria al alumno Mathias , Ortellado Silva', '2023-01-18'),
+(6, 1, 'Cargó un nuevo horario al Segundo Curso, Contabilidad, A', '2023-01-18'),
+(7, 1, 'Cargó un nuevo horario al Segundo Curso, Contabilidad, A', '2023-01-18'),
+(8, 1, 'Eliminó el horario al Segundo Curso, Contabilidad, A', '2023-01-18'),
+(9, 1, 'Editó el horario al Primer Curso, Contabilidad, A', '2023-01-18'),
+(13, 1, 'Editó el horario al Primer Curso, Contabilidad, A', '2023-01-18'),
+(14, 1, 'Matriculó al alumno Carlos Gabriel, Test al sistema', '2023-01-18'),
+(15, 1, 'Incorporó al docente Carlos Gabriel, Test al sistema', '2023-01-18'),
+(16, 1, 'Dió de baja al docente Mirta Graciela,  González Maidana del sistema', '2023-01-18'),
+(21, 1, 'Generó una nueva cuota extraordinaria', '2023-01-19'),
+(22, 1, 'Generó una nueva cuota extraordinaria', '2023-01-19'),
+(23, 1, 'Generó una nueva cuota extraordinaria', '2023-01-19'),
+(24, 1, 'Eliminó una cuota extraordinaria', '2023-01-19'),
+(25, 1, 'Cargó un nuevo horario al Segundo Curso, Contabilidad, A', '2023-01-20'),
+(26, 1, 'Eliminó el horario al Segundo Curso, Contabilidad, A', '2023-01-20');
 
 -- --------------------------------------------------------
 
@@ -783,7 +817,7 @@ CREATE TABLE `profesores` (
 --
 
 INSERT INTO `profesores` (`id_profesor`, `nmb_p`, `ape_p`, `tel_p`, `ci_p`, `id_user`, `tipo_u`, `edad`, `email`, `loc_p`, `fec_p`, `bar_p`, `estado`) VALUES
-(1, 'Carlos Gabriel', 'Lugo Z', '0985114432', 4851123, 18, 2, 50, 'ostias@gmail.com', 'Encarnación', '2001-12-31', 'Cuidad Nueva', 1),
+(1, 'Carlos Gabriel', 'Lugo Z', '0985114432', 4851123, 18, 2, 51, 'ostias@gmail.com', 'Encarnación', '2001-12-31', 'Cuidad Nueva', 1),
 (50, 'María Bárbara Edith', 'Cañete de Ayala', '0985260798', 2255639, NULL, 2, 46, 'mabaedcb@hotmail.com', 'Encarnación', '1975-12-04', 'San Padre Casco Antiguo', 1),
 (51, 'Carolina Antonia', 'Meza Gauto', '0972630069', 2921970, NULL, 2, 42, 'carolina.meza@gmail.com', 'Encarnación', '1980-01-03', 'Padre Kreuser 781', 1),
 (52, 'Liliana Andrea', 'Giménez Congregado', '0985778757', 2594667, NULL, 2, 41, 'liandygi@hotmail.com', 'Encarnación', '1981-04-07', 'Quiteria ', 1),
@@ -1050,7 +1084,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT de la tabla `alumnos`
 --
 ALTER TABLE `alumnos`
-  MODIFY `id_alumno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id_alumno` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT de la tabla `asistenciaalum`
@@ -1068,7 +1102,7 @@ ALTER TABLE `asistenciaprof`
 -- AUTO_INCREMENT de la tabla `cuotas`
 --
 ALTER TABLE `cuotas`
-  MODIFY `id_cuota` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_cuota` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT de la tabla `dias`
@@ -1086,7 +1120,7 @@ ALTER TABLE `enfasis`
 -- AUTO_INCREMENT de la tabla `horarios`
 --
 ALTER TABLE `horarios`
-  MODIFY `id_horario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=235;
+  MODIFY `id_horario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=277;
 
 --
 -- AUTO_INCREMENT de la tabla `indicadores`
@@ -1104,7 +1138,7 @@ ALTER TABLE `indxalum`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `materias`
@@ -1116,7 +1150,7 @@ ALTER TABLE `materias`
 -- AUTO_INCREMENT de la tabla `matxalum`
 --
 ALTER TABLE `matxalum`
-  MODIFY `id_mxa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=401;
+  MODIFY `id_mxa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=415;
 
 --
 -- AUTO_INCREMENT de la tabla `matxcur`
@@ -1140,7 +1174,7 @@ ALTER TABLE `planillas`
 -- AUTO_INCREMENT de la tabla `profesores`
 --
 ALTER TABLE `profesores`
-  MODIFY `id_profesor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `id_profesor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_user`
