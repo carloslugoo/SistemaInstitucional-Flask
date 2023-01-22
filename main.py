@@ -1551,165 +1551,303 @@ def generarexcel(id):
     mycursor = mydb.cursor()
     filtro = int(request.form.get(('idfiltro')))
     print(filtro)
-    #Trabajos de la materia
-    sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and etapa = %s and trabajos.id_materia = %s and " \
-          "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
-    val = [datos[0], filtro, id]
-    mycursor.execute(sql, val)
-    trabajos = mycursor.fetchall()
-    a = trabajos[0]
-    if not a:
-      return redirect(url_for('modproceso', id=id))
-    print(trabajos)
-    inf = datetime.now()
-    # Extraemos la fecha
-    fecha = datetime.strftime(inf, '%Y/%m/%d')
-    # Cargamos el archivo
-    wb = load_workbook('templateprocesos.xlsx')
-    ws = wb["Hoja1"]
-    ws['C4'] = datos[1] + ", " + datos[2]
-    ws['V4'] = a[5]
-    ws['AP4'] = a[8]
-    ws['C5'] = filtro
-    if a[7] == "Primer Curso":
-      ws['G5'] = 1
-    if a[7] == "Segundo Curso":
-      ws['G5'] = 2
-    if a[7] == "Tercer Curso":
-      ws['G5'] = 3
-    ws['T5'] = "T.N"
-    # Insertamos los indicadores
-    cont = 0
-    # Para saber que celdas combinar
-    ci = ""
-    cic = 0
-    cf = ""
-    cfc = 0
-    #Combinar celdas
-    sheet = wb.active
-
-    for i in range(0, len(trabajos)):
-      inicio = 12
-      aux = trabajos[i]
-      # Saca los indicadores
-      sql = "SELECT * FROM indicadores WHERE id_trabajo = %s"
-      val = [aux[0]]
+    if filtro < 3:
+      #Trabajos de la materia
+      sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and etapa = %s and trabajos.id_materia = %s and " \
+            "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
+      val = [datos[0], filtro, id]
       mycursor.execute(sql, val)
-      indicadores = mycursor.fetchall()
-      if i == 0:
-        # Saca los alumnos relacionados con el trabajo
-        sql = "SELECT nmb_a, ape_a, id_txa, traxalum.id_alumno, pun_l, fec_t, id_trabajo FROM traxalum, alumnos WHERE id_trabajo = %s and traxalum.id_alumno = alumnos.id_alumno"
+      trabajos = mycursor.fetchall()
+      a = trabajos[0]
+      if not a:
+        return redirect(url_for('modproceso', id=id))
+      print(trabajos)
+      inf = datetime.now()
+      # Extraemos la fecha
+      fecha = datetime.strftime(inf, '%Y/%m/%d')
+      # Cargamos el archivo
+      wb = load_workbook('templateprocesos.xlsx')
+      ws = wb["Hoja1"]
+      ws['C4'] = datos[1] + ", " + datos[2]
+      ws['V4'] = a[5]
+      ws['AP4'] = a[8]
+      ws['C5'] = filtro
+      if a[7] == "Primer Curso":
+        ws['G5'] = 1
+      if a[7] == "Segundo Curso":
+        ws['G5'] = 2
+      if a[7] == "Tercer Curso":
+        ws['G5'] = 3
+      ws['T5'] = "T.N"
+      # Insertamos los indicadores
+      cont = 0
+      # Para saber que celdas combinar
+      ci = ""
+      cic = 0
+      cf = ""
+      cfc = 0
+      #Combinar celdas
+      sheet = wb.active
+      for i in range(0, len(trabajos)):
+        inicio = 12
+        aux = trabajos[i]
+        # Saca los indicadores
+        sql = "SELECT * FROM indicadores WHERE id_trabajo = %s"
         val = [aux[0]]
         mycursor.execute(sql, val)
-        datas = mycursor.fetchall()
-        datas = sorted(datas, key=lambda datas: datas[1])  # Ordena por orden alfabetic
-      for x in range(0, len(indicadores)):
-        aux2 = indicadores[x]
-        if x == 0:
-          ci = celdas[cont]
-          cic = cont
-        ws['{a}11'.format(a=celdas[cont])] = aux2[1]
-        ws['{a}41'.format(a=celdas[cont])] = aux2[1]
-        #Puntaje de cada indicador
-        ws['{a}12'.format(a=celdas[cont])] = aux2[2]
-        ws['{a}42'.format(a=celdas[cont])] = aux2[2]
-        if x == len(indicadores) - 1:
-          cf = celdas[cont + 1]
-          cfc = cont + 1
-          ws['{a}11'.format(a=celdas[cont + 1])] = "TOTAL INDICADORES LOGRADOS"
-          ws['{a}41'.format(a=celdas[cont + 1])] = "TOTAL INDICADORES LOGRADOS"
-          color1 = PatternFill(start_color='cc9cfc',
-                                end_color='cc9cfc',
-                                fill_type='solid')
-          ws['{a}11'.format(a=celdas[cont + 1])].fill = color1
-          ws['{a}41'.format(a=celdas[cont + 1])].fill = color1
+        indicadores = mycursor.fetchall()
+        if i == 0:
+          # Saca los alumnos relacionados con el trabajo
+          sql = "SELECT nmb_a, ape_a, id_txa, traxalum.id_alumno, pun_l, fec_t, id_trabajo FROM traxalum, alumnos WHERE id_trabajo = %s and traxalum.id_alumno = alumnos.id_alumno"
+          val = [aux[0]]
+          mycursor.execute(sql, val)
+          datas = mycursor.fetchall()
+          datas = sorted(datas, key=lambda datas: datas[1])  # Ordena por orden alfabetic
+        for x in range(0, len(indicadores)):
+          aux2 = indicadores[x]
+          if x == 0:
+            ci = celdas[cont]
+            cic = cont
+          ws['{a}11'.format(a=celdas[cont])] = aux2[1]
+          ws['{a}41'.format(a=celdas[cont])] = aux2[1]
+          #Puntaje de cada indicador
+          ws['{a}12'.format(a=celdas[cont])] = aux2[2]
+          ws['{a}42'.format(a=celdas[cont])] = aux2[2]
+          if x == len(indicadores) - 1:
+            cf = celdas[cont + 1]
+            cfc = cont + 1
+            ws['{a}11'.format(a=celdas[cont + 1])] = "TOTAL INDICADORES LOGRADOS"
+            ws['{a}41'.format(a=celdas[cont + 1])] = "TOTAL INDICADORES LOGRADOS"
+            color1 = PatternFill(start_color='cc9cfc',
+                                  end_color='cc9cfc',
+                                  fill_type='solid')
+            ws['{a}11'.format(a=celdas[cont + 1])].fill = color1
+            ws['{a}41'.format(a=celdas[cont + 1])].fill = color1
+            cont += 1
           cont += 1
-        cont += 1
-      print(ci, cic, cf, cfc)
-      #Fecha del trabajo
-      ws['{a}6'.format(a=ci)] = aux[1]
-      #Tema o contenido
-      ws['{a}9'.format(a=ci)] = aux[2]
-      #Total de puntos
-      ws['{a}12'.format(a=cf)] = aux[3]
-      ws['{a}42'.format(a=cf)] = aux[3]
-      a = ws['{a}42'.format(a=cf)]
-      b = ws['{a}12'.format(a=cf)]
-      a.font = Font(bold=True)
-      b.font = Font(bold=True)
-      #Une las celdas
-      for y in range(6,11):
-        sheet.merge_cells('{a}{c}:{b}{c}'.format(a=ci, b= cf, c=y))
-      total = 0
-      for i in range(0, len(datas)):
-        alumno = datas[i]
-        # Saca los indicadores del alumno
-        sql = "SELECT id_ixa, pun_l FROM indxalum WHERE id_trabajo = %s and id_alumno = %s"
-        val = [aux[0], alumno[3]]
+        print(ci, cic, cf, cfc)
+        #Fecha del trabajo
+        ws['{a}6'.format(a=ci)] = aux[1]
+        #Tema o contenido
+        ws['{a}9'.format(a=ci)] = aux[2]
+        #Total de puntos
+        ws['{a}12'.format(a=cf)] = aux[3]
+        ws['{a}42'.format(a=cf)] = aux[3]
+        a = ws['{a}42'.format(a=cf)]
+        b = ws['{a}12'.format(a=cf)]
+        a.font = Font(bold=True)
+        b.font = Font(bold=True)
+        #Une las celdas
+        for y in range(6,11):
+          sheet.merge_cells('{a}{c}:{b}{c}'.format(a=ci, b= cf, c=y))
+        total = 0
+        for i in range(0, len(datas)):
+          alumno = datas[i]
+          # Saca los indicadores del alumno
+          sql = "SELECT id_ixa, pun_l FROM indxalum WHERE id_trabajo = %s and id_alumno = %s"
+          val = [aux[0], alumno[3]]
+          mycursor.execute(sql, val)
+          indicadores = mycursor.fetchall()
+          print(indicadores)
+          fc = 0
+          for x in range(cic, cfc + 1):
+            #print(x)
+            indicador = indicadores[fc]
+            pl = indicador[1]
+            print(indicador)
+            if not x == cfc - 1:
+              fc += 1
+              #print(fc)
+            if inicio != 32 and x != cfc:
+              ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = pl
+              #print('{b}{a}'.format(a=str(inicio + 1), b=celdas[x]))
+              total += pl
+            if inicio != 32 and x == cfc:
+              ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = total
+              pn = ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])]
+              pn.font = Font(bold=True)
+            #Salto a laa planilla de abajo
+            if inicio == 32 and x != cfc:
+              inicio = 42
+              ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = pl
+              inicio += 1
+            if inicio == 32 and x == cfc:
+              ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = total
+              pn = ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])]
+              pn.font = Font(bold=True)
+
+          til = ws['BP{a}'.format(a=str(inicio + 1))]
+          if not til.value:
+            ws['BP{a}'.format(a=str(inicio + 1))] = 0
+            til = ws['BP{a}'.format(a=str(inicio + 1))]
+          print(til.value)
+          ws['BP{a}'.format(a=str(inicio + 1))] = til.value + total
+          print("endfor")
+          total = 0
+          inicio += 1
+      # Insertamos alumnos
+      inicio = 12
+      for x in range(0, len(datas)):
+        alumno = datas[x]
+        print(alumno)
+        if inicio != 32:
+          ws['B{a}'.format(a=str(inicio + 1))] = alumno[1] + ", " + alumno[0]
+          inicio += 1
+        else:
+          inicio = 42
+          ws['B{a}'.format(a=str(inicio + 1))] = alumnos[x]
+          inicio += 1
+      # Guarda el archivo
+      ws = wb["Hoja1"]
+      ws.title ="Planilla de Proceso"
+      wb.save('./media/Planilla de Proceso.xlsx')
+      ruta = pathlib.Path('./media/')
+      filename = "Planilla de Proceso.xlsx"
+      archivo = ruta / filename  # Si existe un docx con su nombre
+      print(archivo)
+      if archivo.exists():
+        print("El arhivo existe")
+        return send_file(archivo, as_attachment=True)
+      else:
+        print("No existe")
+    if filtro >= 3: #Calificaciones primera etapa o segunda
+      # Trabajos de la materia
+      sql = "SELECT id_trabajo, materias.id_materia fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa, trabajos.id_curso FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and etapa = %s and trabajos.id_materia = %s and " \
+            "trabajos.id_curso = cursos.id_curso and trabajos.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis  ORDER BY trabajos.id_trabajo DESC"
+      if filtro == 3:
+        val = [datos[0], 1, id]
+        etapa = "1ra. Etapa"
+      else:
+        val = [datos[0], 2, id]
+        etapa = "2da. Etapa"
+      mycursor.execute(sql, val)
+      trabajos = mycursor.fetchall()
+      a = trabajos[0]
+      if not a:
+        return redirect(url_for('modproceso', id=id))
+      print(trabajos)
+      inf = datetime.now()
+      # Extraemos la fecha
+      fecha = datetime.strftime(inf, '%Y/%m/%d')
+      # Cargamos el archivo
+      wb = load_workbook('templateetapa.xlsx')
+      ws = wb["Hoja1"]
+      #Cabecera
+      ws['C9'] = "Escuela Nacional de Comercio Héroes del Chaco"
+      ws['C42'] = "Escuela Nacional de Comercio Héroes del Chaco"
+      ws['C10'] = etapa
+      ws['C43'] = etapa
+      ws['A11'] = "Curso: " + a[7] + " " + a[8]
+      ws['A44'] = "Curso: " + a[7] + " " + a[8]
+      ws['D11'] = "T.N"
+      ws['D44'] = "T.N"
+      ws['A12'] = a[5]  # Materia
+      ws['E12'] = datos[1] + ", " + datos[2]
+      ws['D45'] = datos[1] + ", " + datos[2]
+      totalp = 0
+      pla = []
+      #Sacamos el total de puntos acumulado
+      for i in range(0, len(trabajos)):
+        aux = trabajos[i]
+        pt = int(aux[3])
+        totalp = pt + totalp
+        # Saca los indicadores
+        sql = "SELECT * FROM indicadores WHERE id_trabajo = %s"
+        val = [aux[0]]
         mycursor.execute(sql, val)
         indicadores = mycursor.fetchall()
-        print(indicadores)
-        fc = 0
-        for x in range(cic, cfc + 1):
-          #print(x)
-          indicador = indicadores[fc]
-          pl = indicador[1]
-          print(indicador)
-          if not x == cfc - 1:
-            fc += 1
-            #print(fc)
-          if inicio != 32 and x != cfc:
-            ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = pl
-            #print('{b}{a}'.format(a=str(inicio + 1), b=celdas[x]))
-            total += pl
-          if inicio != 32 and x == cfc:
-            ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = total
-            pn = ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])]
-            pn.font = Font(bold=True)
-          #Salto a laa planilla de abajo
-          if inicio == 32 and x != cfc:
-            inicio = 42
-            ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = pl
-            inicio += 1
-          if inicio == 32 and x == cfc:
-            ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])] = total
-            pn = ws['{b}{a}'.format(a=str(inicio + 1), b=celdas[x])]
-            pn.font = Font(bold=True)
+        if i == 0:
+          # Saca los alumnos relacionados con el trabajo
+          sql = "SELECT nmb_a, ape_a, traxalum.id_alumno FROM traxalum, alumnos WHERE id_trabajo = %s and traxalum.id_alumno = alumnos.id_alumno"
+          val = [aux[0]]
+          mycursor.execute(sql, val)
+          datas = mycursor.fetchall()
+          datas = sorted(datas, key=lambda datas: datas[1])  # Ordena por orden alfabetico
+          print(datas)
+      #Puntaje logrado de cada alumno
+      for i in range(0, len(datas)):
+        alumno = datas[i]
+        if filtro == 3:
+          sql = "SELECT id_alumno ,pun_ac FROM matxalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s"
+        else:
+          sql = "SELECT id_alumno ,pun_ac2 FROM matxalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s"
+        val = [alumno[2], a[1], a[10]]
+        mycursor.execute(sql, val)
+        puntaje = mycursor.fetchall()
+        puntaje = puntaje[0]
+        pla.append(puntaje)
+      print(pla)
+      #Insertamos en el excel
+      # Insertamos alumnos
+      print(totalp)
+      inicio = 15
+      for x in range(0, len(datas)):
+        alumno = datas[x]
+        puntaje = pla[x]
+        aux3 = puntaje[1]
+        print(aux3)
+        calculo = (aux3 / totalp) * 100
+        print(calculo)
+        porcentaje1 = (calculo * 0.7)
+        print(porcentaje1)
+        pt = porcentaje1 + 20 + 10
+        print(pt)
+        cal = 0
+        if pt < 70:
+          cal = 1
+        elif pt < 78:
+          cal = 2
+        elif pt < 86:
+          cal = 3
+        elif pt < 94:
+          cal = 4
+        elif pt >= 94:
+          cal = 5
+        print(cal)
+        if filtro == 3:
+          sql = "UPDATE matxalum SET cal = %s WHERE id_alumno = %s and id_materia = %s and id_curso = %s"
+        else:
+          sql = "UPDATE matxalum SET cal2 = %s WHERE id_alumno = %s and id_materia = %s and id_curso = %s"
+        val = (cal, alumno[2], a[1], a[10])
+        mycursor.execute(sql, val)
+        mydb.commit()
+        if inicio != 36:
+          ws['B{a}'.format(a=str(inicio + 1))] = alumno[1] + ", " + alumno[0]
+          ws['C{a}'.format(a=str(inicio + 1))] = totalp
+          ws['D{a}'.format(a=str(inicio + 1))] = puntaje[1]
+          # Puntaje proyecto
+          ws['G{a}'.format(a=str(inicio + 1))] = 15
+          ws['H{a}'.format(a=str(inicio + 1))] = 15
+          # Puntaje institucional
+          ws['K{a}'.format(a=str(inicio + 1))] = 10
+          ws['L{a}'.format(a=str(inicio + 1))] = 10
+          inicio += 1
+        else:
+          inicio = 48
+          ws['B{a}'.format(a=str(inicio + 1))] = alumno[1] + ", " + alumno[0]
+          ws['C{a}'.format(a=str(inicio + 1))] = totalp
+          ws['D{a}'.format(a=str(inicio + 1))] = puntaje[1]
+          #Puntaje proyecto
+          ws['G{a}'.format(a=str(inicio + 1))] = 15
+          ws['H{a}'.format(a=str(inicio + 1))] = 15
+          #Puntaje institucional
+          ws['K{a}'.format(a=str(inicio + 1))] = 10
+          ws['L{a}'.format(a=str(inicio + 1))] = 10
+          inicio += 1
+      # Guarda el archivo
+      ws = wb["Hoja1"]
+      ws.title = "Planilla de Calificaciones"
+      wb.save('./media/Planilla de Calificaciones.xlsx')
+      ruta = pathlib.Path('./media/')
+      filename = "Planilla de Calificaciones.xlsx"
+      archivo = ruta / filename  # Si existe un docx con su nombre
+      print(archivo)
 
-        til = ws['BP{a}'.format(a=str(inicio + 1))]
-        if not til.value:
-          ws['BP{a}'.format(a=str(inicio + 1))] = 0
-          til = ws['BP{a}'.format(a=str(inicio + 1))]
-        print(til.value)
-        ws['BP{a}'.format(a=str(inicio + 1))] = til.value + total
-        print("endfor")
-        total = 0
-        inicio += 1
-    # Insertamos alumnos
-    inicio = 12
-    for x in range(0, len(datas)):
-      alumno = datas[x]
-      print(alumno)
-      if inicio != 32:
-        ws['B{a}'.format(a=str(inicio + 1))] = alumno[1] + ", " + alumno[0]
-        inicio += 1
+      if archivo.exists():
+        print("El arhivo existe")
+        return send_file(archivo, as_attachment=True)
       else:
-        inicio = 42
-        ws['B{a}'.format(a=str(inicio + 1))] = alumnos[x]
-        inicio += 1
-    # Guarda el archivo
-    ws = wb["Hoja1"]
-    ws.title ="Planilla de Proceso"
-    wb.save('./media/Planilla de Proceso.xlsx')
-    ruta = pathlib.Path('./media/')
-    filename = "Planilla de Proceso.xlsx"
-    archivo = ruta / filename  # Si existe un docx con su nombre
-    print(archivo)
-    if archivo.exists():
-      print("El arhivo existe")
-      return send_file(archivo, as_attachment=True)
-    else:
-      print("No existe")
+        print("No existe")
   return redirect(url_for('modproceso', id = id))
 
 @app.route('/modificarproceso2/<int:id>', methods = ['GET', 'POST'])
