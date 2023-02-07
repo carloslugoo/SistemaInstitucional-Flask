@@ -22,7 +22,7 @@
                     <option value="2">Cuotas pagadas</option>
                     </select>
              <br>
-                <input type="submit" name="submit" value="Ver mi asistencia" class="btn btn-secondary">
+                <input type="submit" name="submit" value="Ver cuotas" class="btn btn-secondary">
              </form>
             </div>
         </div>
@@ -60,7 +60,7 @@
     {% set counta.value = counta.value + 1 %}
           <tr>
      <td>{{counta.value}}</td>
-      {%if cuota.3 == 2%}
+      {%if cuota.2 == 2%}
      <td>Cuota extraordinaria</td>
         {%else%}
      <td>Cuota del instituto</td>

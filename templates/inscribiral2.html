@@ -11,14 +11,12 @@
        <h1 class="display-9 fst-italic">Materias</h1>
     </div>
   </div>
-              <br>
      <form method="POST" action="/inscribiralum">
-          <br>
        <div class="col-sm-10">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Materia</th>
-			<th>Seleccionar Materia</th>
+			<th>Seleccionar disciplina</th>
 		</thead>
 		<tbody>
      {% for materia in materias %}
@@ -31,11 +29,7 @@
     </tbody>
 	</table>
     </div>
- </div>
-
-</div>
-     <center><input type="submit" name="submit" value="Inscribir" class="btn btn-success"></center>
-         <br>
+     <input type="submit" name="submit" value="Inscribir" class="btn btn-success">
          </form>
      </div>
   </div>

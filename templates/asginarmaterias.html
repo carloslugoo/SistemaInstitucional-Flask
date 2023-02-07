@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Asignar Materias{% endblock %}</title>
+    <title>{% block title %}Asignar disciplinas{% endblock %}</title>
 </head>
 <body>
   {% block content %}
@@ -25,14 +25,14 @@
              {% endfor %}
             {% endif %}
         {% endwith  %}
-<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic">{{profesor.1}},{{profesor.2}}</h1>
+       <h1 class="display-9 fst-italic">{{profesor.1}}, {{profesor.2}}</h1>
     </div>
       </div>
-   <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic">Sus Disciplinas</h1>
+       <h1 class="display-9 fst-italic">Sus disciplinas</h1>
     </div>
   </div>
 <div class="row">
@@ -51,7 +51,7 @@
            <td>{{materia.1}}</td>
            <td>{{materia.2}}</td>
            <td>{{materia.3}}</td>
-             <td> <center><a class="btn btn-danger" role="button" href="/eliminarmatxpro/{{materia.0}}C{{materia.4}}">Eliminar Materia</a></center></td>
+             <td> <center><a class="btn btn-danger" role="button" href="/eliminarmatxpro/{{materia.0}}C{{materia.4}}">Remover disciplina</a></center></td>
        </tr>
       {% endfor %}
     </tbody>
@@ -59,12 +59,12 @@
     </div>
               <br>
     <div class="container">
-      <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic">Agregar Disciplinas</h1>
+       <h1 class="display-9 fst-italic">Agregar disciplinas</h1>
     </div>
   </div>
-  <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+   <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic">Sociales</h1>
     </div>
@@ -117,7 +117,7 @@
     </div>
    </div>
 
-     <div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
+     <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
        <h1 class="display-9 fst-italic">Contabilidad</h1>
     </div>

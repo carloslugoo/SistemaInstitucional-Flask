@@ -134,7 +134,7 @@ def vermaterias():
 def bienvenidoadmin():
   datos = session['username']
   print(datos)
-  return render_template('directorview.html', datos = datos)
+  return redirect(url_for('listadocursos'))
 
 
 @app.route('/', methods = ['GET', 'POST']) #Login
@@ -235,17 +235,30 @@ def registro():
           t_u = 3  # Admin
           print("admin encontrado")
           create = True
+        else:
+          flash("Ya tiene cuenta", "ci_e")
     if data:
       print("a")
       data = data[0]
       print(data)
-      if data[6]:
-        create = False
-        flash("Ya tiene cuenta", "existe_ci")
-        print("test")
-    else:
-        create = False
-        flash("Error", "ci_e")
+      if data[7] == 1:
+        print("asdff")
+        if data[6]:
+          create = False
+          flash("Ya tiene cuenta", "existe_ci")
+          print("test")
+        else:
+          print("crear si")
+          create = True
+      elif data[6] == 2:
+        print("asd")
+        if data[5]:
+          create = False
+          flash("Ya tiene cuenta", "existe_ci")
+          print("test")
+        else:
+          print("crear si")
+          create = True
     if t_u > 0:
       sql = "SELECT * FROM user WHERE username = %s"
       val = [user.username.data]
@@ -272,8 +285,8 @@ def registro():
         val = [user.username.data]
         mycursor.execute(sql, val)
         aux = mycursor.fetchall()
-        aux = aux[0]
         print(aux)
+        aux = aux[0]
         if t_u == 1:
           id = aux[0]
           sql = "UPDATE alumnos SET id_user= %s WHERE ci_a = %s"
@@ -683,19 +696,24 @@ def verproceso(id):
   mycursor.execute(sql, val)
   data2 = mycursor.fetchall()
   print(data2)
-  sql = "SELECT nmb_p, ape_p, des_m FROM profesores, matxalum, materias WHERE matxalum.id_materia = %s and matxalum.id_profesor = profesores.id_profesor " \
-        "and matxalum.id_materia = materias.id_materia"
-  val = [id]
+  sql = "SELECT DISTINCT nmb_p, ape_p, des_m FROM profesores, matxalum, materias WHERE matxalum.id_materia = %s and matxalum.id_profesor = profesores.id_profesor " \
+        "and matxalum.id_materia = materias.id_materia and matxalum.id_curso = %s"
+  val = [id, datos[4]]
   mycursor.execute(sql, val)
   profesor = mycursor.fetchall()
   print(profesor)
   #Sumatoria de el puntaje del alumno
   #Segunda Etapa
+  sql = "SELECT cal, cal2 FROM matxalum WHERE id_alumno = %s and id_curso = %s and id_materia = %s"
+  val = [datos[0], datos[4], id]
+  mycursor.execute(sql, val)
+  cal = mycursor.fetchall()
+  print(cal)
+  suml2 = 0
+  sumt2 = 0
   if data2:
     profesor = profesor[0]
     print(profesor)
-    suml2 = 0
-    sumt2 = 0
     for x in range(0, len(data2)):
       aux = data2[x]
       pl = aux[4]
@@ -705,10 +723,10 @@ def verproceso(id):
       sumt2 += pt
     print(suml2)
   #Primera etapa
+  suml = 0
+  sumt = 0
   if data:
     #print(data)
-    suml = 0
-    sumt = 0
     for x in range(0, len(data)):
       aux = data[x]
       pl=aux[4]
@@ -720,7 +738,8 @@ def verproceso(id):
   else:
     flash("no", "nom")
     return redirect(url_for('vermaterias'))
-  return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, data = profesor, data2 = data2, suml2 = suml2, sumt2 = sumt2)
+  return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, data = profesor, data2 = data2, suml2 = suml2, sumt2 = sumt2,
+                         cal = cal[0])
 
 @app.route('/vermitrabajo/<int:id>')
 def vermitrabajo(id):
@@ -1227,7 +1246,7 @@ def inscmatxprof():
     print(idmat)
     print(idcur)
     mycursor = mydb.cursor()
-    sql = "SELECT id_profesor FROM profesores WHERE ci_p = %s and tel_p = %s"
+    sql = "SELECT id_profesor, id_user FROM profesores WHERE ci_p = %s and tel_p = %s"
     val = [ci,tel]
     mycursor.execute(sql, val)
     id_p = mycursor.fetchall()
@@ -1257,17 +1276,17 @@ def inscmatxprof():
               print("ya tiene profesor")
             if comp_m[2] == 0:
               sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
-              val = (id_p, aux2, aux3)
+              val = (id_p[0], aux2, aux3)
               mycursor.execute(sql, val)
               mydb.commit()
               # Asigna el profesor a los alumnos
               sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
-              val = (id_p, aux2, aux3)
+              val = (id_p[0], aux2, aux3)
               mycursor.execute(sql, val)
               mydb.commit()
               # Asigna el profesor al horario
               sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
-              val = (id_p, aux2, aux3)
+              val = (id_p[0], aux2, aux3)
               mycursor.execute(sql, val)
               mydb.commit()
               # Comprueba si cargo un trabajo
@@ -1286,21 +1305,22 @@ def inscmatxprof():
               print("el profesor fue dado de baja")
               band = 1
           else:
+            print(aux2, id_p, aux3, fecha)
             mycursor.execute(
               'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
-              (aux2, id_p, aux3, fecha))
+              (aux2, id_p[0], aux3, fecha))
             mydb.commit()
             band = 1
             print(band)
             print("se le asigna")
             # Asigna el profesor a los alumnos
             sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
-            val = (id_p, aux2, aux3)
+            val = ( id_p[0], aux2, aux3)
             mycursor.execute(sql, val)
             mydb.commit()
             # Asigna el profesor al horario
             sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
-            val = (id_p, aux2, aux3)
+            val = (id_p[0], aux2, aux3)
             mycursor.execute(sql, val)
             mydb.commit()
         return redirect(url_for('inscribirprof'))
@@ -2086,7 +2106,7 @@ def eliminartrabajo(id):
     #Mensaje flash y redirigir
     global band
     band = 3
-    return redirect(url_for('modproceso'))
+    return redirect(url_for('modproceso', id = trabajos[3]))
   return render_template('modproceso4.html', datos=datos, trabajos=trabajos, indicadores=indicadores,
                          datas=datas, id = id)
 @app.route('/miscursos') #Listar las materias que tiene por curso el prof
@@ -2663,6 +2683,8 @@ def eliminarhora(id):
 @app.route('/verhorario/<int:id>') #Ver Horarios
 def verhorarioadmin(id):
   datos = session['username']
+  if datos[7] == 1:
+    id = datos[4]
   mycursor = mydb.cursor()
   sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
   val = [id]
@@ -2821,8 +2843,8 @@ def asistenciaprof():
   dia = datetime.today().weekday()
   print(fecha)
   print(hora)
-  dia += 1  #Por que yo realize que Lunes = 1
-  #dia += 1
+  #Por que yo realize que Lunes = 1
+  dia += 1
   print(dia)
   profesor = user_datos
   mycursor = mydb.cursor()

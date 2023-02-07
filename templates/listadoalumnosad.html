@@ -8,13 +8,13 @@
 <body>
 {% block content %}
 
-
+  <div class="col-md-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
         <h1  class="display-15 fst-italic">{{cursos.1}}, {{cursos.3}}, {{cursos.2}}</h1>
     </div>
 </div>
-
+  </div>
 <div class="row">
     <div class="col-md-3">
   <div class="form-group">
@@ -48,17 +48,21 @@
 
 <br>
 {%if filtro == 0%}
+  <div class="col-md-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-person-lines-fill"></i> Todos los alumnos</h1>
     </div>
 </div>
+  </div>
 {%else%}
+  <div class="col-md-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-person-lines-fill"></i> Alumnos en {{materia.0}}</h1>
     </div>
 </div>
+  </div>
 {%endif%}
 <div class="row">
     <div class="col-sm-10">
@@ -72,8 +76,8 @@
        <tr>
      <td>{{alumnos.2}}</td>
      <td>{{alumnos.1}}</td>
-         <td><center><a class="btn btn-secondary" role="button" href="/moddatos/{{alumnos.0}}"> Datos Personales</a>
-         <a class="btn btn-secondary" role="button" href="/estado/{{alumnos.0}}"> Estado Académico</a></center></td>
+         <td><center><a class="btn btn-secondary" role="button" href="/moddatos/{{alumnos.0}}"> Datos personales</a>
+         <a class="btn btn-secondary" role="button" href="/estado/{{alumnos.0}}"> Estado académico</a></center></td>
        </tr>
         {% endfor %}
     </tbody>

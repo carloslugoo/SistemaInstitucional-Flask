@@ -7,17 +7,21 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <body>
 {% block content %}
+  <div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic">Trabajos en {{data.2}} </h1>
             <p>Profesor: {{data.0}}, {{data.1}}</p>
     </div>
 </div>
+  </div>
+  <div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Primera Etapa </h1>
     </div>
 </div>
+  </div>
 {% set count = namespace(value=0) %}
  <div class="row">
   <div class="col-sm-6">
@@ -98,13 +102,19 @@
       </div>
  {%endif%}
 </div>
+{%if cal.0%}
+<p>Calificación: {{cal.0}}</p>
+{%else%}
+<p>Calificación: Sin calificación</p>
+{%endif%}
 <br>
+  <div class="col-sm-10">
 <div class="p-1 p-md-1 mb-1 rounded text-bg-dark">
     <div class="col-md-6 px-0">
            <h1 class="display-9 fst-italic"><i class="bi bi-bar-chart"></i> Segunda Etapa </h1>
     </div>
 </div>
-
+  </div>
 {% set counta = namespace(value=0) %}
  <div class="row">
   <div class="col-sm-6">
@@ -185,6 +195,11 @@
       </div>
  {%endif%}
 </div>
+{%if cal.1%}
+<p>Calificación: {{cal.1}}</p>
+{%else%}
+<p>Calificación: Sin calificación</p>
+{%endif%}
 </div>
 
   <script>
