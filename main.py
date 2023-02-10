@@ -74,10 +74,17 @@ tipoins = 0
 def before_request(): #antes de cargar la pag
   # Verificar si existe una sesion o no, en algun punto de acceso
   if 'username' not in session and request.endpoint in ['bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe',
-                                                        'proceso', 'verproceso', 'vermaterias', 'inscribirdir',
-                                                        'sacarmat', 'inscurmat', 'inscribirprof', 'inscmatxprof',
+                                                        'proceso', 'verproceso', 'vermaterias',
+                                                        'sacarmat', 'inscurmat', '', 'inscmatxprof',
                                                         'misconfig', 'misdatos', 'cerrarsesion', 'procesoss',
-                                                        'alumnosproceso', 'modificarproceso2', 'modproceso', 'miscursos']:
+                                                        'alumnosproceso', 'modificarproceso2', 'modproceso', 'miscursos',
+                                                          #Admin
+                                                        'listadocursos', 'controldeplanilla', 'crearsemana', 'inscribirprof',
+                                                        'inscribirdir', 'asignarpof', 'generarcuotas', 'verlog',
+                                                        #Profes
+                                                        'miscursos','enviarplanilla', 'verasistenciaprofe', 'proceso',
+                                                        #Alumnos
+                                                        'miscuotasal', 'vermaterias']:
 
     return redirect(url_for('login'))
   if 'username' in session and request.endpoint in ['login', 'registro', 'recuperar']:
@@ -92,15 +99,22 @@ def before_request(): #antes de cargar la pag
     datos = session['username']
     if datos[7] == 1:
       if request.endpoint in ['bienvenidoadmin', 'inscribirdir','sacarmat', ' inscurmat', 'inscribirprof','proceso',
-                              'procesoss', 'alumnosproceso', 'inscmatxprof', 'modproceso', 'modificarproceso2','miscursos']:
+                              'procesoss', 'alumnosproceso', 'inscmatxprof', 'modproceso', 'modificarproceso2','miscursos',
+                              'listadocursos', 'controldeplanilla', 'crearsemana', 'inscribirprof',
+                              'inscribirdir', 'asignarpof', 'generarcuotas', 'verlog',
+                              'miscursos','enviarplanilla', 'verasistenciaprofe', 'proceso']:
         return redirect(url_for('vermaterias'))
     if datos[6] == 2:
       if request.endpoint in ['verproceso','vermaterias ', 'bienvenidoadmin', 'inscribirdir', 'sacarmat',
-                              'inscurmat', 'inscribirprof', 'inscmatxprof']:
+                              'inscurmat', 'inscribirprof', 'inscmatxprof',
+                              'listadocursos', 'controldeplanilla', 'crearsemana', 'inscribirprof',
+                              'inscribirdir', 'asignarpof', 'generarcuotas', 'verlog', 'miscuotasal', 'vermaterias'
+                              ]:
         return redirect(url_for('bienvenidoprofe'))
     if datos[6] == 3:
       if request.endpoint in ['verproceso', 'vermaterias', 'proceso', 'procesoss', 'alumnosproceso', 'modproceso',
-                              'modificarproceso2','miscursos']:
+                              'modificarproceso2','miscursos',
+                              'miscursos','enviarplanilla', 'verasistenciaprofe', 'proceso', 'miscuotasal', 'vermaterias']:
         return redirect(url_for('bienvenidoadmin'))
 
 
