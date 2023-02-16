@@ -39,9 +39,9 @@ ext_c = set(["xls", "xlsx", "xlsm", "xlsb", "xltx"])
 app.config['folder'] = folder
 
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="",
+  host="database-sistema.cnb6onds23i8.us-east-1.rds.amazonaws.com",
+  user="admin",
+  password="gabriel0985",
   database="proyecto"
 )
 global bcurso
