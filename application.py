@@ -28,7 +28,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.styles import Font
 
 
-app = Flask(__name__)
+application = app = Flask(__name__)
 
 app.config.from_object(DevConfig)
 
