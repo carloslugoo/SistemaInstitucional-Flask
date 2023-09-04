@@ -100,8 +100,3 @@ aprobada esta se guardará como “Aprobada” para la entrega en formato físic
 • JavaScript <br>
 • CSS <br>
 
-
-<h4 align="center">
-:construction: Proyecto en construcción :construction:
-</h4><br>
-
