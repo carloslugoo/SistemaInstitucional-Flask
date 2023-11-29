@@ -12,7 +12,7 @@ import string
 import random
 from werkzeug.utils import secure_filename
 import os
-import time
+
 #Reporte en pdf
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Spacer
@@ -39,9 +39,9 @@ ext_c = set(["xls", "xlsx", "xlsm", "xlsb", "xltx"])
 app.config['folder'] = folder
 
 mydb = mysql.connector.connect(
-  host="database-sistema.cnb6onds23i8.us-east-1.rds.amazonaws.com",
-  user="admin",
-  password="gabriel0985",
+  host="localhost",
+  user="root",
+  password="",
   database="proyecto"
 )
 global bcurso
@@ -70,10 +70,12 @@ global band
 band = 0
 global tipoins
 tipoins = 0
+
+
 @app.before_request
 def before_request(): #antes de cargar la pag
   # Verificar si existe una sesion o no, en algun punto de acceso
-  if 'username' not in session and request.endpoint in ['bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe',
+  if 'username' not in session and request.endpoint in ['alumnos.bienvenidoalumno', 'bienvenidoadmin', 'bienvenidoprofe',
                                                         'proceso', 'verproceso', 'vermaterias',
                                                         'sacarmat', 'inscurmat', '', 'inscmatxprof',
                                                         'misconfig', 'misdatos', 'cerrarsesion', 'procesoss',
@@ -86,11 +88,11 @@ def before_request(): #antes de cargar la pag
                                                         #Alumnos
                                                         'miscuotasal', 'vermaterias']:
 
-    return redirect(url_for('login'))
+    return redirect(url_for('auth.login'))
   if 'username' in session and request.endpoint in ['login', 'registro', 'recuperar']:
     datos = session['username']
     if datos[7] == 1:  # alumnos
-      return redirect(url_for('vermaterias'))
+      return redirect(url_for('alumnos.vermaterias'))
     if datos[6] == 2:  # profesores
       return redirect(url_for('bienvenidoprofe'))
     if datos[6] == 3:  # Admin
@@ -117,32 +119,17 @@ def before_request(): #antes de cargar la pag
                               'miscursos','enviarplanilla', 'verasistenciaprofe', 'proceso', 'miscuotasal', 'vermaterias']:
         return redirect(url_for('bienvenidoadmin'))
 
+#Vistas
+from views.auth.auth_routes import auth_bp
+from views.alumnos.alumnos_routes import alumnos_views
+from views.profesores.profesores_routes import profesores_views
+# Configurar la variable global en la aplicación
+app.config['band'] = 0
 
-@app.route('/bienvenidoprofe')
-def bienvenidoprofe():
-  datos = session['username']
-  print(datos)
-  return redirect(url_for('miscursos'))
+app.register_blueprint(auth_bp, url_prefix='/', template_folder='views/auth/templates')
+app.register_blueprint(alumnos_views, url_prefix='/', template_folder='views/alumnos/templates')
+app.register_blueprint(profesores_views, url_prefix='/', template_folder='views/profesores/templates')
 
-#Parte de vista de alumnos materias
-@app.route('/bienvenidoalumno')
-def vermaterias():
-  #Alertas
-  global band
-  if band == 6:
-    flash("","noa")
-    band = 0
-  datos = session['username']
-  print(datos)
-  #Materias el cual esta matriculado el alumno
-  mycursor = mydb.cursor()
-  sql = "SELECT matxalum.id_materia,des_m, des_c, sec_c, ano_m, des_e, id_profesor FROM matxalum, materias, cursos, enfasis" \
-        " WHERE id_alumno = %s and cursos.id_curso =%s and matxalum.id_materia = materias.id_materia and cursos.id_enfasis = enfasis.id_enfasis"
-  val = [datos[0], datos[4]]
-  mycursor.execute(sql, val)
-  data = mycursor.fetchall()
-  print(data)
-  return render_template('materias.html', datos=datos, materias=data)
 
 @app.route('/bienvenidoadmin')
 def bienvenidoadmin():
@@ -150,182 +137,6 @@ def bienvenidoadmin():
   print(datos)
   return redirect(url_for('listadocursos'))
 
-
-@app.route('/', methods = ['GET', 'POST']) #Login
-def login():
-  global band
-  user = userform.User(request.form)
-  username = user.username.data
-  password = user.password.data
-  t_u = 0
-  if band == 1:
-    band = 0
-    flash("","creado")
-  #print(username)
-  if request.method == 'POST':
-    mycursor = mydb.cursor()
-    mycursor.execute('SELECT * FROM user WHERE username = %(username)s', {'username': username})
-    data = mycursor.fetchall()
-    if data:
-      userdata = data[0]
-      #print(userdata)
-      if userdata:
-        passcheck = userdata[3]
-        #print(passcheck)
-      if userdata and check_password_hash(passcheck, password):
-        global tipo
-        tipo = userdata[4]
-        if userdata[4] == 1:
-          sql = "SELECT * FROM alumnos WHERE id_user = %s"
-          val = [userdata[0]]
-          mycursor.execute(sql, val)
-          data = mycursor.fetchall()
-          datos = data[0]
-          session['tipo_u'] = userdata[4]
-          session['username'] = datos
-          #flash("Correcto", "success")
-          time.sleep(1)
-          return redirect(url_for('vermaterias'))
-        if userdata[4] == 2:
-          sql = "SELECT * FROM profesores WHERE id_user = %s"
-          val = [userdata[0]]
-          mycursor.execute(sql, val)
-          data = mycursor.fetchall()
-          datos = data[0]
-          session['username'] = datos
-          #flash("Correcto", "success")
-          return redirect(url_for('bienvenidoprofe'))
-        if userdata[4] == 3:
-          sql = "SELECT * FROM admin WHERE id_user = %s"
-          val = [userdata[0]]
-          mycursor.execute(sql, val)
-          data = mycursor.fetchall()
-          datos = data[0]
-          session['username'] = datos
-          #flash("Correcto", "success")
-          return redirect(url_for('bienvenidoadmin'))
-      else:
-        flash("Contra", "error_p")
-    else:
-      flash("Not found", "error_n")
-
-  return render_template('login.html', user = user)
-
-@app.route('/registro', methods = ['GET', 'POST']) #Registro, falta ver username cambiar por cedula ❌
-def registro():
-  user = userform.User(request.form)
-  global band
-  #pasw = user.password.data
-  if request.method == 'POST':
-    password = createpassword(user.password.data)
-    create = False
-    ci = int(user.ci.data)
-    print(ci)
-    mycursor = mydb.cursor()
-    sql = "SELECT * FROM alumnos WHERE ci_a = %s"
-    val = [ci]
-    mycursor.execute(sql, val)
-    data = mycursor.fetchall()
-    t_u = 0
-    if data:
-      t_u = 1 #Alumnos
-      print("alumno encontrado")
-      create = True
-    else:
-      sql = "SELECT * FROM profesores WHERE ci_p = %s"
-      val = [ci]
-      mycursor.execute(sql, val)
-      data = mycursor.fetchall()
-      if data:
-        t_u = 2  #Profesores
-        print("profesor encontrado")
-        create = True
-      else:
-        sql = "SELECT * FROM admin WHERE ci_ad = %s"
-        val = [ci]
-        mycursor.execute(sql, val)
-        data = mycursor.fetchall()
-        if data:
-          t_u = 3  # Admin
-          print("admin encontrado")
-          create = True
-        else:
-          flash("Ya tiene cuenta", "ci_e")
-    if data:
-      print("a")
-      data = data[0]
-      print(data)
-      if data[7] == 1:
-        print("asdff")
-        if data[6]:
-          create = False
-          flash("Ya tiene cuenta", "existe_ci")
-          print("test")
-        else:
-          print("crear si")
-          create = True
-      elif data[6] == 2:
-        print("asd")
-        if data[5]:
-          create = False
-          flash("Ya tiene cuenta", "existe_ci")
-          print("test")
-        else:
-          print("crear si")
-          create = True
-    if t_u > 0:
-      sql = "SELECT * FROM user WHERE username = %s"
-      val = [user.username.data]
-      mycursor.execute(sql, val)
-      coc = mycursor.fetchall()
-      if coc:
-        flash("User existente", "existe_us")
-        print("a")
-        create = False
-      else:
-        sql = "SELECT * FROM user WHERE email = %s"
-        val = [user.email.data]
-        mycursor.execute(sql, val)
-        coe = mycursor.fetchall()
-        if coe:
-          flash("Correo existente", "existe_co")
-          create = False
-    if create == True:
-      if user.password.data == user.confirmpassword.data:
-        mycursor.execute('INSERT INTO user (username, email, password, tipo_u) VALUES (%s, %s, %s, %s)', (user.username.data,
-                                                                                         user.email.data, password, t_u))
-        mydb.commit()
-        sql = "SELECT * FROM user WHERE username = %s"
-        val = [user.username.data]
-        mycursor.execute(sql, val)
-        aux = mycursor.fetchall()
-        print(aux)
-        aux = aux[0]
-        if t_u == 1:
-          id = aux[0]
-          sql = "UPDATE alumnos SET id_user= %s WHERE ci_a = %s"
-          val = (id,ci)
-          mycursor.execute(sql, val)
-          mydb.commit()
-        if t_u == 2:
-          id = aux[0]
-          sql = "UPDATE profesores SET id_user= %s WHERE ci_p = %s"
-          val = (id, ci)
-          mycursor.execute(sql, val)
-          mydb.commit()
-        else:
-          id = aux[0]
-          sql = "UPDATE admin SET id_user= %s WHERE ci_ad = %s"
-          val = (id, ci)
-          mycursor.execute(sql, val)
-          mydb.commit()
-        band = 1
-        #flash("Correcto", "success")
-        return redirect(url_for('login'))
-      else:
-        print("e")
-        flash("Error", "psw")
-  return render_template('register.html', user = user)
 
 @app.route('/recuperar', methods = ['GET', 'POST']) #Recuperar cuenta ❌
 def recuperar():
@@ -690,137 +501,6 @@ def cargarpuntaje(id):
   return render_template('cargartrabajo.html', datos = datos, trabajo = trabajos, alumnos = alumnos, indicadores= indicadores,
                          cursos = cursos)
 
-
-@app.route('/vermateria/<string:id>') #Ver proceso de la materia seleccionada.
-def verproceso(id):
-  datos = session['username']
-  #print(id) #Pimer digito materia, segundo id del profe
-  x = [int(a) for a in str(id)]
-  #print(x)
-  #Trabajos primera etapa
-  mycursor = mydb.cursor()
-  sql = "SELECT trabajos.id_trabajo,des_t, trabajos.fec_t, pun_t, pun_l FROM trabajos, traxalum WHERE trabajos.id_trabajo = traxalum.id_trabajo and id_materia = %s and id_alumno = %s and etapa = %s"
-  val = [id, datos[0], 1]
-  mycursor.execute(sql, val)
-  data = mycursor.fetchall()
-  print(data)
-  #Trabajos segunda etapa
-  sql = "SELECT trabajos.id_trabajo,des_t, trabajos.fec_t, pun_t, pun_l FROM trabajos, traxalum WHERE trabajos.id_trabajo = traxalum.id_trabajo and id_materia = %s and id_alumno = %s and etapa = %s"
-  val = [id, datos[0], 2]
-  mycursor.execute(sql, val)
-  data2 = mycursor.fetchall()
-  print(data2)
-  sql = "SELECT DISTINCT nmb_p, ape_p, des_m FROM profesores, matxalum, materias WHERE matxalum.id_materia = %s and matxalum.id_profesor = profesores.id_profesor " \
-        "and matxalum.id_materia = materias.id_materia and matxalum.id_curso = %s"
-  val = [id, datos[4]]
-  mycursor.execute(sql, val)
-  profesor = mycursor.fetchall()
-  print(profesor)
-  #Sumatoria de el puntaje del alumno
-  #Segunda Etapa
-  sql = "SELECT cal, cal2 FROM matxalum WHERE id_alumno = %s and id_curso = %s and id_materia = %s"
-  val = [datos[0], datos[4], id]
-  mycursor.execute(sql, val)
-  cal = mycursor.fetchall()
-  print(cal)
-  suml2 = 0
-  sumt2 = 0
-  if data2:
-    profesor = profesor[0]
-    print(profesor)
-    for x in range(0, len(data2)):
-      aux = data2[x]
-      pl = aux[4]
-      pt = aux[3]
-      suml2 += pl
-      # print(suml)
-      sumt2 += pt
-    print(suml2)
-  #Primera etapa
-  suml = 0
-  sumt = 0
-  if data:
-    #print(data)
-    for x in range(0, len(data)):
-      aux = data[x]
-      pl=aux[4]
-      pt=aux[3]
-      suml+= pl
-      #print(suml)
-      sumt+= pt
-  #En caso de no tener proceso tira una alerta y redirige
-  else:
-    flash("no", "nom")
-    return redirect(url_for('vermaterias'))
-  return render_template('vermateria.html', datos=datos, procesos = data, suml = suml, sumt = sumt, data = profesor, data2 = data2, suml2 = suml2, sumt2 = sumt2,
-                         cal = cal[0])
-
-@app.route('/vermitrabajo/<int:id>')
-def vermitrabajo(id):
-  datos = session['username']
-  #print(datos)
-  print(id)
-  #Saca el trabajo
-  mycursor = mydb.cursor()
-  sql = "SELECT des_t, pun_t, fec_t, id_materia FROM trabajos WHERE trabajos.id_trabajo = %s"
-  val = [id]
-  mycursor.execute(sql, val)
-  data = mycursor.fetchall()
-  data = data[0]
-  print(data)
-  #Saca los indicadores
-  mycursor = mydb.cursor()
-  sql = "SELECT indxalum.id_indicador, des_i, indxalum.id_trabajo, pun_l, pun_i FROM indxalum, indicadores WHERE indxalum.id_trabajo = %s and id_alumno = %s and " \
-        "indxalum.id_indicador = indicadores.id_indicador"
-  val = [id, datos[0]]
-  mycursor.execute(sql, val)
-  indi = mycursor.fetchall()
-  print(indi)
-  return render_template('vermitrabajo.html', datos=datos, data=data, indicadores = indi)
-
-@app.route('/verasistenciaal/<int:id>', methods =  ['GET', 'POST'])
-def verasistenciaal(id):
-  datos = session['username']
-  print(datos)
-  mycursor = mydb.cursor()
-  #Datos de la disciplina
-  sql = "SELECT DISTINCT nmb_p, ape_p, des_m FROM profesores, matxalum, materias WHERE matxalum.id_materia = %s and matxalum.id_profesor = profesores.id_profesor " \
-        "and matxalum.id_materia = materias.id_materia"
-  val = [id]
-  mycursor.execute(sql, val)
-  profesor = mycursor.fetchall()
-  print(profesor)
-  #Datos de su asistencia
-  sql = "SELECT id_asisalum, fecha, asistio FROM asistenciaalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s ORDER BY asistenciaalum.fecha DESC LIMIT 7"
-  val = [datos[0], id, datos[4]]
-  mycursor.execute(sql, val)
-  asistencias = mycursor.fetchall()
-  print(asistencias)
-  #Si no tienes asistencias tira alerta y redirige
-  if not asistencias:
-    global band
-    band = 6
-    return redirect(url_for('vermaterias'))
-  if request.method == "POST":
-    #Filtro de tiempo..
-    filtro = int(request.form.get("idfiltro"))
-    if filtro == 1:
-      return redirect(url_for('verasistenciaal', id= id))
-    if filtro == 2:
-      sql = "SELECT id_asisalum, fecha, asistio FROM asistenciaalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s ORDER BY asistenciaalum.fecha DESC LIMIT 31"
-      val = [datos[0], id, datos[4]]
-      mycursor.execute(sql, val)
-      asistencias = mycursor.fetchall()
-      print(asistencias)
-      return render_template('verasistenciaal.html', datos=datos, data=profesor[0], asistencias=asistencias, filtro=filtro, id=id)
-    if filtro == 3:
-      sql = "SELECT id_asisalum, fecha, asistio FROM asistenciaalum WHERE id_alumno = %s and id_materia = %s and id_curso = %s ORDER BY asistenciaalum.fecha DESC"
-      val = [datos[0], id, datos[4]]
-      mycursor.execute(sql, val)
-      asistencias = mycursor.fetchall()
-      print(asistencias)
-      return render_template('verasistenciaal.html', datos=datos, data=profesor[0], asistencias=asistencias, filtro=filtro, id=id)
-  return render_template('verasistenciaal.html', datos=datos, data = profesor[0], asistencias=asistencias, filtro = 1, id = id)
 
 @app.route('/inscribiral', methods = ['GET', 'POST']) #Inscripcion de alumnos. Parte de la Carga
 def inscribirdir():
@@ -1417,121 +1097,8 @@ def cargar():
         (aux[0], id_m[0], aux[1], ch))
       mydb.commit()
   return render_template('cargarm.html', alumno = alumno)
-@app.route('/misdatos') #Nav Bar, Boton "Mis Datos"
-def misdatos():
-  datos = session['username']
-  print(datos)
-  if datos[7] == 1: #alumnos
-    return render_template('verdatos.html', datos = datos)
-  if datos[6] == 2: #profesores
-    return render_template('verdatosprof.html', datos=datos)
-  if datos[6] ==3: #Admin
-    return render_template('verdatosad.html', datos=datos)
-
-@app.route('/miconfig', methods = ['GET', 'POST']) #Nav Bar, Boton "Configuracion de Cuenta"
-def misconfig():
-  global band
-  datos = session['username']
-  user = userform.User(request.form)
-  if band == 1:
-    band = 0
-    flash("","c_u")
-  if band == 2:
-    band = 0
-    flash("","co_u")
-  if band == 3:
-    band = 0
-    flash("", "p_u")
-  mycursor = mydb.cursor()
-  if datos[7] == 1:  # alumnos
-    sql = "SELECT * FROM user WHERE id_user = %s"
-    val = [datos[6]]
-    mycursor.execute(sql, val)
-    data = mycursor.fetchall()
-    print(data[0])
-  else:
-    sql = "SELECT * FROM user WHERE id_user = %s"
-    val = [datos[5]]
-    mycursor.execute(sql, val)
-    data = mycursor.fetchall()
-    print(data[0])
-
-  if request.method == 'POST':
-    us = user.username.data
-    pasw = user.password.data
-    em = user.email.data
-    cpasw = user.confirmpassword.data
-    cpasw2 = user.confirmpassword2.data
-    if us and pasw:
-      sql = "SELECT id_user FROM user WHERE username = %s"
-      val = [us]
-      mycursor.execute(sql, val)
-      comp_u = mycursor.fetchall()
-      if comp_u:
-        flash("", "us_e")
-      else:
-        if data:
-          userdata = data[0]
-          # print(userdata)
-          if userdata:
-            passcheck = userdata[3]
-            # print(passcheck)
-            print(us)
-          if userdata and check_password_hash(passcheck, pasw):
-            sql = "UPDATE user SET username =  %s WHERE id_user = %s"
-            val = (us, datos[6])
-            mycursor.execute(sql, val)
-            mydb.commit()
-            band = 1
-            return redirect(url_for('misconfig'))
-          else:
-            flash("", "psw")
-    if em and pasw:
-      if data:
-        userdata = data[0]
-        # print(userdata)
-        if userdata:
-          passcheck = userdata[3]
-        if userdata and check_password_hash(passcheck, pasw):
-          sql = "UPDATE user SET email = %s WHERE id_user = %s"
-          val = (em, datos[6])
-          mycursor.execute(sql, val)
-          mydb.commit()
-          band = 2
-          return redirect(url_for('misconfig'))
-        else:
-          flash("", "psw")
-    if pasw and cpasw and cpasw2:
-      if data:
-        userdata = data[0]
-        if userdata:
-          passcheck = userdata[3]
-        if userdata and check_password_hash(passcheck, pasw):
-          if cpasw == cpasw2:
-            password = createpassword(cpasw)
-            sql = "UPDATE user SET password = %s WHERE id_user = %s"
-            val = (password, datos[6])
-            mycursor.execute(sql, val)
-            mydb.commit()
-            band = 3
-            return redirect(url_for('misconfig'))
-          else:
-            flash("", "psw2")
-        else:
-          flash("", "psw")
-  if datos[7] == 1:  # alumnos
-    return render_template('miconfig.html', datos=datos, data=data[0], user=user)
-  if datos[6] == 2:  # profesores
-    return render_template('miconfigpro.html', datos=datos, data=data[0], user=user)
-  if datos[6] == 3:  # Admin
-    return render_template('miconfigad.html', datos=datos, data=data[0], user=user)
 
 
-@app.route('/cerrarsesion') #Nav Bar, Boton "Mis Datos"
-def cerrarsesion():
-  if 'username' in session:
-    session.pop('username')
-  return redirect(url_for('login'))
 @app.route('/modificarproceso/<int:id>', methods = ['GET', 'POST']) #Modificar trabajos del docente
 def modproceso(id):
   global band
@@ -2123,29 +1690,7 @@ def eliminartrabajo(id):
     return redirect(url_for('modproceso', id = trabajos[3]))
   return render_template('modproceso4.html', datos=datos, trabajos=trabajos, indicadores=indicadores,
                          datas=datas, id = id)
-@app.route('/miscursos') #Listar las materias que tiene por curso el prof
-def miscursos():
-  datos = session['username']
-  print(datos)
-  mycursor = mydb.cursor()
-  sql = "SELECT id_mxp, matxpro.id_materia, matxpro.id_profesor, matxpro.id_curso, des_m, des_c, des_e, fecha" \
-        " FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s and matxpro.id_materia = materias.id_materia " \
-        "and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis "
-  val = [datos[0]]
-  mycursor.execute(sql, val)
-  mat = mycursor.fetchall()
-  print(mat)
-  global band
-  if band == 7:
-    flash("","noclases")
-    band = 0
-  if band == 6:
-    flash("","si")
-    band = 0
-  if band == 5:
-    flash("", "ya")
-    band = 0
-  return render_template('miscursos.html', datos = datos, materias = mat)
+
 
 @app.route('/veralum/<int:id>', methods = ['GET', 'POST']) #Ver los alumnos matriculados con sus cal y puntajes
 def misalumnos(id):
@@ -2694,6 +2239,10 @@ def eliminarhora(id):
     mydb.commit()
     return redirect(url_for('crearsemana'))
   return render_template('eliminarhorario.html', cursos=cursos[0], datos=datos, h_lu=h_lu, h_ma=h_ma, h_mi=h_mi, h_ju=h_ju, h_vi=h_vi, h_sa=h_sa)
+
+##########################################################
+#Vista genericas - Comparten todos los usuarios
+##########################################################
 @app.route('/verhorario/<int:id>') #Ver Horarios
 def verhorarioadmin(id):
   datos = session['username']
@@ -2738,7 +2287,124 @@ def verhorarioadmin(id):
       band = 4
       return redirect(url_for('crearsemana'))
 
+@app.route('/misdatos') #Nav Bar, Boton "Mis Datos"
+def misdatos():
+  datos = session['username']
+  print(datos)
+  if datos[7] == 1: #alumnos
+    return render_template('verdatos.html', datos = datos)
+  if datos[6] == 2: #profesores
+    return render_template('verdatosprof.html', datos=datos)
+  if datos[6] ==3: #Admin
+    return render_template('verdatosad.html', datos=datos)
 
+@app.route('/miconfig', methods = ['GET', 'POST']) #Nav Bar, Boton "Configuracion de Cuenta"
+def misconfig():
+  global band
+  datos = session['username']
+  user = userform.User(request.form)
+  if band == 1:
+    band = 0
+    flash("","c_u")
+  if band == 2:
+    band = 0
+    flash("","co_u")
+  if band == 3:
+    band = 0
+    flash("", "p_u")
+  mycursor = mydb.cursor()
+  if datos[7] == 1:  # alumnos
+    sql = "SELECT * FROM user WHERE id_user = %s"
+    val = [datos[6]]
+    mycursor.execute(sql, val)
+    data = mycursor.fetchall()
+    print(data[0])
+  else:
+    sql = "SELECT * FROM user WHERE id_user = %s"
+    val = [datos[5]]
+    mycursor.execute(sql, val)
+    data = mycursor.fetchall()
+    print(data[0])
+
+  if request.method == 'POST':
+    us = user.username.data
+    pasw = user.password.data
+    em = user.email.data
+    cpasw = user.confirmpassword.data
+    cpasw2 = user.confirmpassword2.data
+    if us and pasw:
+      sql = "SELECT id_user FROM user WHERE username = %s"
+      val = [us]
+      mycursor.execute(sql, val)
+      comp_u = mycursor.fetchall()
+      if comp_u:
+        flash("", "us_e")
+      else:
+        if data:
+          userdata = data[0]
+          # print(userdata)
+          if userdata:
+            passcheck = userdata[3]
+            # print(passcheck)
+            print(us)
+          if userdata and check_password_hash(passcheck, pasw):
+            sql = "UPDATE user SET username =  %s WHERE id_user = %s"
+            val = (us, datos[6])
+            mycursor.execute(sql, val)
+            mydb.commit()
+            band = 1
+            return redirect(url_for('misconfig'))
+          else:
+            flash("", "psw")
+    if em and pasw:
+      if data:
+        userdata = data[0]
+        # print(userdata)
+        if userdata:
+          passcheck = userdata[3]
+        if userdata and check_password_hash(passcheck, pasw):
+          sql = "UPDATE user SET email = %s WHERE id_user = %s"
+          val = (em, datos[6])
+          mycursor.execute(sql, val)
+          mydb.commit()
+          band = 2
+          return redirect(url_for('misconfig'))
+        else:
+          flash("", "psw")
+    if pasw and cpasw and cpasw2:
+      if data:
+        userdata = data[0]
+        if userdata:
+          passcheck = userdata[3]
+        if userdata and check_password_hash(passcheck, pasw):
+          if cpasw == cpasw2:
+            password = createpassword(cpasw)
+            sql = "UPDATE user SET password = %s WHERE id_user = %s"
+            val = (password, datos[6])
+            mycursor.execute(sql, val)
+            mydb.commit()
+            band = 3
+            return redirect(url_for('misconfig'))
+          else:
+            flash("", "psw2")
+        else:
+          flash("", "psw")
+  if datos[7] == 1:  # alumnos
+    return render_template('miconfig.html', datos=datos, data=data[0], user=user)
+  if datos[6] == 2:  # profesores
+    return render_template('miconfigpro.html', datos=datos, data=data[0], user=user)
+  if datos[6] == 3:  # Admin
+    return render_template('miconfigad.html', datos=datos, data=data[0], user=user)
+
+
+@app.route('/cerrarsesion') #Nav Bar, Boton "Cerrar Sesion"
+def cerrarsesion():
+  if 'username' in session:
+    session.pop('username')
+  return redirect(url_for('auth.login'))
+##########################################################
+#Vistas Genericas - END
+##########################################################
 
 @app.route('/editarhorario/<string:id>' , methods = ['GET', 'POST'])
 def editarhorario(id):
@@ -4736,39 +4402,6 @@ def vercuotasdelalumno(id):
       print(total)
     return render_template('vercuotasdelalumno.html', datos=datos, data=alumno, cuotas=cuotas, filtro = 2, total = total)
   return render_template('vercuotasdelalumno.html', datos=datos, data = alumno, cuotas = cuotas, filtro = 1, total = total)
-#Mis cuotas pestaña de alumno
-@app.route('/miscuotas', methods = ['POST', 'GET'])
-def miscuotasal():
-  datos = session['username']
-  mycursor = mydb.cursor()
-  # Cuotas del alumno
-  sql = "SELECT DISTINCT id_cuota,fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE id_alumno = %s and estado = %s ORDER BY cuotas.id_cuota DESC"
-  val = [datos[0], 0]
-  mycursor.execute(sql, val)
-  cuotas = mycursor.fetchall()
-  print(cuotas)
-  total = 0
-  for x in range(0, len(cuotas)):
-    aux = cuotas[x]
-    total = total + float(aux[5])
-    print(total)
-  if request.method == "POST":
-    filtro = int(request.form.get("idfiltro"))
-    if filtro == 1:
-      return redirect(url_for('miscuotasal'))
-    if filtro == 2:
-      sql = "SELECT DISTINCT id_cuota,fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE id_alumno = %s and estado = %s ORDER BY cuotas.id_cuota DESC"
-      val = [datos[0], 1]
-      mycursor.execute(sql, val)
-      cuotas = mycursor.fetchall()
-      print(cuotas)
-      total = 0
-      for x in range(0, len(cuotas)):
-        aux = cuotas[x]
-        total = total + float(aux[5])
-        print(total)
-      return render_template('miscuotas.html', datos=datos, cuotas=cuotas, filtro = filtro, total = total)
-  return render_template('miscuotas.html', datos=datos, cuotas = cuotas, filtro = 1, total = total)
 
 @app.route('/cuotapagada/<int:id>', methods = ['POST', 'GET'])
 def marcarpagado(id):
