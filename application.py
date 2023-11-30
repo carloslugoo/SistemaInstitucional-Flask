@@ -6,13 +6,12 @@ from flask import flash
 from config import DevConfig
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
-import userform
+
 from datetime import datetime
-import string
-import random
 from werkzeug.utils import secure_filename
 import os
-
+#Import del formulario
+import userform
 #Reporte en pdf
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Spacer
@@ -129,6 +128,12 @@ app.config['alumnos'] = []
 app.config['userdatos'] = []
 app.config['vector'] = []
 app.config['vector2'] = []
+app.config['bcurso'] = 0
+app.config['balumno'] = 0
+app.config['tipoins'] = 0
+app.config['cursos'] = []
+app.config['idcurso'] = 0
+app.config['idmaterias'] = 0
 #rutas
 app.register_blueprint(auth_bp, url_prefix='/', template_folder='views/auth/templates')
 app.register_blueprint(alumnos_views, url_prefix='/', template_folder='views/alumnos/templates')
@@ -146,364 +151,6 @@ def bienvenidoadmin():
 def recuperar():
   user = userform.User(request.form)
   return render_template('recuperar.html', user=user)
-
-#Parte de Proceso de Alumnos, Carga de trabajos
-@app.route('/proceso', methods = ['GET', 'POST']) #Procesos ✔
-def proceso():
-  global bcurso
-  global balumno
-  datos = session['username']
-  #print(datos)
-  mycursor = mydb.cursor()
-  sql = "SELECT * FROM matxpro WHERE id_profesor = %s"
-  val = [datos[0]]
-  mycursor.execute(sql, val)
-  profe = mycursor.fetchall()
-  #print(profe) #ID, Id Materia, Id profe, Carga horaria, Id curso
-  profemat = []
-  profemati = []
-  cantm = 0
-  global user_datos
-  global tipoins
-  #Mensajes flash
-  global band
-  if band == 1:
-    flash("car","car")
-    band = 0
-  global cursos
-  global alumnos
-  for x in range(0, len(profe)):
-    #print(x)
-    aux = profe[x]
-    sql = "SELECT * FROM materias WHERE id_materia = %s"
-    val = [aux[1]]
-    mycursor.execute(sql, val)
-    aux = mycursor.fetchall()
-    aux = aux[0]
-    #print(aux)
-    #print(x)
-    if x == 0:
-      profemat.append(aux)
-      #print(profemat)
-      cantm += 1
-      #print(x)
-      #print(cantm)
-    elif profemat[x-cantm-1] != aux:
-      #print(cantm)
-      cantm += 1
-      profemat.append(aux)
-      #print(profemat)
-  #print(profemat)
-  task = userform.Task(request.form)
-  if request.method == 'POST' and task.validate(): #ID prof = datos[0],
-    #Informacion del trabajo
-    print("Info: ")
-    nombre_t = task.nombre.data
-    print(nombre_t)
-    tipo_t = request.form.get(('tipo_t'))
-    print(tipo_t)
-    puntaje_t = task.puntaje.data
-    puntaje_t = int(puntaje_t)
-    print(puntaje_t)
-    etapa_t = request.form.get(('etapa_t'))
-    print(etapa_t)
-    global idcurso
-    print(idcurso)
-    # Informacion del trabajo
-    print("Indicadores: ")
-    indicadores = []
-    puntaje_i = []
-    create = True
-    for x in range(1, 11):
-      if x == 1:
-        i1 = request.form.get(('i1'))
-        p1 = request.form.get(('p1'))
-        if i1 and p1:
-          indicadores.append(i1)
-          puntaje_i.append(p1)
-      if x == 2:
-        i2 = request.form.get(('i2'))
-        p2 = request.form.get(('p2'))
-        if i2 and p2:
-          indicadores.append(i2)
-          puntaje_i.append(p2)
-      if x == 3:
-        i3 = request.form.get(('i3'))
-        p3 = request.form.get(('p3'))
-        if i3 and p3:
-          indicadores.append(i3)
-          puntaje_i.append(p3)
-      if x == 4:
-        i4 = request.form.get(('i4'))
-        p4 = request.form.get(('p4'))
-        if i4 and p4:
-          indicadores.append(i4)
-          puntaje_i.append(p4)
-      if x == 5:
-        i5 = request.form.get(('i5'))
-        p5 = request.form.get(('p5'))
-        if i5 and p5:
-          indicadores.append(i5)
-          puntaje_i.append(p5)
-      if x == 6:
-        i6 = request.form.get(('i6'))
-        p6 = request.form.get(('p6'))
-        if i6 and p6:
-          indicadores.append(i6)
-          puntaje_i.append(p6)
-      if x == 7:
-        i7 = request.form.get(('i7'))
-        p7 = request.form.get(('p7'))
-        if i7 and p7:
-          indicadores.append(i7)
-          puntaje_i.append(p7)
-      if x == 8:
-        i8 = request.form.get(('i8'))
-        p8 = request.form.get(('p8'))
-        if i8 and p8:
-          indicadores.append(i8)
-          puntaje_i.append(p8)
-      if x == 9:
-        i9 = request.form.get(('i9'))
-        p9 = request.form.get(('p9'))
-        if i9 and p9:
-          indicadores.append(i9)
-          puntaje_i.append(p9)
-      if x == 10:
-        i10 = request.form.get(('i10'))
-        p10 = request.form.get(('p10'))
-        if i10 and p10:
-          indicadores.append(i10)
-          puntaje_i.append(p10)
-    tt = 0
-    for x in range(0, len(puntaje_i)):
-      aux = int(puntaje_i[x])
-      tt = tt + aux
-    print(indicadores)
-    print(puntaje_i)
-    print(tt)
-    #Comprobar si el puntaje de los indicadores es mayor que el puntaje del trabajo o si no esta completo
-    if tt > puntaje_t:
-      create = False
-      flash("pun_m", "pun_m")
-      #flash("")
-    if tt != puntaje_t:
-      create = False
-      print("El puntaje no coincide")
-      flash("pun_m", "pun_m")
-    global idmaterias
-    fecha = datetime.now()
-    fecha = datetime.strftime(fecha, '%Y/%m/%d')
-    if idmaterias != 0:
-      if idcurso !=0:
-        if create == True:
-          clavet = crearclavet()
-          #Guardamos el trabajo
-          mycursor = mydb.cursor()
-          mycursor.execute(
-            'INSERT INTO trabajos (fec_t, des_t, pun_t, id_profesor, id_materia, tipo_t, clave_t, id_curso, etapa) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
-            (fecha, nombre_t, puntaje_t, datos[0], idmaterias, tipo_t, clavet, idcurso, etapa_t))
-          mydb.commit()
-          # Saca el id del trabajo
-          sql = "SELECT id_trabajo, id_curso FROM trabajos WHERE id_materia = %s and id_profesor = %s and fec_t = %s and des_t= %s and pun_t = %s and tipo_t = %s and clave_t = %s"
-          val = [idmaterias, datos[0], fecha, task.nombre.data, task.puntaje.data, tipo_t, clavet]
-          mycursor.execute(sql, val)
-          idtra = mycursor.fetchall()
-          idtra = idtra[0]
-          print(idtra[0])
-          #Guarda los indicadores
-          for x in range(0, len(puntaje_i)):
-            aux = indicadores[x]
-            aux2 = puntaje_i[x]
-            #print(aux)
-            #print(aux2)
-            mycursor.execute(
-              'INSERT INTO indicadores (des_i, pun_i, id_trabajo) VALUES (%s, %s, %s)',
-              (aux, aux2, idtra[0]))
-            mydb.commit()
-            print(idtra[0])
-          return redirect(url_for('cargarpuntaje', id = idtra[0]))
-      else:
-        # Errorsito
-        flash("Error", "cur")
-    else:
-      # Errorsito
-      flash("Error", "mat")
-
-
-  return render_template('procesotest.html', task = task, datos = datos, materias = profemat,bcurso = bcurso, cursos = cursos,
-                         alumnos = alumnos, balumno = balumno )
-
-@app.route('/procesoss', methods = ['POST']) #Parte de procesos, aca quitamos la materia ✔
-def procesoss():
-  if request.method == 'POST':
-    id_mat = request.form.get(('idmat'))
-    if id_mat:
-      global bcurso
-      bcurso = 1
-    print(id_mat)
-    datos = session['username']
-    mycursor = mydb.cursor()
-    print(datos[0])
-    print(id_mat)
-    sql = "SELECT * FROM matxpro WHERE id_profesor = %s and id_materia =%s"
-    val = [datos[0], id_mat]
-    global idmaterias
-    idmaterias = id_mat
-    mycursor.execute(sql, val)
-    data = mycursor.fetchall()
-    print("Cursos con esa materia:")
-    print(data)
-    #print(cursos[0])
-    #print(len(cursos))
-    global balumno
-    global cursos
-    cursos = []
-    if cursos:
-      balumno = 1
-    for x in range(0, len(data)):
-      print(x)
-      aux = data[x]
-      mycursor = mydb.cursor()
-      sql = "SELECT id_curso, des_c, sec_c,des_e FROM cursos,enfasis WHERE id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
-      val = [aux[3]]
-      mycursor.execute(sql, val)
-      aux = mycursor.fetchall()
-      aux = aux[0]
-      cursos.append(aux)
-    print("Cursos procesados:")
-    print(cursos)
-  return redirect(url_for('proceso'))
-
-@app.route('/alumnos', methods = ['POST']) #Parte de procesos, quitamos los cursos y los alumnos relacionados con la materia ✔
-def alumnosproceso():
-  if request.method == 'POST':
-    id_curso = request.form.get(('idcurso'))
-    datos = session['username']
-    global balumno
-    balumno = 1
-    global cursos
-    global idmaterias
-    mycursor = mydb.cursor()
-    sql = "SELECT alumnos.id_alumno,nmb_a, ape_a FROM alumnos, " \
-          "matxalum WHERE matxalum.id_curso =%s and alumnos.id_alumno = matxalum.id_alumno " \
-          "and matxalum.id_materia = %s"
-    val = [id_curso, idmaterias]
-    mycursor.execute(sql, val)
-    global idcurso
-    idcurso = id_curso
-    data = mycursor.fetchall()
-    data = sorted(data, key=lambda data: data[2])  # Ordena por orden alfabetico
-    print(id_curso)
-    print(idmaterias)
-    print("Alumnos con esta materia:")
-    print(data)
-    global alumnos
-    alumnos = data
-  return redirect(url_for('proceso'))
-
-@app.route('/cargarpuntaje/<int:id>', methods =  ['GET', 'POST'])# Carga de trabajo y indicadores ✔
-def cargarpuntaje(id):
-  datos = session['username']
-  idtra = id
-  print(idtra)
-  # Saca el trabajo
-  mycursor = mydb.cursor()
-  sql = "SELECT id_trabajo, des_t, pun_t, id_materia, id_curso, id_profesor, etapa FROM trabajos WHERE id_trabajo = %s"
-  val = [idtra]
-  mycursor.execute(sql, val)
-  trabajos = mycursor.fetchall()
-  trabajos = trabajos[0]
-  print(trabajos)
-  # Saca los indicadores
-  sql = "SELECT * FROM indicadores WHERE id_trabajo = %s"
-  val = [idtra]
-  mycursor.execute(sql, val)
-  indicadores = mycursor.fetchall()
-  print(indicadores)
-  # Saca los alumnos
-  mycursor = mydb.cursor()
-  sql = "SELECT alumnos.id_alumno,nmb_a, ape_a FROM alumnos, " \
-        "matxalum WHERE matxalum.id_curso =%s and alumnos.id_alumno = matxalum.id_alumno " \
-        "and matxalum.id_materia = %s"
-  val = [trabajos[4], trabajos[3]]
-  mycursor.execute(sql, val)
-  alumnos = mycursor.fetchall()
-  alumnos = sorted(alumnos, key=lambda alumnos: alumnos[2])
-  print(alumnos)
-  # Saca el curso:
-  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
-  val = [trabajos[4]]
-  mycursor.execute(sql, val)
-  cursos = mycursor.fetchall()
-  cursos = cursos[0]
-  print(cursos)
-  #Comprobar si se cargo correctamente
-  create = True
-  if request.method == 'POST':
-    puntajes = []
-    pl = 0
-    # Comprobar que se hayan cargado todos los indicadores
-    for x in range(0, len(alumnos)):
-      for y in range(1, len(indicadores) + 1):
-        aux = request.form.getlist(('{a}{i}'.format(a=x + 1, i=y)))
-        if not aux:
-          create = False
-    # Solo si esta cargado correctamente
-    if create == True:
-      #Carga de indicador por alumno, puntaje logrado por indicador y acumular puntaje total logrado
-      for x in range(0, len(alumnos)):
-        aux1 = alumnos[x]
-        #print(aux1)
-        for y in range(1, len(indicadores) + 1):
-          aux2 = indicadores[y - 1]
-          #print(aux2)
-          if y == 1:
-            pl = 0
-            #print("Alumno {}".format(alumnos[x]))
-          aux = request.form.getlist(('{a}{i}'.format(a = x + 1, i = y)))
-          #print('{a}{i}'.format(a=x + 1, i=y))
-          #print(aux)
-          p = int(aux[0])
-          #print(p)
-          pl +=int(aux[0])
-          mycursor.execute(
-            'INSERT INTO indxalum (id_indicador, id_trabajo, id_alumno, pun_l) VALUES (%s, %s, %s, %s)',
-            (aux2[0], trabajos[0], aux1[0], p))
-          mydb.commit()
-          if y == len(indicadores):
-            puntajes.append(pl)
-      print(puntajes)
-      fecha = datetime.now()
-      fecha = datetime.strftime(fecha, '%Y')
-      #print(fecha)
-      for x in range(0, len(alumnos)):
-        aux1 = alumnos[x]
-        aux2 = puntajes[x]
-        #Cargando el trabajo al alumno con su puntaje logrado
-        mycursor.execute(
-          'INSERT INTO traxalum (id_alumno, pun_l, fec_t, id_trabajo) VALUES (%s, %s, %s, %s)',
-          (aux1[0], aux2, fecha, trabajos[0]))
-        mydb.commit()
-        #Sumando a su puntaje acumulado
-        if trabajos[6] == 1: #Primera Etapa..
-          sql = "UPDATE matxalum SET pun_ac = (pun_ac + %s) WHERE id_alumno = %s and id_materia = %s and id_curso = %s and id_profesor = %s"
-          val = (aux2, aux1[0],  trabajos[3], trabajos[4], trabajos[5])
-          mycursor.execute(sql, val)
-          mydb.commit()
-        if trabajos[6] == 2:
-          sql = "UPDATE matxalum SET pun_ac2 = (pun_ac2 + %s) WHERE id_alumno = %s and id_materia = %s and id_curso = %s and id_profesor = %s"
-          val = (aux2, aux1[0], trabajos[3], trabajos[4], trabajos[5])
-          mycursor.execute(sql, val)
-          mydb.commit()
-      #Mandar mensaje flash..
-      global band
-      band = 1
-      return redirect(url_for('proceso'))
-    else:
-      flash("error","error")
-  return render_template('cargartrabajo.html', datos = datos, trabajo = trabajos, alumnos = alumnos, indicadores= indicadores,
-                         cursos = cursos)
 
 
 @app.route('/inscribiral', methods = ['GET', 'POST']) #Inscripcion de alumnos. Parte de la Carga
@@ -2869,64 +2516,6 @@ def exportarasistenciaad(id):
       return send_file(archivo, as_attachment=True)
   return redirect(url_for('verasisad', id=id))
 
-@app.route('/enviarplanilla', methods = ['POST', 'GET'])
-def enviarplanilla():
-  datos = session['username']
-  #Si el profesor mando planillas
-  mycursor = mydb.cursor()
-  sql = "SELECT estado, fecha_m, fecha_r, des_p, cp FROM planillas WHERE id_profesor = %s LIMIT 45"
-  val = [datos[0]]
-  mycursor.execute(sql, val)
-  planillas = mycursor.fetchall()
-  print(planillas)
-  if planillas:
-    print("ya tiene")
-    cp = planillas[len(planillas) - 1]
-    cp = int(cp[4]) + 1
-  else:
-    cp = 1
-  if request.method == "POST":
-    planilla = request.files["planilla"]
-    desc = request.form.get("desc")
-    if "planilla" not in request.files:
-      print("No envio nada")
-      pass
-    elif planilla.filename == "":
-      print("No mando nada")
-      pass
-    elif planilla and archpermi2(planilla.filename):
-      filename = planilla.filename.split('.')
-      ext = filename[len(filename) - 1]
-      print(ext)
-      print(filename)
-      filename = "planillapendiente_" + str(datos[0]) + str(cp) + "." + ext
-      print(filename)
-      print(desc)
-      planilla.save(os.path.join(app.config["folder"], filename))
-      flash("", "")  # Ya guarda el archivo
-      estado = 0
-      inf = datetime.now()
-      # Extraemos la fecha
-      fecha = datetime.strftime(inf, '%Y/%m/%d')
-      mycursor = mydb.cursor()
-      if planillas:
-        print("ya tiene")
-        mycursor.execute(
-          'INSERT INTO planillas (filename, estado, id_profesor, fecha_m, des_p, cp) VALUES (%s, %s, %s, %s, %s, %s)',
-          (filename, estado, datos[0], fecha, desc, cp))
-        mydb.commit()
-      else:
-        print("no tiene")
-        mycursor.execute(
-          'INSERT INTO planillas (filename, estado, id_profesor, fecha_m, des_p, cp) VALUES (%s, %s, %s, %s, %s, %s)',
-          (filename, estado, datos[0], fecha, desc, 1))
-        mydb.commit()
-      print("mandado")
-      return redirect(url_for('enviarplanilla'))
-    else:
-      print("archivo no permitido")
-  return render_template('enviarplanillas.html', datos=datos, planillas = planillas)
-
 @app.route('/controlplanillas', methods = ['POST', 'GET'])
 def controldeplanilla():
   datos = session['username']
@@ -3333,31 +2922,23 @@ def verlog():
 
 def createpassword(password):
   return generate_password_hash(password)
-def crearclavet(): #Una clave random para el trabajo.
-  length = 5
-  letters = string.ascii_letters + string.digits
-  clave = ''.join(random.choice(letters) for i in range(length))
-  return clave
+
 def conv_b(foto):
   with open(foto, 'rb') as f:
     blob= f.read()
   return blob
+
 def guar_f(id_u,foto):
   with open('media/foto_{}.png'.format(id_u), 'wb') as f:
     f.write(foto)
+
 #Para documentos de inscripcion de alumnos o docentes
 def archpermi(filename):
   filename = filename.split('.')
   if filename[len(filename) - 1] in ext_p:
     return True
   return False
-#Para planillas
-def archpermi2(filename):
-  filename = filename.split('.')
-  if filename[len(filename) - 1] in ext_c:
-      return True
-  return False
-def guardararchivo():
+
 
   return
 if __name__=='__main__':
