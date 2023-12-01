@@ -1,6 +1,9 @@
 # Sistema de alumnos, docentes y directivos
 Proyecto realizado para la institucion Héroes del Chaco
-# `Modulos:`
+# Documentación:
+• Carpeta del proyecto: https://drive.google.com/file/d/1TJKlDj1Kym2fciYzQp660QVOVBrhGAFz/view?usp=sharing <br>
+• Manual de usuario: https://drive.google.com/drive/u/0/folders/1LEg9sge1853Dhm5EVZ0RIkfXYVLnMzGp 
+# Modulos:
 # Alumnos <br>
 - Listado de materias: <br>
 • Permite visualizar al alumno las materias en la cual está matriculado en el año.
@@ -54,7 +57,7 @@ electrónico, localidad, barrio, nombre del tutor, teléfono del tutor) y los do
 ![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/8f30b589-e75b-4f61-949f-14c85a999780)
 - Llamar asistencia:  <br>
 • Importante: Solo podra tomar lista los dias asociados a su disciplina a cargo. <br>
-• Se le proporcionará al docente la lista de alumnos matriculados donde se podrá asignar a cada uno el estado de "Ausente" o "Presente".
+• Se le proporcionará al docente la lista de alumnos matriculados donde se podrá asignar a cada uno el estado de "Ausente" o "Presente". <br>
 ![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/761bb81b-26f6-4563-9a40-10ffd1d3afea)
 - Registro de asistencias:  <br>
 • Se proporcionará al docente un registro de todas las asistencias tomadas, permitiendolas visualizar para control y tambien modificarlas de ser necesario. <br>
@@ -76,7 +79,7 @@ apellidos, edad, fecha de nacimiento, numero de cedula, número de teléfono, co
 electrónico, localidad, barrio), y sus documentos (constancia de cargos, constancia de
 ingresos y las fotos de su cedula).
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/0cd22eac-2c56-4d67-b7d5-5fd78dc93adc)
-Directora o secretario:
+# Directora o secretario:
 - Matricular alumnos: <br>
 • El directivo o secretario podrá matricular al alumno, en la carga se encuentra la ficha
 personal (nombres y apellidos, edad, fecha de nacimiento, numero de cedula, número
@@ -117,7 +120,12 @@ ser exportado para ser utilizado en formato físico.
 visualizará la fecha, el curso y la materia el cual fue emitida la planilla, una vez
 aprobada esta se guardará como “Aprobada” para la entrega en formato físico. <br>
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/2df41ee7-99ea-4d2e-a99e-daa1399be3c1)
-## ✔️ Tecnologías utilizadas: <br>
+# Actualizaciones - Observaciones:
+Actualmente le estoy realizando mantenimiento al software en los siguientes aspectos: <br>
+• Mejorando la escalabilidad del mismo. <br>
+• Proporcionarle mejor presentación y documentación en el Github. <br>
+• Deseo que sea totalmente resposivo. <br>
+# ✔️ Tecnologías utilizadas: <br>
 • Python <br>
 • MySQL <br>
 • HTML <br>
