@@ -1,8 +1,9 @@
 # Sistema de alumnos, docentes y directivos
 Proyecto realizado para la institucion Héroes del Chaco
 # Documentación:
-• Carpeta del proyecto: https://drive.google.com/file/d/1TJKlDj1Kym2fciYzQp660QVOVBrhGAFz/view?usp=sharing <br>
-• Manual de usuario: https://drive.google.com/drive/u/0/folders/1LEg9sge1853Dhm5EVZ0RIkfXYVLnMzGp 
+• Carpeta del proyecto: [CARPETA-FINAL.pdf](https://github.com/carloslugoo/Proyecto.2022-UCI/files/13528107/CARPETA-FINAL.pdf) <br>
+• Manual de usuario: [MANUAL-DE-USUARIOS.pdf](https://github.com/carloslugoo/Proyecto.2022-UCI/files/13528106/MANUAL-DE-USUARIOS.pdf)
+
 # Modulos:
 # Alumnos <br>
 - Listado de materias: <br>
