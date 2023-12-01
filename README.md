@@ -1,33 +1,36 @@
-<h1 align="center"> Sistema de alumnos, docentes y directivos </h1>
-Los procesos pendientes y logrados del proyecto:
-https://trello.com/b/Gd848f0J/proyecto-2022
-
-
-## :hammer:Funcionalidades del proyecto
-Alumno:
-- `Datos personales`: <br>
+# Sistema de alumnos, docentes y directivos
+Proyecto realizado para la institucion Héroes del Chaco
+# Modulos
+# `Alumnos`: <br>
+- Listado de materias: <br>
+• Permite visualizar al alumno las materias en la cual está matriculado en el año.
+![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/f4d1efbc-bd78-43e1-9917-4f6fede4f6ab)
+- Calificación por materia:  <br>
+• El alumno podrá ver la cantidad de puntaje acumulado por cada materia en la cual este matriculado, a
+través de un gráfico y una interfaz que determine el los puntos logrados de total. <br>
+• Se podrá visualizar la calificación final una vez realizado la carga de exámenes ya
+sea en diciembre, febrero o marzo.
+![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/1eec6aac-7b10-4878-bd8e-221cfaa8c9f6)
+- Visualizar trabajos:  <br>
+• Permitirá visualizar los indicadores de cada trabajo, asi como el puntaje logrado por cada item.
+![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/7f27a092-4186-4ce4-a1d0-f9d40d645b44)
+- Asistencia por materia:  <br>
+• El alumno podrá visualizar su asistencia y ausencia por materia, mediante gráficos y
+una interfaz.
+![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/3be6fb9f-e8ca-47cd-8e43-3013e6b5b293)
+- Estado de cuotas: <br>
+• El alumno podrá comprobar el estado (pendiente o pagado) de todas las cuotas que
+se generaran cada mes mediante el directivo.
+![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/ff614a5b-dcda-493d-980c-39ce7d8c2473)
+- Horario de clases: <br>
+• Mediante esta pestaña el alumno tendra disponible su horario de clases del curso al cual se matriculó.
+![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/61ba925b-91b4-4f32-97b6-14b3d5171f3f)
+- Datos personales: <br>
 • Permite al alumno visualizar sus datos personales como la ficha personal (nombres y
 apellidos, edad, fecha de nacimiento, numero de cedula, número de teléfono, correo
 electrónico, localidad, barrio, nombre del tutor, teléfono del tutor) y los documentos
 (fotos de la cedula, antecedentes académicos y la autorización de padres).
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/8782fa1b-0191-450d-a9e5-5d659f17e219)
-- `Listado de materias`: <br>
-• Permite visualizar al alumno las materias en la cual está matriculado en el año.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/f4d1efbc-bd78-43e1-9917-4f6fede4f6ab)
-- `Calificación por materia`:  <br>
-• La cantidad de puntaje acumulado por cada materia en la cual este matriculado, a
-través de un gráfico y una interfaz que determine el los puntos logrados de total. <br>
-• Se podrá visualizar la calificación final una vez realizado la carga de exámenes ya
-sea en diciembre, febrero o marzo.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/1eec6aac-7b10-4878-bd8e-221cfaa8c9f6)
-- `Asistencia por materia`:  <br>
-• El alumno podrá visualizar su asistencia y ausencia por materia, mediante gráficos y
-una interfaz.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/3be6fb9f-e8ca-47cd-8e43-3013e6b5b293)
-- `Estado de cuotas`: <br>
-• El alumno podrá comprobar el estado (pendiente o pagado) de todas las cuotas que
-se generaran cada mes mediante el directivo.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/ff614a5b-dcda-493d-980c-39ce7d8c2473)
 Docente:
 - `Datos personales`: <br>
 • Permite al docente visualizar sus datos personales, ya sea ficha personal (nombres y
