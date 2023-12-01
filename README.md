@@ -45,22 +45,30 @@ electrónico, localidad, barrio, nombre del tutor, teléfono del tutor) y los do
 • Mediante esta pestaña el docente podra visualizar todos los trabajos realizados en su disciplina, y tendra la posibilidad de modificar los puntajes asociados al mismo. <br>
 • Esto podrá ser exportado a una planilla Excel.
 ![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/7230ad95-e418-4d15-992b-95b0ba62777e)
+![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/dac5b7d1-d67f-4ce0-b6f2-4c240e7e70b5)
+- Modificar trabajos: <br>
+• El docente podrá modificar los puntajes de cada alumno seleccionando a los alumnos que desea modificar. <br>
+• Posteriormente solo deberá asignar los items logrados y no logrados.
+• En esta pestaña tambien podrá borrar el trabajo seleccionado.
+![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/e7d24d57-6cb4-4582-9bcb-608cae610540)
+![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/8f30b589-e75b-4f61-949f-14c85a999780)
+- Llamar asistencia:  <br>
+• Importante: Solo podra tomar lista los dias asociados a su disciplina a cargo. <br>
+• Se le proporcionará al docente la lista de alumnos matriculados donde se podrá asignar a cada uno el estado de "Ausente" o "Presente".
+![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/761bb81b-26f6-4563-9a40-10ffd1d3afea)
+- Registro de asistencias:  <br>
+• Se proporcionará al docente un registro de todas las asistencias tomadas, permitiendolas visualizar para control y tambien modificarlas de ser necesario. <br>
+![image](https://github.com/carloslugoo/Proyecto.2022-UCI/assets/112581880/5cc41151-d13e-4018-8fa3-9cfa274fa9d9)
 - Carga de proceso o exámenes: <br>
 • Permitirá a los docentes, la carga de trabajos de proceso (trabajos prácticos o tareas)
 y también exámenes finales. <br>
-• En caso de ser necesario, se podrá modificar el puntaje logrado de cualquier alumno. <br>
-• Se podrá exportar en un Excel, una planilla en cualquier momento con los puntajes y
-ya calificaciones en caso de contener exámenes.
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/e6c8c745-7705-4ad2-9ba4-19360cea67a3)
 - Entrega de proceso o exámenes:  <br>
-• Permite al docente emitir el documento ya sea de proceso o exámenes finales para ser
+• Permite al docente adjuntar y enviar el documento, ya sea de proceso o exámenes finales para ser
 aprobado por los directivos, al ser emitida quedara en estado “Pendiente”.
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/537025b6-dcc6-4ab6-91d6-9ceede26ea52)
-- Registro de asistencias del alumno: <br>
-• Los docentes podrán controlar la asistencia por curso por materia.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/06c0458f-92b1-4463-990d-c5c48978a78a)
 - Asistencia de docentes: <br>
-• Los docentes podrán marcar su asistencia del día y mencionar su plan de clase.
+• Los docentes podrán marcar su asistencia del día (entrada y salida) mediante una tarjeta que deberá ser escaneada en formato físico.
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/d09420d0-7f82-4af0-9ab5-146d4ca539ea)
 - Datos personales: <br>
 • Permite al docente visualizar sus datos personales, ya sea ficha personal (nombres y
