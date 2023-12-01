@@ -126,8 +126,9 @@ Actualmente le estoy realizando mantenimiento al software en los siguientes aspe
 • Mejorando la escalabilidad del mismo. <br>
 • Proporcionarle mejor presentación y documentación en el Github. <br>
 • Deseo que sea totalmente resposivo. <br>
+• Todo esto para implementarlo en el año 2024 nuevamente. <br>
 # ✔️ Tecnologías utilizadas: <br>
-• Python <br>
+• Python - Flask <br>
 • MySQL <br>
 • HTML <br>
 • JavaScript <br>
