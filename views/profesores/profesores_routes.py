@@ -36,10 +36,9 @@ mydb = mysql.connector.connect(
   user="root",
   password="",
   database="proyecto"
-
 )
 
-
+#views
 @profesores_views.before_request
 def before_request():
     #Si no estas autenticado, fuera
@@ -224,7 +223,7 @@ def exportaralumnos(id):
     print(filtro)
     #Dando formato al pdf
     pdf = SimpleDocTemplate(
-      "{a}_alumnos.pdf".format(a = datos[2]),
+      "./static/resources/pdfs_creados/{a}_alumnos.pdf".format(a = datos[2]),
       pagesize=A4,
       rightMargin=inch,
       leftMargin=inch,
@@ -346,13 +345,13 @@ def exportaralumnos(id):
     Story.append(table)
     pdf.build(Story)
     #Comprueba si existe el archivo y lo descarga para el usuario
-    ruta = pathlib.Path('.')
+    ruta = pathlib.Path('./static/resources/pdfs_creados')
     filename = "{a}_alumnos.pdf".format(a=datos[2])
     archivo = ruta / filename  # Si existe un pdf con su nombre
     print(archivo)
     if archivo.exists():
       return send_file(archivo, as_attachment=True)
-  return redirect(url_for('misalumnos', id=id))
+  return redirect(url_for('profesores.misalumnos', id=id))
 
 
 @profesores_views.route('/modificarproceso/<int:id>', methods = ['GET', 'POST']) #Modificar trabajos del docente
@@ -400,7 +399,7 @@ def generarexcel(id):
   if request.method == 'POST':
     mycursor = mydb.cursor()
     filtro = int(request.form.get(('idfiltro')))
-    print(filtro)
+    #print(filtro)
     if filtro < 3:
       #Trabajos de la materia
       sql = "SELECT id_trabajo, fec_t, des_t, pun_t, id_profesor, materias.des_m, tipo_t, cursos.des_c, des_e, etapa FROM trabajos, materias, cursos, enfasis WHERE id_profesor = %s and etapa = %s and trabajos.id_materia = %s and " \

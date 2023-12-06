@@ -57,7 +57,7 @@ def login():
           data = mycursor.fetchall()
           datos = data[0]
           session['username'] = datos
-          return redirect(url_for('bienvenidoadmin'))
+          return redirect(url_for('directores.listadocursos'))
       else:
         flash("Contra", "error_p")
     else:
