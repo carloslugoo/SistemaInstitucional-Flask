@@ -81,6 +81,37 @@ electrónico, localidad, barrio), y sus documentos (constancia de cargos, consta
 ingresos y las fotos de su cedula).
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/0cd22eac-2c56-4d67-b7d5-5fd78dc93adc)
 # Directora o secretario:
+- Listado de cursos: <br>
+• El directivo visualizará los cursos de la instituciones y las funciones disponibles para cada curso.
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/fb51891e-b24f-45ff-99ce-bde9db1d77d2)
+- Listado de alumnos: <br>
+• A través de un filtro ya sea por curso, materia o énfasis se generará un listado de
+alumnos que permitirá visualizar su estado académico (calificación, puntaje y
+asistencia), podrá ser exportado para ser utilizado en formato físico.
+![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/9f12890f-31cb-4d91-8ea2-a6456d6a719d)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/f7126b37-9c63-40f5-879d-43bdea4692ad)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/f954fa88-4e3e-4ff7-bd68-b67a3ba53853)
+- Listado de docentes: <br>
+• A través de un filtro ya sea por curso, materia o énfasis se generará un listado de
+docentes que permitirá visualizar las disciplinas a su cargo y asistencia, podrá
+ser exportado los docentes como la asistencia de cada uno, para ser utilizado en formato físico.
+![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/beb56c2a-6883-409f-aa15-333ef461f652)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/0b6f22f5-a9b8-4047-aa05-82f3f648de09)
+- Control de asistencia de docentes: <br>
+• Mediante un filtro por fecha se podrá visualizar la asistencia de los docentes y
+también se podrá exportar.
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/f3889260-720a-4e06-a350-ba2280fa7436)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/90ebe1e0-d4b6-4b6a-a683-ff9a8635b3fb)
+- Cuotas: <br>
+• En ella se encuentrá la lista de alumnos matriculados en el curso y las cuotas pendientes, tambien se provee un panel para dar cuotas como "Pagadas".
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/58256131-5d27-4132-9154-190b94b779a6)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/5c27c582-9a77-474e-affe-6bd584b3e9cc)
+- Horarios: <br>
+• Esta pestaña permite al directivo ver, modificar o eliminar el horario de clases de la semana para cada curso en la institución.
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/47814344-2517-42d9-9c41-f15e66866c31)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/586c1334-2305-435a-a810-29c30ef8b008)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/3c5a6c2f-d968-4a2d-8aef-a82cee068a26)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/f076561c-c9a6-49de-83ce-a8d190af2534)
 - Matricular alumnos: <br>
 • El directivo o secretario podrá matricular al alumno, en la carga se encuentra la ficha
 personal (nombres y apellidos, edad, fecha de nacimiento, numero de cedula, número
@@ -96,26 +127,14 @@ de teléfono, correo electrónico, localidad, barrio), adjuntar los documentos (
 la cedula, constancia de cargo y constancia de ingresos) y asignarlos a los cursos y
 sus respectivas disciplinas.
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/f04cd905-2e3e-4f17-8f9c-7fe28a7f4e57)
-- Listado de alumnos: <br>
-• A través de un filtro ya sea por curso, materia o énfasis se generará un listado de
-alumnos que permitirá visualizar su estado académico (calificación, puntaje y
-asistencia), podrá ser exportado para ser utilizado en formato físico.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/9f12890f-31cb-4d91-8ea2-a6456d6a719d)
-- Control de asistencia de docentes: <br>
-• Mediante un filtro por fecha se podrá visualizar la asistencia de los docentes y
-también se podrá exportar.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/99b14700-19d3-4883-a3ea-2264e61d0bd9)
+
 - Registro de pago de cuotas: <br>
 • El directivo o secretario, tendrá un botón en el cual genere las cuotas por mes, estas
 quedaran de manera “Pendiente”, una vez realizado el pago el estado será cambiado
 a “Pagado”. En esta sección se aplicará el mismo método para el pago de cuotas y el
 pago de cuotas extraordinarias.
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/84e033a6-9980-405c-86bc-e6d3ba97d9af)
-- Listado de docentes: <br>
-• A través de un filtro ya sea por curso, materia o énfasis se generará un listado de
-docentes que permitirá visualizar las disciplinas a su cargo y la carga horaria, podrá
-ser exportado para ser utilizado en formato físico.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/beb56c2a-6883-409f-aa15-333ef461f652)
+
 - Control de entrega de proceso o exámenes:  <br>
 • En esta sección el directivo podrá aprobar o desaprobar la planilla del docente, se
 visualizará la fecha, el curso y la materia el cual fue emitida la planilla, una vez
