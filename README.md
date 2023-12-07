@@ -120,6 +120,7 @@ adjuntar los documentos (fotos de la cedula, antecedentes académicos y la
 autorización de padres) y también matricularlo en las materias según el curso, énfasis
 y sección.
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/c2763f0b-71ae-4983-8e42-7665cf053691)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/2369a67a-a00c-4cea-94e3-7546f4a39b25)
 - Incorporar docentes: <br>
 • El directivo o secretario podrá incorporar al docente, en la carga se encuentra la ficha
 personal (nombres y apellidos, edad, fecha de nacimiento, numero de cedula, número
