@@ -128,19 +128,25 @@ de teléfono, correo electrónico, localidad, barrio), adjuntar los documentos (
 la cedula, constancia de cargo y constancia de ingresos) y asignarlos a los cursos y
 sus respectivas disciplinas.
 ![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/f04cd905-2e3e-4f17-8f9c-7fe28a7f4e57)
-
-- Registro de pago de cuotas: <br>
-• El directivo o secretario, tendrá un botón en el cual genere las cuotas por mes, estas
-quedaran de manera “Pendiente”, una vez realizado el pago el estado será cambiado
-a “Pagado”. En esta sección se aplicará el mismo método para el pago de cuotas y el
-pago de cuotas extraordinarias.
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/84e033a6-9980-405c-86bc-e6d3ba97d9af)
-
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/690b9888-f542-4a32-a3f9-b9f5151b5780)
+- Asignar disciplinas: <br>
+• En la pestaña el directivo podrá asignar disciplinas a los docentes seleccionados o tambien darlos de baja de ser necesario.
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/090585ee-670a-4efa-8563-6344f1cf5115)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/f53d9cec-11ea-4c69-bd64-5e22a2ed4cb5)
 - Control de entrega de proceso o exámenes:  <br>
 • En esta sección el directivo podrá aprobar o desaprobar la planilla del docente, se
 visualizará la fecha, el curso y la materia el cual fue emitida la planilla, una vez
 aprobada esta se guardará como “Aprobada” para la entrega en formato físico. <br>
-![image](https://github.com/Luguitoo/Proyecto.2022-UCI/assets/112581880/2df41ee7-99ea-4d2e-a99e-daa1399be3c1)
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/6633ab86-b2e5-4933-a165-ed4ba9875954)
+- Cuotas: <br>
+• El directivo o secretario, tendrá un botón en el cual genere las cuotas por mes, estas
+quedaran de manera “Pendiente”, una vez realizado el pago el estado será cambiado
+a “Pagado”. En esta sección se aplicará el mismo método para el pago de cuotas y el
+pago de cuotas extraordinarias.
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/6fd760a3-2698-460e-a75e-574a349e48b4)
+- Registro de cambios: <br>
+• Se visualizará todos los cambios realizados por los directivos en el sistema.
+![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/8721d239-8b5a-4107-a0bd-4b64409486f9)
 # Actualizaciones - Observaciones:
 Actualmente le estoy realizando mantenimiento al software en los siguientes aspectos: <br>
 • Mejorando la escalabilidad del mismo. <br>
