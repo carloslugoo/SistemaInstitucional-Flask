@@ -44,6 +44,13 @@ def before_request():
     #Si no estas autenticado, fuera
     if 'username' not in session:
         return redirect(url_for('auth.login'))
+    #Si no es tu url, fuera
+    if request.endpoint in ['verproceso','vermaterias ', 'bienvenidoadmin', 'inscribirdir', 'sacarmat',
+                            'inscurmat', 'inscribirprof', 'inscmatxprof',
+                            'listadocursos', 'controldeplanilla', 'crearsemana', 'inscribirprof',
+                            'inscribirdir', 'asignarpof', 'generarcuotas', 'verlog', 'miscuotasal', 'vermaterias'
+                            ]:
+      return redirect(url_for('docentes.miscursos'))
     # Acceder a la variable global desde la aplicación
     band = current_app.config['band']
     if request.endpoint in ['profesores.modificarproceso2']:

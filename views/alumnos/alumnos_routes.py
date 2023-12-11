@@ -16,10 +16,16 @@ def before_request():
     #Si no estas autenticado, fuera
     if 'username' not in session:
         return redirect(url_for('auth.login'))
+  
+    if request.endpoint in ['bienvenidoadmin', 'inscribirdir','sacarmat', ' inscurmat', 'inscribirprof','proceso',
+                            'procesoss', 'alumnosproceso', 'inscmatxprof', 'modproceso', 'modificarproceso2','miscursos',
+                            'listadocursos', 'controldeplanilla', 'crearsemana', 'inscribirprof',
+                            'inscribirdir', 'asignarpof', 'generarcuotas', 'verlog',
+                            'miscursos','enviarplanilla', 'verasistenciaprofe', 'proceso']:
+        return redirect(url_for('vermaterias'))
     
     # Acceder a la variable global desde la aplicación
     band = current_app.config['band']
-    
     if band == 6:
         flash("", "noa")
         # Restablecer la variable global en la aplicación

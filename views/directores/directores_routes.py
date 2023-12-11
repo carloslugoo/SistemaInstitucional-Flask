@@ -32,6 +32,9 @@ global ci
 global tel
 global tipoins
 global idmaterias
+idmaterias = 0
+global user_datos
+user_datos=[]
 #Conexion a SQL
 mydb = mysql.connector.connect(
   host="localhost",
@@ -39,7 +42,18 @@ mydb = mysql.connector.connect(
   password="",
   database="proyecto"
 )
-
+#views
+@directores_views.before_request
+def before_request():
+    #Si no estas autenticado, fuera
+    if 'username' not in session:
+        return redirect(url_for('auth.login'))
+    #Si no es tu url, fuera
+    if request.endpoint in ['verproceso', 'alumnos.vermaterias', 'proceso', 'procesoss', 'alumnosproceso', 'modproceso',
+                            'modificarproceso2','miscursos',
+                            'miscursos','enviarplanilla', 'verasistenciaprofe', 'proceso', 'miscuotasal', 'vermaterias']:
+        return redirect(url_for('directores.listadocursos'))
+    # Acceder a la variable global desde la aplicación
 #Vista main, listado de cursos
 @directores_views.route('/listadocursos') 
 def listadocursos():
@@ -502,6 +516,91 @@ def listadodocentes(id):
         return redirect(url_for('directores.listadodocentes', id=id))
   return render_template('listadodocentesad.html', datos=datos, cursos = cursos, materias = materias, profesores = profe_t, materia = materia, filtro = filtro)
 
+@directores_views.route('/exportardocentesad/<int:id>', methods = ['GET', 'POST'])
+def exportardocentesad(id):
+  datos = session['username']
+  #Datos del curso
+  mycursor = mydb.cursor()
+  sql = "SELECT id_curso, des_c, sec_c, des_e FROM cursos, enfasis WHERE cursos.id_curso = %s and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  cursos = mycursor.fetchall()
+  cursos = cursos[0]
+  print(cursos)
+  # Saca los profesores
+  sql = "SELECT DISTINCT matxpro.id_profesor, nmb_p, ape_p, des_m FROM matxpro, profesores, materias WHERE matxpro.id_curso = %s " \
+        "and matxpro.id_profesor = profesores.id_profesor and matxpro.id_materia = materias.id_materia"
+  val = [id]
+  mycursor.execute(sql, val)
+  profe_t = mycursor.fetchall()
+  profe_t = sorted(profe_t, key=lambda profe_t: profe_t[2])
+  print(profe_t)
+  if request.method == 'POST':
+    pdf = SimpleDocTemplate(
+      "./static/resources/pdfs_creados/{a}{b}_docentes.pdf".format(a=cursos[1], b = cursos[3]),
+      pagesize=A4,
+      rightMargin=inch,
+      leftMargin=inch,
+      topMargin=inch,
+      bottomMargin=inch / 2
+    )
+    Story = []
+    # Estilos
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
+    # Cabecera
+    text = ''' <strong><font size=14>Docentes </font></strong>
+       '''
+    text2 = '''
+           <strong><font size=10>Diretor/a: {a}, {b}</font></strong>
+       '''.format(a=datos[1], b=datos[2])
+    text3 = '''
+           <strong><font size=10>Curso: {a}, {b}</font></strong>
+       '''.format(a=cursos[1], b=cursos[3])
+    # Adjuntamos los titulos declarados mas arriba, osea las cabeceras
+    Story.append(Paragraph(text2))
+    Story.append(Paragraph(text3))
+    Story.append(Paragraph(text, styles['Center']))
+    Story.append(Spacer(1, 20))
+    data = [(
+      Paragraph('<strong><font size=6>#</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Nombre y Apellido</font></strong>', styles['Center']),
+      Paragraph('<strong><font size=6>Disciplina a su cargo</font></strong>', styles['Center'])
+    )]
+    # Aqui acomplamos los registros o datos a nuestra tabla data, estos seran los datos mostrados de bajo de los headers
+    for x in range(0, len(profe_t)):
+      aux = profe_t[x]
+      count = str(x + 1)
+      docente = aux[1] + "," + aux[2]
+      materia = aux[3]
+      data.append((
+        Paragraph('<font size=6>%s</font>' % count, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % docente, styles['Normal']),
+        Paragraph('<font size=6>%s</font>' % materia, styles['Normal'])
+      ))
+    # Declaramamos que la tabla recibira como dato los datos anteriores y le damos la dimensiones a cada uno de nuestros campos
+    table = Table(
+       data,
+      colWidths=[20, 140, 140]
+    )
+    table.setStyle(
+      TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+      ])
+    )
+    Story.append(table)
+    pdf.build(Story)
+    # Comprueba si existe el archivo y lo descarga para el usuario
+    ruta = pathlib.Path('./static/resources/pdfs_creados')
+    filename = "{a}{b}_docentes.pdf".format(a=cursos[1], b = cursos[3])
+    archivo = ruta / filename  # Si existe un pdf con su nombre
+    print(archivo)
+    if archivo.exists():
+      return send_file(archivo, as_attachment=True)
+  return redirect(url_for('directores.listadodocentes', id=id))
+
 #Ver asistencia del docente
 @directores_views.route('/verasisad/<int:id>', methods = ['POST', 'GET'])
 def verasisad(id):
@@ -746,6 +845,49 @@ def vercuotasdelalumno(id):
       print(total)
     return render_template('vercuotasdelalumno.html', datos=datos, data=alumno, cuotas=cuotas, filtro = 2, total = total)
   return render_template('vercuotasdelalumno.html', datos=datos, data = alumno, cuotas = cuotas, filtro = 1, total = total)
+
+#Marcar cuota como pagada
+@directores_views.route('/cuotapagada/<int:id>', methods = ['POST', 'GET'])
+def marcarpagado(id):
+  datos = session['username']
+  print(id)
+  global band
+  mycursor = mydb.cursor()
+  sql = "SELECT id_cuota, id_alumno, id_tipoc FROM cuotas WHERE id_cuota = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  cuotas = mycursor.fetchall()
+  cuotas = cuotas[0]
+  print(cuotas)
+  #Marca como pagado
+  mycursor = mydb.cursor()
+  sql = "UPDATE cuotas SET estado = %s WHERE id_cuota = %s"
+  val = (1,id)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  print("pagaado")
+  band = 1
+  # Auditoria
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  sql = "SELECT nmb_a, ape_a FROM alumnos WHERE id_alumno = %s"
+  val = [cuotas[1]]
+  mycursor.execute(sql, val)
+  alumno = mycursor.fetchall()
+  alumno = alumno[0]
+  if int(cuotas[2]) == 1:
+    mycursor.execute(
+      'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+      (datos[0], "Marcó como pagado una cuota del instituto al alumno {a}, {b}".format(a=alumno[0], b=alumno[1]), fecha))
+    mydb.commit()
+  else:
+    mycursor.execute(
+      'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+      (datos[0], "Marcó como pagado una cuota extraordinaria al alumno {a}, {b}".format(a=alumno[0], b=alumno[1]), fecha))
+    mydb.commit()
+  return redirect(url_for('directores.vercuotasdelalumno', id=cuotas[1]))
 
 #Pestaña de horario de clases
 @directores_views.route('/crearseman') 
@@ -1252,3 +1394,854 @@ def inscurmat():
       return redirect(url_for('directores.inscribirdir'))
   return render_template('inscribiral2.html', datos = datos, materias=idmaterias, bver = bver)
 
+#Incorporar al Profesor, carga.
+@directores_views.route('/inscribirprofe', methods = ['GET', 'POST']) 
+def inscribirprof():
+  alumno = userform.Alumno(request.form) #Reutilizo el form
+  datos = session['username']
+  global idmaterias
+  print(current_app.config['band'])
+  if current_app.config['band'] == 1:
+    flash("", "si")
+    current_app.config['band'] = 0
+  if current_app.config['band'] == 3:
+    current_app.config['band']  = 0
+    flash("", "no")
+  if current_app.config['band'] == 4:
+    current_app.config['band'] = 0
+    flash("", "profe")
+  global tipoins
+  tipoins = 2
+  if request.method == "POST":
+    co_i = request.files["co_i"]
+    cedu = request.files["cedu_p"]
+    co_c = request.files["co_c"]
+    fecha = (request.form['fec_n'])
+    print(fecha)
+    if fecha:
+      # Parte Cedula...
+      if "cedu_p" not in request.files:
+        # print("No envio nada")
+        pass
+      elif cedu.filename == "":
+        # print("No mando nada")
+        pass
+      elif cedu and archpermi(cedu.filename):
+        filename = secure_filename(cedu.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "cedulaprof_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        cedu.save(os.path.join(os.path.abspath("./static/resources/documentos/"), filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      # Parte Constancia de Ingresos
+      if "co_i" not in request.files:
+        #print("No envio nada")
+        pass
+      elif co_i.filename == "":
+        #print("No mando nada")
+        pass
+      elif co_i and archpermi(co_i.filename):
+        filename = secure_filename(co_i.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "constancia_ingresos_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        co_i.save(os.path.join(os.path.abspath("./static/resources/documentos/"), filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      # Parte Autorizacion de Padres
+      if "co_c" not in request.files:
+        #print("No envio nada")
+        pass
+      elif co_c.filename == "":
+        #print("No mando nada")
+        pass
+      elif co_c and archpermi(co_c.filename):
+        filename = secure_filename(co_c.filename)
+        extc = filename.split('.')
+        print(extc)
+        print(filename)
+        print(alumno.num_c.data)
+        filename = "constancia_cargos_" + alumno.num_c.data + "." + extc[1]
+        print(filename)
+        co_c.save(os.path.join(os.path.abspath("./static/resources/documentos/"), filename))
+        flash("", "")  # Ya guarda el archivo
+      else:
+        print("archivo no permitido")
+      mycursor = mydb.cursor()
+      global cur
+      global enf
+      global sec
+      global ci
+      global tel
+      cur = request.form.get(('curso'))
+      enf = request.form.get(('enfasis'))
+      sec = request.form.get(('seccion'))
+      ci = alumno.num_c.data
+      tel = alumno.num_t.data
+      # Validar si la cedula y el num de telefono no son repetidos..
+      sql = "SELECT ci_p FROM profesores WHERE ci_p = %s"
+      val = [ci]
+      mycursor.execute(sql, val)
+      comp_p = mycursor.fetchall()
+      if comp_p:
+        print(comp_p)
+        flash("", "error")
+      else:
+        # Inserta en tabla profesores todos los datos
+        mycursor.execute(
+          'INSERT INTO profesores (nmb_p, ape_p, tel_p, ci_p, edad, email, loc_p, fec_p, bar_p) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
+          (alumno.nombre.data, alumno.apellido.data, alumno.num_t.data, alumno.num_c.data, alumno.edad.data,
+           alumno.email.data, alumno.localidad.data, fecha, alumno.barrio.data))
+        mydb.commit()
+        # Auditoria
+        inf = datetime.now()
+        # Extraemos la fecha
+        fecha = datetime.strftime(inf, '%Y/%m/%d')
+        mycursor = mydb.cursor()
+        mycursor.execute(
+          'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+          (datos[0], "Incorporó al docente {a}, {b} al sistema".format(a=alumno.nombre.data, b=alumno.apellido.data),
+           fecha))
+        mydb.commit()
+        return redirect(url_for('directores.inscmatxprof'))
+    else:
+      print("no fehca")
+      flash("fecha", "fecha")
+  return render_template('inscribirprof.html', datos=datos, alumno=alumno)
+
+#Parte de incorporacion, carga de materias por  profe
+@directores_views.route('/inscribirprofee', methods = ['GET', 'POST'])
+def inscmatxprof():
+  bver = 0
+  datos = session['username']
+  global idmaterias #Contiene el nombre de las materias y sus id
+  global ci
+  global tel
+  global tipoins
+  tipoins = 2 #Profesores
+  fecha = datetime.now()
+  fecha = datetime.strftime(fecha, '%Y')
+  print(fecha)
+  mycursor = mydb.cursor(buffered=True)
+  for x in range(1, 7):
+    print(x)
+    if x <= 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      if x == 1:
+        con_p = mycursor.fetchall()
+        print(con_p)
+      if x == 2:
+        con_s = mycursor.fetchall()
+        print(con_s)
+    if x == 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      soc_p = mycursor.fetchall()
+      print(soc_p)
+    if x == 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      con_t = mycursor.fetchall()
+      print(con_t)
+    if x > 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      if x == 5:
+        soc_s = mycursor.fetchall()
+        print(soc_s)
+      if x == 6:
+        soc_t = mycursor.fetchall()
+        print(soc_t)
+  if request.method == 'POST':
+    if ci == 0 or tel == 0:
+      current_app.config['band'] = 3
+      return redirect(url_for('directores.inscribirprof'))
+    idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
+    idcur = request.form.getlist(('idcur'))
+    print(idmat)
+    print(idcur)
+    mycursor = mydb.cursor()
+    sql = "SELECT id_profesor, id_user FROM profesores WHERE ci_p = %s and tel_p = %s"
+    val = [ci,tel]
+    mycursor.execute(sql, val)
+    id_p = mycursor.fetchall()
+    #print(cur)
+    if id_p:
+      id_p = id_p[0]
+      print(id_p[0])
+      if idmat:
+        print(idmat)
+        for x in range(0, len(idmat)):
+          aux = idmat[x]
+          aux2 = aux.split(',')
+          aux3 = int(aux2[0])
+          aux2 = int(aux2[1])
+          print((aux2))
+          print((aux3))
+          mycursor = mydb.cursor()
+          sql = "SELECT * FROM matxpro WHERE id_materia = %s and id_curso = %s"
+          val = [aux2, aux3]
+          mycursor.execute(sql, val)
+          comp_m = mycursor.fetchall()
+          if comp_m:
+            comp_m = comp_m[0]
+            print(comp_m)
+            if comp_m[2] != 0:
+              current_app.config['band'] = 4
+              print("ya tiene profesor")
+            if comp_m[2] == 0:
+              sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id_p[0], aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              # Asigna el profesor a los alumnos
+              sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id_p[0], aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              # Asigna el profesor al horario
+              sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id_p[0], aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              # Comprueba si cargo un trabajo
+              sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s"
+              val = [0, aux2, aux3]
+              mycursor.execute(sql, val)
+              trabajos = mycursor.fetchall()
+              if trabajos:
+                for x in range(0, len(trabajos)):
+                  aux = trabajos[x]
+                  id_t = aux[0]
+                  sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+                  val = (id, id_t)
+                  mycursor.execute(sql, val)
+                  mydb.commit()
+              print("el profesor fue dado de baja")
+              current_app.config['band'] = 1
+          else:
+            print(aux2, id_p, aux3, fecha)
+            mycursor.execute(
+              'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
+              (aux2, id_p[0], aux3, fecha))
+            mydb.commit()
+            current_app.config['band'] = 1
+            print(current_app.config['band'])
+            print("se le asigna")
+            # Asigna el profesor a los alumnos
+            sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+            val = ( id_p[0], aux2, aux3)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            # Asigna el profesor al horario
+            sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+            val = (id_p[0], aux2, aux3)
+            mycursor.execute(sql, val)
+            mydb.commit()
+        return redirect(url_for('inscribirprof'))
+      else:
+        current_app.config['band'] = 3
+        return redirect(url_for('directores.inscribirprof'))
+    else:
+      current_app.config['band'] == 3
+      return redirect(url_for('directores.inscribirprof'))
+  return render_template('inscribirprof2.html', datos = datos, materias=idmaterias, bver = bver,
+                         soc_p = soc_p, soc_s = soc_s, soc_t = soc_t, con_p=con_p, con_s = con_s, con_t = con_t)
+
+#Aignar disciplinas o dar de baja docentes
+@directores_views.route('/asignarprofe', methods = ['POST', 'GET']) 
+def asignarprofe():
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores"
+  val = []
+  mycursor.execute(sql, val)
+  data = mycursor.fetchall()
+  data = sorted(data, key=lambda data: data[2])
+  print(data)
+  estado = 3
+  if request.method == 'POST':
+    estado = request.form.get("estado")
+    estado = int(estado)
+    print(estado)
+    if estado == 1 or estado == 0:
+      mycursor = mydb.cursor()
+      sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores WHERE estado = %s"
+      val = [estado]
+      mycursor.execute(sql, val)
+      data = mycursor.fetchall()
+      data = sorted(data, key=lambda data: data[2])
+      print(data)
+      return render_template('asignarprofe.html', datos=datos, data=data, estado = estado)
+    else:
+      return redirect(url_for('directores.asignarprofe'))
+  return render_template('asignarprofe.html', datos=datos, data = data, estado = estado)
+
+#Asignar displinas al docente seleccionado
+@directores_views.route('/asignarmaterias/<int:id>', methods = ['POST', 'GET'])
+def asignarmaterias(id):
+  global user_datos
+  user_datos = id
+  current_app.config['band']
+  datos = session['username']
+  if current_app.config['band'] == 1:
+    flash("","bien")
+    current_app.config['band'] = 0
+  if current_app.config['band'] == 4:
+    flash("","mal")
+    current_app.config['band'] = 0
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores WHERE id_profesor = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  profesor = mycursor.fetchall()
+  profesor = profesor[0]
+  print(profesor)
+  sql = "SELECT matxpro.id_materia, des_m, des_c, des_e, matxpro.id_curso FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s " \
+        "and matxpro.id_materia = materias.id_materia and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  print(materias)
+  fecha = datetime.now()
+  fecha = datetime.strftime(fecha, '%Y')
+  print(fecha)
+  mycursor = mydb.cursor(buffered=True)
+  for x in range(1, 7):
+    #print(x)
+    if x <= 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      if x == 1:
+        con_p = mycursor.fetchall()
+        #print(con_p)
+      if x == 2:
+        con_s = mycursor.fetchall()
+        #print(con_s)
+    if x == 3:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      soc_p = mycursor.fetchall()
+      #print(soc_p)
+    if x == 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 1]
+      mycursor.execute(sql, val)
+      con_t = mycursor.fetchall()
+      #print(con_t)
+    if x > 4:
+      sql = "SELECT matxcur.id_curso, materias.id_materia, des_m FROM matxcur, materias WHERE id_curso = %s and id_enfasis = %s and " \
+            "materias.id_materia = matxcur.id_materia"
+      val = [x, 2]
+      mycursor.execute(sql, val)
+      if x == 5:
+        soc_s = mycursor.fetchall()
+        #print(soc_s)
+      if x == 6:
+        soc_t = mycursor.fetchall()
+        #print(soc_t)
+  if request.method == "POST":
+    idmat = request.form.getlist(('idmat')) #Aca si tengo los id de las materias en q se insc
+    print(idmat)
+    if idmat:
+      for x in range(0, len(idmat)):
+        aux = idmat[x]
+        aux2 = aux.split(',')
+        aux3 = int(aux2[0])
+        aux2 = int(aux2[1])
+        print((aux2))
+        print((aux3))
+        mycursor = mydb.cursor()
+        sql = "SELECT * FROM matxpro WHERE id_materia = %s and id_curso = %s"
+        val = [aux2, aux3]
+        mycursor.execute(sql, val)
+        comp_m = mycursor.fetchall()
+        print(comp_m)
+        if comp_m:
+            comp_m = comp_m[0]
+            print(comp_m)
+            if comp_m[2] != 0:
+              band = 4
+              print("ya tiene profesor")
+            if comp_m[2] == 0:
+              sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id,aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              # Asigna el profesor a los alumnos
+              sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id, aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              # Asigna el profesor al horario
+              sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+              val = (id, aux2, aux3)
+              mycursor.execute(sql, val)
+              mydb.commit()
+              #Comprueba si cargo un trabajo
+              sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_profesor = %s and id_materia = %s and id_curso = %s"
+              val = [0, aux2,aux3]
+              mycursor.execute(sql, val)
+              trabajos = mycursor.fetchall()
+              print(trabajos)
+              if trabajos:
+                for x in range(0, len(trabajos)):
+                  aux = trabajos[x]
+                  id_t = aux[0]
+                  sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+                  val = (id, id_t)
+                  mycursor.execute(sql, val)
+                  mydb.commit()
+              print("se asigno, el profesor anterior fue dado de baja")
+        else:
+          mycursor.execute(
+            'INSERT INTO matxpro (id_materia, id_profesor, id_curso, fecha) VALUES (%s, %s, %s, %s)',
+            (aux2, id, aux3, fecha))
+          mydb.commit()
+          band = 1
+          print(band)
+          print("se le asigna")
+          #Asigna el profesor a los alumnos
+          sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+          val = (id, aux2, aux3)
+          mycursor.execute(sql, val)
+          mydb.commit()
+          # Asigna el profesor al horario
+          sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+          val = (id, aux2, aux3)
+          mycursor.execute(sql, val)
+          mydb.commit()
+    #En caso que el profe este de baja, lo pone activo
+    sql = "UPDATE profesores SET estado = %s WHERE id_profesor = %s"
+    val = (1, id)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    return redirect(url_for('directores.asignarmaterias', id=id))
+  return render_template('asginarmaterias.html', datos=datos, profesor = profesor,
+                         soc_p = soc_p, soc_s = soc_s, soc_t = soc_t, con_p=con_p, con_s = con_s, con_t = con_t, materias = materias)
+
+#Remover discplina al docente
+@directores_views.route('/eliminarmatxpro/<string:id>')
+def eliminarmatxpro(id):
+  print(id)
+  global user_datos
+  print(user_datos)
+  aux = id.split('C')
+  id_m = aux[0]
+  id_c = aux[1]
+  mycursor = mydb.cursor()
+  # Da de baja en materia x profesor
+  sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s and id_profesor = %s"
+  val = (0, id_m, id_c, user_datos)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  # Da de baja en profesor a los alumnos
+  sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+  val = (0, id_m, id_c)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  # Da de baja al profesor en horario
+  sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+  val = (0, id_m, id_c)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  #Si tiene trabajos..
+  sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_materia = %s and id_curso = %s and id_profesor = %s"
+  val = [id_m, id_c, user_datos]
+  mycursor.execute(sql, val)
+  trabajos = mycursor.fetchall()
+  print(trabajos)
+  if trabajos:
+    for x in range(0, len(trabajos)):
+      aux = trabajos[x]
+      id_t = aux[0]
+      sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+      val = (0, id_t)
+      mycursor.execute(sql, val)
+      mydb.commit()
+  return redirect(url_for('directores.asignarmaterias', id = user_datos))
+
+#Dar de baja al docente
+@directores_views.route('/dardebajaprofe/<int:id>', methods = ['POST', 'GET'])
+def dardebajaprofe(id):
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT id_profesor, nmb_p, ape_p, ci_p FROM profesores WHERE id_profesor = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  profesor = mycursor.fetchall()
+  profesor = profesor[0]
+  print(profesor)
+  sql = "SELECT matxpro.id_materia, des_m, des_c, des_e, matxpro.id_curso FROM matxpro, materias, cursos, enfasis WHERE id_profesor = %s " \
+        "and matxpro.id_materia = materias.id_materia and matxpro.id_curso = cursos.id_curso and cursos.id_enfasis = enfasis.id_enfasis"
+  val = [id]
+  mycursor.execute(sql, val)
+  materias = mycursor.fetchall()
+  print(materias)
+  fecha = datetime.now()
+  fecha = datetime.strftime(fecha, '%Y')
+  print(fecha)
+  if request.method == "POST":
+    sql = "SELECT id_trabajo, id_materia FROM trabajos WHERE id_profesor = %s"
+    val = [id]
+    mycursor.execute(sql, val)
+    trabajos = mycursor.fetchall()
+    if materias:
+      for x in range(0, len(materias)):
+        aux = materias[x]
+        id_m = aux[0]
+        id_c = aux[4]
+        #Da de baja en materia x profesor
+        sql = "UPDATE matxpro SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+        val = (0, id_m, id_c)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        # Da de baja en profesor a los alumnos
+        sql = "UPDATE matxalum SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+        val = (0, id_m, id_c)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        # Da de baja al profesor en horario
+        sql = "UPDATE horarios SET id_profesor = %s WHERE id_materia = %s and id_curso = %s"
+        val = (0, id_m, id_c)
+        mycursor.execute(sql, val)
+        mydb.commit()
+    if trabajos:
+      print(trabajos)
+      for x in range(0, len(trabajos)):
+        aux = trabajos[x]
+        id_t = aux[0]
+        sql = "UPDATE trabajos SET id_profesor = %s WHERE id_trabajo = %s"
+        val = (0, id_t)
+        mycursor.execute(sql, val)
+        mydb.commit()
+    sql = "UPDATE profesores SET estado = %s WHERE id_profesor = %s"
+    val = (0, id)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    # Auditoria
+    inf = datetime.now()
+    # Extraemos la fecha
+    fecha = datetime.strftime(inf, '%Y/%m/%d')
+    mycursor = mydb.cursor()
+    mycursor.execute(
+      'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+      (datos[0], "Dió de baja al docente {a}, {b} del sistema".format(a=profesor[1], b=profesor[2]), fecha))
+    mydb.commit()
+    return redirect(url_for('directores.asignarprofe'))
+  return render_template('dardebajaprofe.html', datos=datos, profesor = profesor, materias = materias)
+
+#Control de planillas
+@directores_views.route('/controlplanillas', methods = ['POST', 'GET'])
+def controldeplanilla():
+  datos = session['username']
+  #Planillas pendientes
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM planillas WHERE estado = %s LIMIT 45"
+  val = [0]
+  mycursor.execute(sql, val)
+  pp = mycursor.fetchall()
+  print(pp)
+  # Planillas aprobadas
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM planillas WHERE estado = %s LIMIT 45"
+  val = [1]
+  mycursor.execute(sql, val)
+  pa = mycursor.fetchall()
+  # Planillas desaprobadas
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM planillas WHERE estado = %s LIMIT 45"
+  val = [2]
+  mycursor.execute(sql, val)
+  pd = mycursor.fetchall()
+  if request.method == "POST":
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 1:
+      return redirect(url_for('directores.controldeplanilla'))
+    else:
+      return render_template('controlplanillas.html', datos=datos, planillas_a=pa, planillas=pp, planillas_d=pd,
+                             filtro=filtro)
+  return render_template('controlplanillas.html', datos=datos, planillas_a = pa, planillas = pp, planillas_d = pd, filtro = 1)
+
+#Descarga de planillas
+@directores_views.route('/descargarplanilla/<int:id>')
+def descargarplanilla(id):
+  datos = session['username']
+  print(id)
+  ruta = pathlib.Path('./media/')
+  mycursor = mydb.cursor()
+  sql = "SELECT id_planillas, filename FROM planillas WHERE id_planillas = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  p = mycursor.fetchall()
+  planilla = p[0]
+  print(planilla)
+  filename = planilla[1]
+  archivo = ruta / filename  # Si existe un docx con su nombre
+  print(archivo)
+  if archivo.exists():
+    print("El arhivo existe")
+    return send_file(archivo, as_attachment=True)
+  else:
+    print("No existe")
+  return redirect(url_for('directores.controldeplanilla'))
+
+#Aprobar planilla
+@directores_views.route('/aprobarplanilla/<int:id>')
+def aprobarplanilla(id):
+  datos = session['username']
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  sql = "UPDATE planillas SET estado = %s, fecha_r = %s WHERE id_planillas = %s"
+  val = (1,fecha, id)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  print("aprobado")
+  # Auditoria
+  sql = "SELECT id_planillas, des_p FROM planillas WHERE id_planillas = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  p = mycursor.fetchall()
+  planilla = p[0]
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  mycursor.execute(
+    'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+    (datos[0], "Aprobó la planilla: {a}".format(a= planilla[1]), fecha))
+  mydb.commit()
+  return redirect(url_for('directores.controldeplanilla'))
+
+#Desaprobar planilla
+@directores_views.route('/desaprobarplanilla/<int:id>')
+def desaprobarplanilla(id):
+  datos = session['username']
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  sql = "UPDATE planillas SET estado = %s, fecha_r = %s WHERE id_planillas = %s"
+  val = (2,fecha, id)
+  mycursor.execute(sql, val)
+  mydb.commit()
+  # Auditoria
+  sql = "SELECT id_planillas, des_p FROM planillas WHERE id_planillas = %s"
+  val = [id]
+  mycursor.execute(sql, val)
+  p = mycursor.fetchall()
+  planilla = p[0]
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  mycursor = mydb.cursor()
+  mycursor.execute(
+    'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+    (datos[0], "Desaprobó la planilla: {a}".format(a=planilla[1]), fecha))
+  mydb.commit()
+  print("desaprobado")
+  return redirect(url_for('directores.controldeplanilla'))
+
+#Generar cuotas a los alumnos
+@directores_views.route('/generarcuotas', methods = ['POST', 'GET'])
+def generarcuotas():
+  #Alertas
+  if current_app.config['band'] == 2:
+    flash("","nod")
+    current_app.config['band'] = 0
+  if current_app.config['band'] == 3:
+    flash("","ya")
+    current_app.config['band'] = 0
+  if current_app.config['band'] == 4:
+    flash("", "ya2")
+    current_app.config['band'] = 0
+  if current_app.config['band'] == 1:
+    flash("","ok")
+    current_app.config['band'] = 0
+  if current_app.config['band'] == 7:
+    flash("", "del")
+    current_app.config['band'] = 0
+  datos = session['username']
+  #El mes
+  mes = datetime.today().month
+  print(mes)
+  inf = datetime.now()
+  # Extraemos la fecha
+  fecha = datetime.strftime(inf, '%Y/%m/%d')
+  #Cuotas existentes
+  mycursor = mydb.cursor()
+  sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c, monto FROM cuotas ORDER BY cuotas.id_cuota DESC"
+  val = []
+  mycursor.execute(sql, val)
+  cuotas = mycursor.fetchall()
+  print(cuotas)
+  if request.method == "POST":
+    idcuota = int(request.form.get("idcuota"))
+    monto = request.form.get("monto")
+    print(monto)
+    if idcuota == 2:
+      desc = request.form.get("desc")
+      # Comprueba que no halla generado una cuota de instituto aun
+      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE mes = %s and id_tipoc = %s and des_c = %s"
+      val = [mes, idcuota,desc]
+      mycursor.execute(sql, val)
+      compc = mycursor.fetchall()
+      if not desc:
+        current_app.config['band'] = 2
+        return redirect(url_for('generarcuotas'))
+      if compc:
+        current_app.config['band'] = 4
+        return redirect(url_for('generarcuotas'))
+    else:
+      desc = ""
+      # Comprueba que no halla generado una cuota de instituto aun
+      sql = "SELECT DISTINCT fecha, id_tipoc, mes, des_c, monto FROM cuotas WHERE mes = %s and id_tipoc = %s"
+      val = [mes, idcuota]
+      mycursor.execute(sql, val)
+      compc = mycursor.fetchall()
+      if compc:
+        current_app.config['band'] = 3
+        print("ya generaste una cuota de instituto este mes")
+        return redirect(url_for('generarcuotas'))
+    print(idcuota, desc)
+    #Quitamos los cursos existentes
+    mycursor = mydb.cursor()
+    sql = "SELECT id_curso, id_enfasis FROM cursos"
+    val = []
+    mycursor.execute(sql, val)
+    cursos = mycursor.fetchall()
+    for x in range(0, len(cursos)):
+      aux = cursos[x]
+      print(aux)
+      mycursor = mydb.cursor()
+      sql = "SELECT DISTINCT id_alumno, id_curso FROM matxalum WHERE id_curso = %s"
+      val = [aux[0]]
+      mycursor.execute(sql, val)
+      alumnos = mycursor.fetchall()
+      print(alumnos)
+      if alumnos:
+        for i in range(0, len(alumnos)):
+          alumno = alumnos[i]
+          print(alumno)
+          mycursor.execute(
+            'INSERT INTO cuotas (estado, fecha, id_tipoc, id_alumno, mes, des_c, monto) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+            (0, fecha, idcuota, alumno[0], mes, desc, monto))
+          mydb.commit()
+    current_app.config['band'] = 1
+    # Auditoria
+    inf = datetime.now()
+    # Extraemos la fecha
+    fecha = datetime.strftime(inf, '%Y/%m/%d')
+    mycursor = mydb.cursor()
+    if idcuota == 1:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Generó una nueva cuota del instituto", fecha))
+      mydb.commit()
+    else:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Generó una nueva cuota extraordinaria", fecha))
+      mydb.commit()
+    return redirect(url_for('directores.generarcuotas'))
+  return render_template('generarcuotas.html', datos=datos, cuotas = cuotas)
+
+#Eliminar cuotas
+@directores_views.route('/eliminarcuota/<string:id>', methods = ['POST', 'GET'])
+def eliminarcuotas(id):
+  global band
+  print(id)
+  x = id.split("I")
+  print(x)
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT * FROM cuotas WHERE fecha = %s and des_c = %s LIMIT 1"
+  val = [x[0], x[1]]
+  mycursor.execute(sql, val)
+  cuota = mycursor.fetchall()
+  cuota = cuota[0]
+  print(cuota)
+  if request.method == "POST":
+    print("eliminar")
+    mycursor = mydb.cursor()
+    sql = "DELETE FROM cuotas WHERE fecha = %s and des_c = %s and id_tipoc = %s"
+    val = [x[0], x[1], cuota[3]]
+    mycursor.execute(sql, val)
+    mydb.commit()
+    band = 7
+    # Auditoria
+    inf = datetime.now()
+    # Extraemos la fecha
+    fecha = datetime.strftime(inf, '%Y/%m/%d')
+    mycursor = mydb.cursor()
+    if int(cuota[3]) == 1:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Eliminó una cuota del instituto", fecha))
+      mydb.commit()
+    else:
+      mycursor.execute(
+        'INSERT INTO log (id_user, accion, fecha) VALUES (%s, %s, %s)',
+        (datos[0], "Eliminó una cuota extraordinaria", fecha))
+      mydb.commit()
+    return redirect(url_for('directores.generarcuotas'))
+  return render_template('eliminarcuota.html', datos=datos, cuota = cuota)
+
+#Registro de cambios
+@directores_views.route('/verlog', methods = ['POST', 'GET'])
+def verlog():
+  datos = session['username']
+  mycursor = mydb.cursor()
+  sql = "SELECT log.id_user, nmb_ad, ape_ad, fecha, accion FROM log, admin WHERE admin.id_admin = log.id_user ORDER BY log.id_log DESC LIMIT 60"
+  val = []
+  mycursor.execute(sql, val)
+  registros = mycursor.fetchall()
+  print(registros)
+  if request.method == "POST":
+    filtro = int(request.form.get("idfiltro"))
+    print(filtro)
+    if filtro == 2:
+      print("a")
+      mycursor = mydb.cursor()
+      sql = "SELECT log.id_user, nmb_ad, ape_ad, fecha, accion FROM log, admin WHERE admin.id_admin = log.id_user ORDER BY log.id_log DESC LIMIT 10"
+      val = []
+      mycursor.execute(sql, val)
+      registros = mycursor.fetchall()
+      print(registros)
+      return render_template('verlog.html', datos=datos, registros=registros, filtro = filtro)
+    if filtro == 3:
+      mycursor = mydb.cursor()
+      sql = "SELECT log.id_user, nmb_ad, ape_ad, fecha, accion FROM log, admin WHERE admin.id_admin = log.id_user ORDER BY log.id_log DESC LIMIT 20"
+      val = []
+      mycursor.execute(sql, val)
+      registros = mycursor.fetchall()
+      return render_template('verlog.html', datos=datos, registros=registros, filtro = filtro)
+    if filtro == 1:
+      return redirect(url_for('ddirectores.verlog'))
+  return render_template('verlog.html', datos=datos, registros=registros, filtro = 1)
