@@ -147,12 +147,6 @@ pago de cuotas extraordinarias.
 - Registro de cambios: <br>
 • Se visualizará todos los cambios realizados por los directivos en el sistema.
 ![image](https://github.com/carloslugoo/SistemaInstitucional-Flask/assets/112581880/8721d239-8b5a-4107-a0bd-4b64409486f9)
-# Actualizaciones - Observaciones:
-Actualmente le estoy realizando mantenimiento al software en los siguientes aspectos: <br>
-• Mejorando la escalabilidad del mismo. <br>
-• Proporcionarle mejor presentación y documentación en el Github. <br>
-• Deseo que sea totalmente resposivo. <br>
-• Todo esto para implementarlo en el año 2024 nuevamente. <br>
 # ✔️ Tecnologías utilizadas: <br>
 • Python - Flask <br>
 • MySQL <br>
