@@ -12,43 +12,35 @@
  <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
 <body>
-          <!--Nav bar -->
-    <nav class="navbar navbar-dark bg-dark">
-      <div class="container">
-        <a class="navbar-brand" href="/bienvenidoalumno"><img src="/static/images/logo.png" width="100" height="100"></a>
-           <div class="container-inline">
-      <div class="dropdown">
-        <a class="nav-link dropdown-toggle text-white" class="" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-             <i class="bi bi-person-fill"></i> {{datos.1}}, {{datos.2}}
+    <!--Nav bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/bienvenidoalumno">
+                <img src="/static/images/logo.png" width="100" height="100" alt="Logo">
             </a>
-        <span class="caret"></span></button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="/misdatos">Mis datos</a></li>
-          <li><a class="dropdown-item" href="/miconfig">Configuración de cuenta</a></li>
-          <li><a class="dropdown-item" href="/cerrarsesion">Cerrar sesion</a></li>
-        </ul>
-      </div>
-    </div>
-      </div>
-    </nav>
-     <br>
-     <div class="">
-    <div class="row flex-nowrap">
-        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
-            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                <p class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                    <span class="fs-5 d-none d-sm-inline">Actividades</span>
-                </p>
-
-                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-                    <li class="nav-item"><a href="/bienvenidoalumno" class="nav-link align-middle px-0"><i class="fs-4 bi bi-book text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Mis disciplinas</span></a></li>
-                    <li class="nav-item"><a href="/verhorario/{{datos.7}}" class="nav-link align-middle px-0"><i class="fs-4 bi bi-calendar3 text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Horario de clases</span></a></li>
-                    <li class="nav-item"><a href="/miscuotas" class="nav-link px-0 align-middle"><i class="fs-4 bi-credit-card text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Cuotas</span> </a> </li>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item "  style="margin-left: 50px;"><a href="/bienvenidoalumno" class="nav-link align-middle px-0"><i class="fs-4 bi bi-book text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Mis disciplinas</span></a></li>
+                    <li class="nav-item"  style="margin-left: 50px;"><a href="/verhorario/{{datos.7}}" class="nav-link align-middle px-0"><i class="fs-4 bi bi-calendar3 text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Horario de clases</span></a></li>
+                    <li class="nav-item"  style="margin-left: 50px;"><a href="/miscuotas" class="nav-link px-0 align-middle"><i class="fs-4 bi-credit-card text-white"></i> <span class="ms-1 d-none d-sm-inline text-white">Cuotas</span></a></li>
+                    <li class="nav-item dropdown" style="margin-left: 50px;">
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-fill"></i> {{datos.1}}, {{datos.2}}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/misdatos">Mis datos</a></li>
+                            <li><a class="dropdown-item" href="/miconfig">Configuración de cuenta</a></li>
+                            <li><a class="dropdown-item" href="/cerrarsesion">Cerrar sesión</a></li>
+                        </ul>
+                    </li>
                 </ul>
-                <hr>
             </div>
         </div>
-        <div class="">
+    </nav>
+        <div class="container">
            {%block content%}
             {%endblock%}
      <!--Nav bar -->

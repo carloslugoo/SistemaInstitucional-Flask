@@ -34,39 +34,38 @@
                 {% endfor %}
             {% endif %}
         {% endwith  %}
-<div class="col-sm-10">
-<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
-    <div class="col-md-6 px-0">
-       <h1 class="display-9 fst-italic"> <i class="bi bi-book"></i> Mis disciplinas </h1>
-      <p class="lead my-3"> Aqui puedes encontrar tus materias</p>
+    <div class="rounded text-bg-dark text-center mx-auto" style="margin-top: 10px;">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold"><i class="bi bi-book"></i> Mis disciplinas</h1>
+            <p class="lead my-3">Aquí puedes encontrar tus materias</p>
+        </div>
     </div>
-  </div>
- </div>
-
+</div>
 {% set count = namespace(value=0) %}
 
-  <div class="row">
- {% for materia in materias %}
-  {% set count.value = count.value + 1 %}
-          <div class="col-sm-4">
-        <div class="h-70 p-1 text-bg-dark rounded-3">
-          <h3>{{materia.1}}</h3>
-          <p>Curso: {{materia.2}} Sección: {{materia.3}}</p>
-          <p>Enfasis: {{materia.5}}          Año: {{materia.4}}</p>
-         <a href="/vermateria/{{materia.0}}" class="btn btn-outline-light" role="button">Ver trabajos</a>
-         <a href="/verasistenciaal/{{materia.0}}" class="btn btn-outline-light" role="button">Ver asistencia</a>
+<div class="row" style="margin-top: 10px;">
+{% for materia in materias %}
+{% set count.value = count.value + 1 %}
+    <div class="col-md-12" >
+        <div class="h-70 p-1 text-bg-dark rounded-3 mb-3">
+            <h3>{{materia.1}}</h3>
+            <p>Curso: {{materia.2}} Sección: {{materia.3}}</p>
+            <p>Enfasis: {{materia.5}}          Año: {{materia.4}}</p>
+            <a href="/vermateria/{{materia.0}}" class="btn btn-outline-light" role="button">Ver trabajos</a>
+            <a href="/verasistenciaal/{{materia.0}}" class="btn btn-outline-light" role="button">Ver asistencia</a>
         </div>
-          </div>
+    </div>
     {% if count.value == 2%}
-     </div>
+    </div>
     <br>
-       <div class="row">
-      {% set count.value = count.value - 2 %}
-           {% endif %}
+    <div class="row">
+    {% set count.value = count.value - 2 %}
+        {% endif %}
     {% endfor %}
 
 </div>
-</div>
+
 {% endblock %}
 </body>
 </html>

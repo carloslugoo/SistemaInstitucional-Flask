@@ -8,15 +8,15 @@
 <body>
 {% block content %}
 
-<div class="p-2 p-md-2 mb-2 rounded text-bg-dark">
-    <div class="col-md-6 px-0">
+<div class="rounded text-bg-dark" style="margin-top: 10px;">
+    <div class="col-md-12 px-0">
        <h1 class="display-9 fst-italic"> <i class="bi bi-book"></i> Trabajo: {{data.0}} - Fecha: {{data.2}}</h1>
       <p>Puntaje Total: {{data.1}}</p>
     </div>
   </div>
 {% set count = namespace(value=0) %}
 <div class="row">
-  <div class="col-sm-6">
+  <div class="col-md-12 ">
 <table class="table table-hover table-striped table-bordered">
 		<thead style="background-color: grey; color: white;">
 			<th>Indicador</th>
